@@ -1,0 +1,22 @@
+{% extends "lims_core/base.html" %}
+{% block title %}Samples - WuLims{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-0">Samples</h1>
+
+  <a class="btn btn-sm btn-outline-secondary" href="{% url 'admin:samples_sample_add' %}">Add sample (admin)</a>
+</div>
+
+<div
+  hx-get="{% url 'samples:table' %}"
+  hx-trigger="load, keyup changed delay:300ms from:#filter-form, change from:#filter-form"
+  hx-target="#table-target"
+  hx-include="#filter-form"
+>
+  {% include "samples/partials/sample_filters.html" %}
+</div>
+
+<div id="table-target" class="mt-3"></div>
+<div id="modal-target"></div>
+{% endblock %}

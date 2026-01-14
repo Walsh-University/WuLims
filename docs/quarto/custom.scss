@@ -1,0 +1,214 @@
+/* CS111 reveal.js theme layered over the built-in "dark" theme */
+/*-- scss:defaults --*/
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap");
+
+:root {
+    --r-background-color: #0b1021;
+    --r-main-font: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    --r-main-font-size: 40px;
+    --r-main-color: #e8edf7;
+    --r-heading-font: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    --r-heading1-size: 2.4em;
+    --r-heading2-size: 1.8em;
+    --r-heading3-size: 1.4em;
+    --r-heading-color: #f7fbff;
+    --r-link-color: #63c4ff;
+    --r-link-color-hover: #9ad4ff;
+    --r-selection-background-color: rgba(99, 196, 255, 0.35);
+    --code-bg: #10162f;
+    --code-border: #1b2340;
+    --accent-amber: #f2c14f;
+    --accent-green: #7ed7a6;
+    --accent-blue: #63c4ff;
+    --accent-pink: #ff8fb1;
+    --panel-bg: #0e1530;
+    --panel-border: #1f2a4d;
+}
+
+/*-- scss:rules --*/
+@media print {
+    .reveal {
+        width: 100vw !important;
+        height: 100vh !important;
+    }
+
+    .reveal section {
+        width: 100% !important;
+        height: 100% !important;
+    }
+}
+.reveal {
+    background:
+        radial-gradient(
+            circle at 18% 22%,
+            rgba(99, 196, 255, 0.16),
+            transparent 30%
+        ),
+        radial-gradient(
+            circle at 82% 18%,
+            rgba(242, 193, 79, 0.14),
+            transparent 28%
+        ),
+        radial-gradient(
+            circle at 65% 80%,
+            rgba(255, 143, 177, 0.12),
+            transparent 30%
+        ),
+        var(--r-background-color);
+}
+
+.reveal .slides {
+    text-align: left;
+    max-width: 1152px;
+}
+
+.reveal .slides section {
+    padding: 20px 36px !important;
+    box-sizing: border-box !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+}
+
+.reveal h1,
+.reveal h2,
+.reveal h3 {
+    letter-spacing: -0.02em;
+    margin-bottom: 0.25em;
+}
+
+.reveal h1 {
+    padding-bottom: 0.35em;
+    border-bottom: 2px solid var(--accent-amber);
+}
+.reveal .slides section h1 {
+    padding-bottom: 0.35em;
+    border-bottom: 2px solid var(--accent-amber);
+}
+
+.reveal h2 {
+    color: var(--accent-blue);
+}
+
+.reveal p {
+    line-height: 1.5;
+}
+
+.reveal strong {
+    color: var(--accent-amber);
+    font-weight: 700;
+}
+
+.reveal ul li,
+.reveal ol li {
+    margin: 0.35em 0;
+}
+
+.reveal a {
+    font-weight: 600;
+}
+
+.reveal code {
+    font-family:
+        "JetBrains Mono NL", "Fira Code", "SFMono-Regular", "Menlo", monospace;
+    background-color: rgba(16, 22, 47, 0.9);
+    border: 1px solid var(--code-border);
+    padding: 0.15em 0.35em;
+    border-radius: 5px;
+    color: #e6e8f1;
+}
+
+.reveal pre {
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
+    border-radius: 10px;
+}
+
+.reveal pre code {
+    background: var(--code-bg);
+    border: 1px solid var(--code-border);
+    padding: 16px 18px;
+    line-height: 1.45;
+}
+
+.reveal blockquote {
+    border-left: 4px solid var(--accent-blue);
+    padding: 0.6em 1.2em;
+    background: rgba(99, 196, 255, 0.08);
+    box-shadow: inset 0 0 0 1px rgba(99, 196, 255, 0.08);
+}
+
+.reveal table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.9em;
+}
+
+.reveal table th,
+.reveal table td {
+    padding: 0.55em 0.8em;
+    border: 1px solid var(--panel-border);
+}
+
+.reveal table th {
+    background: rgba(99, 196, 255, 0.12);
+    color: #f7fbff;
+}
+
+.reveal .callout {
+    border-left: 4px solid var(--accent-green);
+    background: rgba(126, 215, 166, 0.1);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
+}
+
+.reveal .callout-note {
+    border-color: var(--accent-blue);
+    background: rgba(99, 196, 255, 0.08);
+}
+
+.reveal .callout-tip {
+    border-color: var(--accent-green);
+}
+
+.reveal .callout-warning {
+    border-color: var(--accent-amber);
+    background: rgba(242, 193, 79, 0.1);
+}
+
+.reveal .callout-title {
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.reveal .progress span {
+    background: linear-gradient(90deg, var(--accent-blue), var(--accent-pink));
+}
+
+.reveal .controls .control-arrow {
+    color: var(--accent-amber);
+}
+
+.reveal .slide-number {
+    background: rgba(15, 20, 40, 0.8);
+    border: 1px solid var(--panel-border);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+}
+
+.reveal .title-slide {
+    padding-top: 80px;
+}
+
+.reveal .title-slide h1 {
+    font-size: 2.8em;
+    border-bottom: none;
+    margin-bottom: 0.2em;
+}
+
+.reveal .title-slide p {
+    color: #d6deeb;
+    font-weight: 600;
+}
+
+.reveal footer {
+    color: #b8c4e0;
+    font-size: 0.65em;
+    letter-spacing: 0.02em;
+}

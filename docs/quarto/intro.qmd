@@ -1,0 +1,2200 @@
+# WuLims Developer Documentation
+
+Welcome to the WuLims project! This is a Laboratory Information Management System (LIMS) built with Django, HTMX, and Bootstrap.
+
+## Documentation Index {.smaller}
+
+| Document | Description |
+|----------|-------------|
+| [Getting Started](getting-started.md) | Environment setup, Django basics, and running the project |
+| [Project Structure](project-structure.md) | Directory layout and file organization |
+| [Architecture](architecture.md) | HTMX patterns, template hierarchy, and design decisions |
+| [Creating Views](creating-views.md) | How to create new views and HTMX endpoints |
+| [Migrations](migrations.md) | Database migrations and model changes |
+
+## Tech Stack
+
+- **Python 3.13+** - Programming language
+- **Django 6.0** - Web framework
+- **HTMX** - Dynamic HTML without JavaScript frameworks
+- **Alpine.js** - Lightweight JavaScript for interactivity
+- **Bootstrap 5.3** - CSS framework for styling
+- **PostgreSQL** - Production database
+- **uv** - Fast Python package manager (replaces pip)
+
+## Quick Start {.smaller}
+
+```bash
+# Clone and enter the project
+cd WuLims
+
+# Create virtual environment and install dependencies
+uv venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+uv sync
+
+# Set up the database
+python manage.py migrate
+
+# Create an admin user
+python manage.py createsuperuser
+
+# Run the development server
+python manage.py runserver
+```
+
+Then visit:
+
+- http://127.0.0.1:8000/ - Home page
+- http://127.0.0.1:8000/samples/ - Sample worklist
+- http://127.0.0.1:8000/admin/ - Admin panel
+
+## Project Goals
+
+WuLims is designed to be:
+
+1. **Student-friendly** - Easy to understand and extend
+2. **Enterprise-ready** - Patterns that scale (custom User model, SSO-ready)
+3. **Modern** - HTMX for dynamic UIs without SPA complexity
+4. **Practical** - Real LIMS workflows (sample tracking, approvals)
+
+
+# Getting Started
+
+This guide covers environment setup and Django fundamentals for new developers.
+
+## Prerequisites
+
+- Python 3.13 or higher
+- Git
+- A code editor
+    - PyCharm (recommended)
+    - VS Code (also good)
+    - Zed (lightweight)
+    - Any IDE that supports Python and Django
+- Docker
+
+## Environment Setup
+
+### 1. Install uv (Package Manager)
+
+We use `uv` instead of pip. It's faster and handles virtual environments better.
+
+**macOS/Linux:**
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+**Windows (PowerShell):**
+```powershell
+powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+
+--- 
+
+### 2. Clone and Set Up the Project
+
+```bash
+# Clone the repository
+git clone git@github.com:Walsh-University/WuLims.git
+cd WuLims
+
+# Create a virtual environment
+uv venv
+
+# Activate the virtual environment
+source .venv/bin/activate  # macOS/Linux
+.venv\Scripts\activate     # Windows
+
+# Install dependencies
+uv sync
+```
+
+--- 
+
+### 3. Database Setup
+
+WuLims supports two database options:
+
+**Option B: SQLite (Default - No Setup Required)**
+
+SQLite is used for backup. No additional configuration needed - just proceed to step 4.
+
+**Option A: PostgreSQL (Recommended for Production-like Development)**
+
+To keep the environment production-like, we're using PostgreSQL via Docker:
+
+## PostgreSQL Setup
+Copy `.env.example` to `.env` and source it:
+
+```bash
+cp .env.example .env
+source .env  # or use a tool like direnv
+```
+
+**DO NOT COMMIT `.env` TO VERSION CONTROL.**  
+
+.env is a local configuration file with secrets (passwords) and
+development keys.  It should never be shared or committed.
+
+---
+
+### Start PostgreSQL with Docker
+
+
+```bash
+# Start the PostgreSQL container
+docker compose up -d
+```
+
+
+To stop PostgreSQL later:
+```bash
+docker compose down        # Stop container (keeps data)
+docker compose down -v     # Stop and delete all data
+```
+
+---
+
+### 4. Initialize the Database
+
+```bash
+# Create database tables
+python manage.py migrate
+
+# Create an admin account
+python manage.py createsuperuser
+```
+--- 
+
+### 5. Run the Development Server
+
+```bash
+python manage.py runserver
+```
+
+Visit http://127.0.0.1:8000/ in your browser.
+
+
+# Django Fundamentals
+
+Django follows the **MTV pattern** (Model-Template-View), which is similar to MVC:
+
+| Django | Traditional MVC | Purpose |
+|--------|-----------------|---------|
+| Model | Model | Database structure and business logic |
+| Template | View | HTML presentation |
+| View | Controller | Request handling and response |
+
+## The Request-Response Cycle
+
+```
+Browser Request
+      ↓
+   urls.py (URL routing)
+      ↓
+   views.py (Process request)
+      ↓
+   models.py (Database queries)
+      ↓
+   template.html (Render HTML)
+      ↓
+Browser Response
+```
+
+# Key Django Concepts
+
+## Models (`models.py`) {.smaller}
+
+Models define the database structure. Each model becomes a database table.
+
+```python
+from django.db import models
+
+class Sample(models.Model):
+    sample_id = models.CharField(max_length=50, unique=True)
+    client_name = models.CharField(max_length=200)
+    received_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.sample_id
+```
+
+- `CharField` - Text with max length
+- `DateTimeField` - Date and time
+- `ForeignKey` - Relationship to another model
+- `auto_now_add=True` - Automatically set on creation
+
+## Views (`views.py`) {.smaller}
+
+Views handle HTTP requests and return responses. We use **function-based views**.
+
+```python
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def sample_list(request):
+    samples = Sample.objects.all()
+    return render(request, "samples/sample_list.html", {"samples": samples})
+```
+
+- `@login_required` - User must be logged in
+- `request` - Contains HTTP request data
+- `render()` - Combines template with context data
+
+## URLs (`urls.py`)
+
+URL patterns map URLs to views.
+
+```python
+from django.urls import path
+from . import views
+
+app_name = "samples"  # Namespace for reverse lookups
+
+urlpatterns = [
+    path("", views.sample_list, name="list"),
+    path("<int:pk>/", views.sample_detail, name="detail"),
+]
+```
+
+- `app_name` - Enables namespaced URLs like `samples:list`
+- `<int:pk>` - Captures an integer from the URL
+- `name="list"` - Name for reverse URL lookups
+
+## Templates {.smaller}
+
+Templates are HTML files with Django template language.
+
+```html
+{% extends "lims_core/base.html" %}
+
+{% block content %}
+<h1>Samples</h1>
+<ul>
+{% for sample in samples %}
+    <li>{{ sample.sample_id }} - {{ sample.client_name }}</li>
+{% empty %}
+    <li>No samples found.</li>
+{% endfor %}
+</ul>
+{% endblock %}
+```
+
+- `{% extends %}` - Inherit from a base template
+- `{% block %}` - Define/override content blocks
+- `{% for %}` - Loop over items
+- `{{ variable }}` - Output a variable
+
+## Common Commands
+
+```bash
+# Run development server
+python manage.py runserver
+
+# Create migrations after model changes
+python manage.py makemigrations
+
+# Apply migrations to database
+python manage.py migrate
+
+# Create admin user
+python manage.py createsuperuser
+
+# Open Django shell
+python manage.py shell
+
+# Run tests
+python manage.py test
+
+# Check for issues
+python manage.py check
+```
+
+## Adding Dependencies
+
+Use `uv` to add new packages:
+
+```bash
+# Add a package
+uv add package-name
+
+# Add a development-only package
+uv add --dev package-name
+
+# Update all packages
+uv sync --upgrade
+```
+
+Dependencies are stored in `pyproject.toml`.
+
+
+## Development Workflow {.smaller}
+
+1. **Pull latest changes**: `git pull`
+2. **Create a feature branch**: `git checkout -b feature/your-feature`
+3. **Make changes** to models, views, templates
+4. **Run migrations** if you changed models
+5. **Test locally** with the dev server
+6. **Commit changes**: `git add . && git commit -m "Description"`
+7. **Push branch**: `git push -u origin feature/your-feature`
+8. **Create Pull Request** for review
+
+
+# Troubleshooting
+
+## "No module named 'django'"
+Your virtual environment isn't activated. Run:
+```bash
+source .venv/bin/activate  # macOS/Linux
+.venv\Scripts\activate     # Windows
+```
+
+## "Port already in use"
+Another process is using port 8000. Use a different port:
+```bash
+python manage.py runserver 8001
+```
+
+## "Migration errors"
+If migrations are out of sync:
+```bash
+python manage.py migrate --run-syncdb
+```
+
+## "Permission denied" on macOS
+Make sure you have write permissions to the project directory.
+
+
+
+# Project Structure
+
+This document explains the directory layout and purpose of each component in WuLims.
+
+## Directory Overview
+
+```
+WuLims/
+├── config/                 # Django project configuration
+├── accounts/               # User authentication app
+├── lims_core/              # Core app (base templates, shared components)
+├── samples/                # Sample management app
+├── static/                 # Static files (CSS, JS, images)
+├── docs/                   # Documentation (you are here)
+├── manage.py               # Django CLI entry point
+├── pyproject.toml          # Dependencies and project metadata
+├── uv.lock                 # Locked dependency versions
+├── docker-compose.yml      # PostgreSQL container configuration
+└── .env.example            # Environment variable template
+```
+
+## Configuration (`config/`)
+
+The Django project configuration.
+
+```
+config/
+├── __init__.py
+├── settings.py         # All Django settings
+├── urls.py             # Root URL routing
+├── wsgi.py             # WSGI entry point (production)
+└── asgi.py             # ASGI entry point (async/websockets)
+```
+
+## `settings.py`
+
+Key settings to know:
+
+```python
+# Custom user model (always use this pattern)
+AUTH_USER_MODEL = "accounts.User"
+
+# Installed apps - add new apps here
+INSTALLED_APPS = [
+    # Django built-ins
+    "django.contrib.admin",
+    "django.contrib.auth",
+    # ...
+
+    # Our apps
+    "accounts",
+    "lims_core",
+    "samples",
+]
+
+# Where to redirect after login/logout
+LOGIN_REDIRECT_URL = "samples:list"
+LOGOUT_REDIRECT_URL = "login"
+```
+
+---
+
+**Database Configuration:**
+
+The database backend is configured via environment variables:
+
+- If `DB_NAME` is set: Uses PostgreSQL with `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`
+- If `DB_NAME` is not set: Uses SQLite (default for quick setup)
+
+## `urls.py`
+
+The root URL router. All app URLs are included here:
+
+```python
+urlpatterns = [
+    path("admin/", admin.site.urls),
+    path("accounts/login/", LoginView.as_view(), name="login"),
+    path("accounts/logout/", LogoutView.as_view(), name="logout"),
+    path("samples/", include("samples.urls")),
+    path("", include("lims_core.urls")),
+]
+```
+
+---
+
+## Apps
+
+Django apps are self-contained modules. 
+
+Each app handles a specific feature.
+
+## `accounts/` - User Management
+
+Handles user authentication and profiles.
+
+```
+accounts/
+├── __init__.py
+├── models.py           # Custom User model
+├── admin.py            # Admin panel customization
+├── apps.py             # App configuration
+├── migrations/         # Database migrations
+└── templates/
+    └── accounts/
+        └── login.html  # Login page
+```
+--- 
+
+**Key file - `models.py`:**
+
+```python
+class User(AbstractUser):
+    """Custom user model with SSO-ready fields."""
+    external_id = models.CharField(max_length=255, blank=True)  # For SSO
+    employee_id = models.CharField(max_length=50, blank=True)   # University ID
+    department = models.CharField(max_length=100, blank=True)
+
+    def display_name(self):
+        """Returns best available display name."""
+        if self.first_name and self.last_name:
+            return f"{self.first_name} {self.last_name}"
+        return self.email or self.username
+```
+
+> **Why a custom User model?** It's much easier to add fields now than to migrate later. The `external_id` field will be used for SSO integration.
+
+## `lims_core/` - Core Infrastructure
+
+Shared templates, base layouts, and utility views.
+
+```
+lims_core/
+├── __init__.py
+├── apps.py
+├── urls.py
+├── views.py            # Home page view
+├── migrations/
+└── templates/
+    └── lims_core/
+        ├── base.html   # Master template (all pages extend this)
+        ├── home.html   # Landing page
+        └── partials/
+            └── toast.html  # Notification component
+```
+---
+
+**Key file - `base.html`:**
+
+This is the master template. All pages extend it:
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}WuLims{% endblock %}</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg">
+        <!-- ... navbar content ... -->
+    </nav>
+
+    <!-- Toast container for notifications -->
+    <div id="toast-container">
+        <div id="toast-target"></div>
+    </div>
+
+    <!-- Main content -->
+    <main class="container mt-4">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+```
+
+## `samples/` - Sample Management
+
+The main LIMS functionality - tracking and managing samples.
+
+```
+samples/
+├── __init__.py
+├── models.py           # Sample model with status workflow
+├── views.py            # List, detail, and approval views
+├── urls.py             # URL routing
+├── forms.py            # Filter forms
+├── admin.py            # Admin panel configuration
+├── apps.py
+├── migrations/
+└── templates/
+    └── samples/
+        ├── sample_list.html    # Main worklist page
+        ├── sample_detail.html  # Sample detail page
+        └── partials/           # HTMX partial templates
+            ├── sample_table.html
+            ├── sample_row.html
+            ├── sample_filters.html
+            ├── sample_overview.html
+            ├── sample_chain_of_custody.html
+            └── approve_modal.html
+```
+---
+
+**Key file - `models.py`:**
+
+```python
+class Sample(models.Model):
+    class Status(models.TextChoices):
+        RECEIVED = "RECEIVED", "Received"
+        IN_PROGRESS = "IN_PROGRESS", "In Progress"
+        IN_REVIEW = "IN_REVIEW", "In Review"
+        APPROVED = "APPROVED", "Approved"
+        REJECTED = "REJECTED", "Rejected"
+
+    sample_id = models.CharField(max_length=50, unique=True)
+    client_name = models.CharField(max_length=200)
+    received_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.RECEIVED)
+    approved_at = models.DateTimeField(null=True, blank=True)
+    approved_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+```
+
+
+## Static Files (`static/`)
+
+Static assets like CSS, JavaScript, and images.
+
+```
+static/
+├── css/
+│   └── styles.css      # Custom styles
+├── js/
+│   └── app.js          # Custom JavaScript
+└── images/
+    └── logo.png
+```
+
+Reference static files in templates:
+
+```html
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+<img src="{% static 'images/logo.png' %}" alt="Logo">
+```
+
+## Templates
+
+Templates follow a consistent organization:
+
+```
+app_name/
+└── templates/
+    └── app_name/           # Namespaced to avoid conflicts
+        ├── page.html       # Full pages (extend base.html)
+        └── partials/       # HTMX fragments (no base template)
+            └── component.html
+```
+
+## Template Types
+
+1. **Full Pages** - Extend `base.html`, have complete HTML structure
+2. **Partials** - HTML fragments returned by HTMX endpoints, no `{% extends %}`
+
+
+## File Naming Conventions {.smaller}
+
+| Type | Convention | Example |
+|------|------------|---------|
+| Apps | lowercase, singular | `samples`, `accounts` |
+| Models | PascalCase, singular | `Sample`, `User` |
+| Views | snake_case, descriptive | `sample_list`, `approve_sample` |
+| URLs | lowercase with hyphens | `/samples/`, `/approve-sample/` |
+| Templates | snake_case.html | `sample_list.html` |
+| HTMX endpoints | underscore prefix in URL | `/_table/`, `/_modal/` |
+
+
+## Adding a New App
+
+When you need to add new functionality:
+
+```bash
+# Create the app
+python manage.py startapp inventory
+
+# Add to settings.py INSTALLED_APPS
+INSTALLED_APPS = [
+    # ...
+    "inventory",
+]
+
+# Create app structure
+inventory/
+├── models.py       # Define your models
+├── views.py        # Define your views
+├── urls.py         # Define URL patterns (create this file)
+├── admin.py        # Register models with admin
+└── templates/
+    └── inventory/
+        └── (your templates)
+
+# Include URLs in config/urls.py
+path("inventory/", include("inventory.urls")),
+```
+
+# Architecture
+
+Architectural patterns used in WuLims, focusing on HTMX integration.
+
+## Overview
+
+WuLims uses a **server-rendered architecture with HTMX** for dynamic interactions. This approach:
+
+- Avoids JavaScript framework complexity (no React/Vue/Angular)
+- Keeps logic on the server (Python, not JavaScript)
+- Provides fast, responsive UIs without page reloads
+- Is easier to learn and debug
+
+## The HTMX Pattern
+
+Traditional web apps reload the entire page. Single Page Apps (SPAs) use JavaScript to update parts of the page. **HTMX is a middle ground**: it lets the server return HTML fragments that replace parts of the page.
+
+```
+Traditional:  Click → Full page reload → Entire HTML response
+SPA:          Click → JavaScript → JSON API → JavaScript renders HTML
+HTMX:         Click → HTMX request → Server returns HTML fragment → Replace element
+```
+
+## How HTMX Works
+
+1. Add `hx-*` attributes to HTML elements
+2. HTMX intercepts events (clicks, form submits, etc.)
+3. HTMX makes an AJAX request to the server
+4. Server returns HTML (not JSON)
+5. HTMX swaps the HTML into the page
+
+```html
+<!-- When clicked, fetch /samples/_table/ and put the response in #table-target -->
+<button hx-get="/samples/_table/"
+        hx-target="#table-target"
+        hx-swap="innerHTML">
+    Refresh Table
+</button>
+
+<div id="table-target">
+    <!-- Table content will be inserted here -->
+</div>
+```
+
+## Key HTMX Attributes {.smaller}
+
+| Attribute | Purpose | Example |
+|-----------|---------|---------|
+| `hx-get` | Make GET request | `hx-get="/samples/"` |
+| `hx-post` | Make POST request | `hx-post="/samples/1/approve/"` |
+| `hx-target` | Where to put response | `hx-target="#result"` |
+| `hx-swap` | How to insert response | `hx-swap="innerHTML"` |
+| `hx-trigger` | When to send request | `hx-trigger="click"` |
+| `hx-include` | Include form data | `hx-include="#filter-form"` |
+
+---
+
+### Swap Options
+
+```html
+hx-swap="innerHTML"     <!-- Replace inner content (default) -->
+hx-swap="outerHTML"     <!-- Replace entire element -->
+hx-swap="beforeend"     <!-- Append inside element -->
+hx-swap="afterend"      <!-- Insert after element -->
+hx-swap="delete"        <!-- Delete the target -->
+```
+---
+
+### Trigger Options
+
+```html
+hx-trigger="click"                      <!-- On click (default for buttons) -->
+hx-trigger="load"                       <!-- When element loads -->
+hx-trigger="change"                     <!-- When input changes -->
+hx-trigger="keyup changed delay:300ms"  <!-- Debounced keyup -->
+hx-trigger="submit"                     <!-- On form submit -->
+```
+
+---
+
+## Our HTMX Patterns
+
+### Pattern 1: Live Filtering {.smaller}
+
+The sample list filters without page reload:
+
+```html
+<!-- Filter form -->
+<form id="filter-form">
+    <input type="text" name="q" placeholder="Search...">
+    <select name="status">
+        <option value="">Any</option>
+        <option value="RECEIVED">Received</option>
+    </select>
+</form>
+
+<!-- Table container - loads on page load and when filters change -->
+<div hx-get="/samples/_table/"
+     hx-trigger="load, keyup changed delay:300ms from:#filter-form, change from:#filter-form"
+     hx-target="#table-target"
+     hx-include="#filter-form">
+
+    <div id="table-target">
+        <!-- Table rows loaded here -->
+    </div>
+</div>
+```
+---
+
+**How it works:**
+
+1. `hx-trigger="load"` - Loads table when page loads
+2. `keyup changed delay:300ms` - Reloads when typing (debounced)
+3. `change from:#filter-form` - Reloads when dropdown changes
+4. `hx-include="#filter-form"` - Sends form data with each request
+
+---
+
+**Server view (`views.py`):**
+```python
+def sample_table(request):
+    """HTMX endpoint - returns table HTML fragment."""
+    samples = Sample.objects.all()
+
+    # Apply filters from request
+    q = request.GET.get("q", "")
+    if q:
+        samples = samples.filter(
+            Q(sample_id__icontains=q) | Q(client_name__icontains=q)
+        )
+
+    status = request.GET.get("status", "")
+    if status:
+        samples = samples.filter(status=status)
+
+    return render(request, "samples/partials/sample_table.html", {"samples": samples})
+```
+
+## Pattern 2: Tab Switching
+
+Sample detail page switches tabs without reload:
+
+```html
+<!-- Tab navigation -->
+<ul class="nav nav-tabs">
+    <li class="nav-item">
+        <a class="nav-link active"
+           hx-get="/samples/{{ sample.pk }}/?tab=overview"
+           hx-target="#tab-content"
+           hx-swap="innerHTML">
+            Overview
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link"
+           hx-get="/samples/{{ sample.pk }}/?tab=coc"
+           hx-target="#tab-content"
+           hx-swap="innerHTML">
+            Chain of Custody
+        </a>
+    </li>
+</ul>
+
+<!-- Tab content -->
+<div id="tab-content">
+    <!-- Active tab content loaded here -->
+</div>
+```
+---
+
+**Server view:**
+```python
+def sample_detail(request, pk):
+    sample = get_object_or_404(Sample, pk=pk)
+    tab = request.GET.get("tab", "overview")
+
+    # Return partial for HTMX requests
+    if tab == "overview":
+        return render(request, "samples/partials/sample_overview.html", {"sample": sample})
+    elif tab == "coc":
+        return render(request, "samples/partials/sample_chain_of_custody.html", {"sample": sample})
+
+    # Full page for initial load
+    return render(request, "samples/sample_detail.html", {"sample": sample})
+```
+
+## Pattern 3: Modal Dialogs
+
+Approval modal loads dynamically:
+
+```html
+<!-- Button triggers modal load -->
+<button hx-get="/samples/{{ sample.pk }}/_approve_modal/"
+        hx-target="#modal-container"
+        hx-swap="innerHTML">
+    Approve
+</button>
+
+<!-- Modal container -->
+<div id="modal-container"></div>
+```
+---
+
+**Modal template (`approve_modal.html`):**
+```html
+<div class="modal fade show" style="display: block;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5>Approve Sample</h5>
+                <button type="button" class="btn-close"
+                        hx-get="/samples/_clear_modal/"
+                        hx-target="#modal-container">
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Approve sample {{ sample.sample_id }}?</p>
+            </div>
+            <div class="modal-footer">
+                <button hx-post="/samples/{{ sample.pk }}/approve/"
+                        hx-target="#sample-row-{{ sample.pk }}"
+                        hx-swap="outerHTML">
+                    Confirm
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-backdrop fade show"></div>
+```
+
+## Pattern 4: Out-of-Band Swaps
+
+Update multiple elements with one response using `hx-swap-oob`:
+
+```python
+def approve_sample(request, pk):
+    sample = get_object_or_404(Sample, pk=pk)
+    sample.status = Sample.Status.APPROVED
+    sample.approved_by = request.user
+    sample.approved_at = timezone.now()
+    sample.save()
+
+    # Return multiple HTML fragments
+    html = render_to_string("samples/partials/sample_row.html", {"sample": sample})
+
+    # Toast notification (out-of-band swap)
+    toast_html = render_to_string("lims_core/partials/toast.html", {
+        "message": f"Sample {sample.sample_id} approved",
+        "level": "success"
+    })
+
+    # Clear modal (out-of-band swap)
+    return HttpResponse(
+        html +
+        f'<div id="toast-target" hx-swap-oob="beforeend">{toast_html}</div>' +
+        '<div id="modal-container" hx-swap-oob="innerHTML"></div>'
+    )
+```
+---
+
+**How `hx-swap-oob` works:**
+
+- The main response replaces the target (`#sample-row-X`)
+- Elements with `hx-swap-oob` are swapped to their matching IDs
+- This allows updating the row, showing a toast, AND closing the modal in one response
+
+# Template Organization
+
+## Full Page vs Partial Templates
+
+**Full pages** extend `base.html` and render complete HTML:
+
+```html
+{% extends "lims_core/base.html" %}
+
+{% block content %}
+<h1>Sample List</h1>
+<!-- Page content -->
+{% endblock %}
+```
+---
+
+**Partials** are HTML fragments for HTMX (no `{% extends %}`):
+
+```html
+<!-- samples/partials/sample_table.html -->
+<table class="table">
+    <thead>
+        <tr>
+            <th>Sample ID</th>
+            <th>Client</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for sample in samples %}
+        <tr id="sample-row-{{ sample.pk }}">
+            <td>{{ sample.sample_id }}</td>
+            <td>{{ sample.client_name }}</td>
+            <td>{{ sample.get_status_display }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+```
+
+## Naming Conventions {.smaller}
+
+| Type | Location | Example |
+|------|----------|---------|
+| Full pages | `templates/app/` | `sample_list.html` |
+| Partials | `templates/app/partials/` | `sample_table.html` |
+| HTMX endpoints | URL with `_` prefix | `/_table/`, `/_modal/` |
+
+
+## URL Design for HTMX
+
+```python
+# samples/urls.py
+urlpatterns = [
+    # Full page views
+    path("", views.sample_list, name="list"),
+    path("<int:pk>/", views.sample_detail, name="detail"),
+
+    # HTMX endpoints (prefixed with _)
+    path("_table/", views.sample_table, name="table"),
+    path("<int:pk>/_approve_modal/", views.approve_modal, name="approve_modal"),
+    path("<int:pk>/approve/", views.approve_sample, name="approve"),
+]
+```
+
+The underscore prefix (`_table/`) indicates HTMX-only endpoints that return partials.
+
+## Bootstrap Integration
+
+Bootstrap is loaded via CDN in `base.html`. Use Bootstrap classes directly:
+
+```html
+<div class="card">
+    <div class="card-header">Sample Details</div>
+    <div class="card-body">
+        <button class="btn btn-primary">Submit</button>
+    </div>
+</div>
+```
+
+See [Bootstrap 5 documentation](https://getbootstrap.com/docs/5.3/) for available components.
+
+
+## Alpine.js (Optional)
+
+Alpine.js is included for simple client-side interactivity when HTMX isn't enough:
+
+```html
+<div x-data="{ open: false }">
+    <button @click="open = !open">Toggle</button>
+    <div x-show="open">Content</div>
+</div>
+```
+---
+
+**Use Alpine.js for:**
+
+- Simple show/hide toggles
+- Client-side validation feedback
+- Dropdown menus
+
+**Use HTMX for:**
+
+- Loading data from server
+- Form submissions
+- Any server interaction
+
+---
+
+# Common Gotchas
+
+## 1. CSRF Tokens
+
+Django requires CSRF tokens for POST requests. HTMX handles this automatically if you include:
+
+```html
+<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+```
+
+Or include the token in forms:
+
+```html
+<form hx-post="/submit/">
+    {% csrf_token %}
+    <!-- form fields -->
+</form>
+```
+
+## 2. ID Conflicts
+
+Every HTMX target needs a unique ID:
+
+```html
+<!-- Bad: duplicate IDs -->
+{% for sample in samples %}
+<div id="sample-row">...</div>  <!-- All have same ID! -->
+{% endfor %}
+
+<!-- Good: unique IDs -->
+{% for sample in samples %}
+<div id="sample-row-{{ sample.pk }}">...</div>
+{% endfor %}
+```
+
+## 3. Loading States
+
+Show loading indicators with `hx-indicator`:
+
+```html
+<button hx-get="/slow-endpoint/"
+        hx-indicator="#spinner">
+    Load Data
+</button>
+<span id="spinner" class="htmx-indicator">Loading...</span>
+```
+
+
+# Creating Views
+
+This guide walks through creating new views in WuLims, from simple pages to HTMX-powered interactions.
+
+## Overview
+
+A view in Django:
+
+1. Receives an HTTP request
+2. Processes data (query database, validate forms, etc.)
+3. Returns an HTTP response (usually rendered HTML)
+
+We use **function-based views** (not class-based) for simplicity.
+
+## Step-by-Step: Creating a New View
+
+### Step 1: Write the View Function
+
+Create or edit `views.py` in your app:
+
+```python
+# samples/views.py
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from .models import Sample
+
+@login_required
+def sample_list(request):
+    """Display all samples."""
+    samples = Sample.objects.all().order_by("-received_at")
+    return render(request, "samples/sample_list.html", {
+        "samples": samples,
+    })
+```
+---
+
+**Key components:**
+
+- `@login_required` - Redirects to login if not authenticated
+- `request` - Contains HTTP request data (GET params, POST data, user, etc.)
+- `render()` - Combines template with context data
+
+--- 
+
+### Step 2: Create the URL Pattern
+
+Add the URL in your app's `urls.py`:
+
+```python
+# samples/urls.py
+from django.urls import path
+from . import views
+
+app_name = "samples"  # Namespace for URL reversing
+
+urlpatterns = [
+    path("", views.sample_list, name="list"),
+]
+```
+---
+
+**URL pattern syntax:**
+
+- `""` - Matches `/samples/` (because this file is included at `/samples/`)
+- `<int:pk>/` - Captures an integer named `pk`
+- `<str:slug>/` - Captures a string named `slug`
+- `name="list"` - Allows reversing with `{% url 'samples:list' %}`
+
+---
+
+### Step 3: Create the Template
+
+Create `templates/samples/sample_list.html`:
+
+```html
+{% extends "lims_core/base.html" %}
+
+{% block title %}Samples - WuLims{% endblock %}
+
+{% block content %}
+<h1>Samples</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Sample ID</th>
+            <th>Client</th>
+            <th>Status</th>
+            <th>Received</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for sample in samples %}
+        <tr>
+            <td>
+                <a href="{% url 'samples:detail' sample.pk %}">
+                    {{ sample.sample_id }}
+                </a>
+            </td>
+            <td>{{ sample.client_name }}</td>
+            <td>{{ sample.get_status_display }}</td>
+            <td>{{ sample.received_at|date:"M d, Y" }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4">No samples found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
+```
+
+## View Types
+
+### 1. List View
+
+Display multiple objects:
+
+```python
+@login_required
+def sample_list(request):
+    samples = Sample.objects.all()
+    return render(request, "samples/sample_list.html", {"samples": samples})
+```
+---
+
+### 2. Detail View
+
+Display a single object:
+
+```python
+@login_required
+def sample_detail(request, pk):
+    sample = get_object_or_404(Sample, pk=pk)
+    return render(request, "samples/sample_detail.html", {"sample": sample})
+```
+
+**URL pattern:**
+```python
+path("<int:pk>/", views.sample_detail, name="detail"),
+```
+
+---
+
+### 3. Create View
+
+Handle form submission to create objects:
+
+```python
+from django.shortcuts import redirect
+from .forms import SampleForm
+
+@login_required
+def sample_create(request):
+    if request.method == "POST":
+        form = SampleForm(request.POST)
+        if form.is_valid():
+            sample = form.save()
+            return redirect("samples:detail", pk=sample.pk)
+    else:
+        form = SampleForm()
+
+    return render(request, "samples/sample_form.html", {"form": form})
+```
+---
+
+### 4. Update View
+
+Edit existing objects:
+
+```python
+@login_required
+def sample_update(request, pk):
+    sample = get_object_or_404(Sample, pk=pk)
+
+    if request.method == "POST":
+        form = SampleForm(request.POST, instance=sample)
+        if form.is_valid():
+            form.save()
+            return redirect("samples:detail", pk=sample.pk)
+    else:
+        form = SampleForm(instance=sample)
+
+    return render(request, "samples/sample_form.html", {
+        "form": form,
+        "sample": sample,
+    })
+```
+---
+
+### 5. Delete View
+
+Remove objects:
+
+```python
+@login_required
+def sample_delete(request, pk):
+    sample = get_object_or_404(Sample, pk=pk)
+
+    if request.method == "POST":
+        sample.delete()
+        return redirect("samples:list")
+
+    return render(request, "samples/sample_confirm_delete.html", {"sample": sample})
+```
+
+
+## HTMX Views
+
+HTMX views return HTML fragments instead of full pages.
+
+### HTMX Partial View
+
+```python
+@login_required
+def sample_table(request):
+    """HTMX endpoint - returns table HTML only."""
+    samples = Sample.objects.all()
+
+    # Apply filters from query params
+    status = request.GET.get("status")
+    if status:
+        samples = samples.filter(status=status)
+
+    # Return partial template (no base.html)
+    return render(request, "samples/partials/sample_table.html", {
+        "samples": samples,
+    })
+```
+---
+
+**Partial template (`partials/sample_table.html`):**
+```html
+<!-- No {% extends %} - this is a fragment -->
+<table class="table">
+    <tbody>
+        {% for sample in samples %}
+        <tr id="sample-row-{{ sample.pk }}">
+            <td>{{ sample.sample_id }}</td>
+            <td>{{ sample.client_name }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+```
+---
+
+**Usage in full page:**
+```html
+<div hx-get="{% url 'samples:table' %}"
+     hx-trigger="load"
+     hx-target="#table-container">
+</div>
+<div id="table-container">
+    <!-- Table loaded here -->
+</div>
+```
+
+## HTMX POST Action
+
+```python
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from django.utils import timezone
+
+@login_required
+def approve_sample(request, pk):
+    """HTMX POST endpoint - approves a sample."""
+    if request.method != "POST":
+        return HttpResponse("Method not allowed", status=405)
+
+    sample = get_object_or_404(Sample, pk=pk)
+
+    # Business logic
+    sample.status = Sample.Status.APPROVED
+    sample.approved_by = request.user
+    sample.approved_at = timezone.now()
+    sample.save()
+
+    # Return updated row HTML
+    return render(request, "samples/partials/sample_row.html", {"sample": sample})
+```
+---
+
+**Trigger from button:**
+```html
+<button hx-post="{% url 'samples:approve' sample.pk %}"
+        hx-target="#sample-row-{{ sample.pk }}"
+        hx-swap="outerHTML">
+    Approve
+</button>
+```
+
+## HTMX with Multiple Updates (Out-of-Band)
+
+```python
+@login_required
+def approve_sample(request, pk):
+    sample = get_object_or_404(Sample, pk=pk)
+    sample.status = Sample.Status.APPROVED
+    sample.approved_by = request.user
+    sample.approved_at = timezone.now()
+    sample.save()
+
+    # Main response: updated row
+    row_html = render_to_string(
+        "samples/partials/sample_row.html",
+        {"sample": sample}
+    )
+
+    # Out-of-band: toast notification
+    toast_html = render_to_string(
+        "lims_core/partials/toast.html",
+        {"message": "Sample approved!", "level": "success"}
+    )
+
+    # Combine responses
+    return HttpResponse(
+        row_html +
+        f'<div id="toast-target" hx-swap-oob="beforeend">{toast_html}</div>'
+    )
+```
+
+## Forms
+
+### Creating a Form
+
+```python
+# samples/forms.py
+from django import forms
+from .models import Sample
+
+class SampleForm(forms.ModelForm):
+    class Meta:
+        model = Sample
+        fields = ["sample_id", "client_name", "status"]
+        widgets = {
+            "sample_id": forms.TextInput(attrs={"class": "form-control"}),
+            "client_name": forms.TextInput(attrs={"class": "form-control"}),
+            "status": forms.Select(attrs={"class": "form-select"}),
+        }
+```
+---
+
+### Filter Form (Non-Model)
+
+```python
+class SampleFilterForm(forms.Form):
+    q = forms.CharField(required=False, label="Search")
+    status = forms.ChoiceField(
+        required=False,
+        choices=[("", "Any")] + list(Sample.Status.choices)
+    )
+```
+---
+
+### Using Forms in Templates
+
+```html
+<form method="post">
+    {% csrf_token %}
+
+    {% for field in form %}
+    <div class="mb-3">
+        <label class="form-label">{{ field.label }}</label>
+        {{ field }}
+        {% if field.errors %}
+        <div class="text-danger">{{ field.errors }}</div>
+        {% endif %}
+    </div>
+    {% endfor %}
+
+    <button type="submit" class="btn btn-primary">Save</button>
+</form>
+```
+
+## Decorators
+
+### Common Decorators
+
+```python
+from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
+
+# Require login
+@login_required
+def my_view(request):
+    pass
+
+# Require specific permission
+@permission_required("samples.approve_sample")
+def approve_view(request):
+    pass
+
+# Custom check
+@user_passes_test(lambda u: u.groups.filter(name="Reviewers").exists())
+def reviewer_only_view(request):
+    pass
+
+# Require POST method
+from django.views.decorators.http import require_POST
+
+@require_POST
+def action_view(request):
+    pass
+```
+---
+
+### Stacking Decorators
+
+```python
+@login_required
+@require_POST
+def approve_sample(request, pk):
+    # User must be logged in AND request must be POST
+    pass
+```
+
+
+## Querysets
+
+### Common Query Patterns
+
+```python
+# Get all objects
+Sample.objects.all()
+
+# Filter by field
+Sample.objects.filter(status="APPROVED")
+
+# Multiple filters (AND)
+Sample.objects.filter(status="APPROVED", client_name="ACME")
+
+# OR queries
+from django.db.models import Q
+Sample.objects.filter(Q(status="APPROVED") | Q(status="IN_REVIEW"))
+
+# Exclude
+Sample.objects.exclude(status="REJECTED")
+
+# Order by
+Sample.objects.order_by("-received_at")  # Descending
+Sample.objects.order_by("received_at")   # Ascending
+
+# Limit
+Sample.objects.all()[:10]  # First 10
+
+# Get single object (raises DoesNotExist if not found)
+sample = Sample.objects.get(pk=1)
+
+# Get or 404
+sample = get_object_or_404(Sample, pk=1)
+
+# Check if exists
+if Sample.objects.filter(sample_id="ABC123").exists():
+    pass
+
+# Count
+count = Sample.objects.filter(status="APPROVED").count()
+
+# Related objects (ForeignKey)
+sample.approved_by.username  # Access related User
+User.objects.get(pk=1).sample_set.all()  # Reverse relation
+```
+
+## Complete Example: Adding a Notes Feature
+
+Let's add a notes feature to samples.
+
+### 1. Create the Model
+
+```python
+# samples/models.py
+class SampleNote(models.Model):
+    sample = models.ForeignKey(Sample, on_delete=models.CASCADE, related_name="notes")
+    author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Note on {self.sample.sample_id} by {self.author}"
+```
+
+---
+
+### 2. Create Migration
+
+```bash
+python manage.py makemigrations
+python manage.py migrate
+```
+---
+
+### 3. Create the Form
+
+```python
+# samples/forms.py
+class SampleNoteForm(forms.ModelForm):
+    class Meta:
+        model = SampleNote
+        fields = ["content"]
+        widgets = {
+            "content": forms.Textarea(attrs={
+                "class": "form-control",
+                "rows": 3,
+                "placeholder": "Add a note..."
+            })
+        }
+```
+---
+
+### 4. Create Views
+
+```python
+# samples/views.py
+
+@login_required
+def sample_notes(request, pk):
+    """HTMX endpoint - returns notes list."""
+    sample = get_object_or_404(Sample, pk=pk)
+    return render(request, "samples/partials/sample_notes.html", {
+        "sample": sample,
+        "notes": sample.notes.all(),
+    })
+
+@login_required
+@require_POST
+def add_note(request, pk):
+    """HTMX POST - adds a note to sample."""
+    sample = get_object_or_404(Sample, pk=pk)
+    form = SampleNoteForm(request.POST)
+
+    if form.is_valid():
+        note = form.save(commit=False)
+        note.sample = sample
+        note.author = request.user
+        note.save()
+
+    # Return updated notes list
+    return render(request, "samples/partials/sample_notes.html", {
+        "sample": sample,
+        "notes": sample.notes.all(),
+        "form": SampleNoteForm(),  # Fresh form
+    })
+```
+---
+
+### 5. Add URLs
+
+```python
+# samples/urls.py
+urlpatterns = [
+    # ... existing paths ...
+    path("<int:pk>/_notes/", views.sample_notes, name="notes"),
+    path("<int:pk>/add-note/", views.add_note, name="add_note"),
+]
+```
+---
+
+### 6. Create Templates
+
+**`partials/sample_notes.html`:**
+```html
+<div id="notes-section">
+    <h5>Notes</h5>
+
+    <!-- Add note form -->
+    <form hx-post="{% url 'samples:add_note' sample.pk %}"
+          hx-target="#notes-section"
+          hx-swap="outerHTML">
+        {% csrf_token %}
+        <div class="mb-2">
+            <textarea name="content" class="form-control" rows="2"
+                      placeholder="Add a note..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-sm btn-primary">Add Note</button>
+    </form>
+
+    <!-- Notes list -->
+    <div class="mt-3">
+        {% for note in notes %}
+        <div class="card mb-2">
+            <div class="card-body py-2">
+                <small class="text-muted">
+                    {{ note.author.display_name }} - {{ note.created_at|timesince }} ago
+                </small>
+                <p class="mb-0">{{ note.content }}</p>
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-muted">No notes yet.</p>
+        {% endfor %}
+    </div>
+</div>
+```
+
+---
+
+### 7. Include in Detail Page
+
+Add to `sample_detail.html`:
+```html
+<div hx-get="{% url 'samples:notes' sample.pk %}"
+     hx-trigger="load"
+     hx-target="this">
+    Loading notes...
+</div>
+```
+
+## Checklist for New Views {.smaller}
+
+- [ ] Create view function in `views.py`
+- [ ] Add `@login_required` decorator
+- [ ] Add URL pattern in `urls.py`
+- [ ] Create template in `templates/app_name/`
+- [ ] For HTMX: use `partials/` folder, no `{% extends %}`
+- [ ] Test the view manually
+- [ ] Add any needed forms to `forms.py`
+
+
+# Migrations
+
+This guide explains how Django migrations work and how to manage database schema changes.
+
+## What Are Migrations?
+
+Migrations are Django's way of propagating model changes to the database. When you modify a model (add a field, change a field type, etc.), you create a migration file that describes the change, then apply it to update the database.
+
+## Migration Workflow
+```
+Model change → makemigrations → Migration file → migrate → Database updated
+```
+
+**Why migrations?**
+
+- Track database schema changes in version control
+- Apply changes consistently across all environments
+- Roll back changes if needed
+- Share schema changes with team members
+
+## Basic Migration Commands
+
+### Create Migrations
+
+After changing a model, create migration files:
+
+```bash
+python manage.py makemigrations
+```
+
+This scans all apps for model changes and creates migration files in each app's `migrations/` folder.
+---
+
+**Create migrations for a specific app:**
+```bash
+python manage.py makemigrations samples
+```
+---
+
+### Apply Migrations
+
+Apply pending migrations to the database:
+
+```bash
+python manage.py migrate
+```
+
+---
+
+**Apply migrations for a specific app:**
+```bash
+python manage.py migrate samples
+```
+---
+
+### View Migration Status
+
+See which migrations have been applied:
+
+```bash
+python manage.py showmigrations
+```
+
+Output:
+```
+accounts
+ [X] 0001_initial
+ [X] 0002_add_department
+samples
+ [X] 0001_initial
+ [ ] 0002_add_notes  ← Not applied yet
+```
+---
+
+### View Migration SQL
+
+See the SQL that a migration will execute:
+
+```bash
+python manage.py sqlmigrate samples 0002
+```
+
+---
+
+## Step-by-Step: Making a Model Change
+
+## Example: Adding a Field
+
+Let's add a `priority` field to the Sample model.
+
+**1. Modify the model:**
+
+```python
+# samples/models.py
+class Sample(models.Model):
+    class Priority(models.TextChoices):
+        LOW = "LOW", "Low"
+        NORMAL = "NORMAL", "Normal"
+        HIGH = "HIGH", "High"
+        URGENT = "URGENT", "Urgent"
+
+    sample_id = models.CharField(max_length=50, unique=True)
+    client_name = models.CharField(max_length=200)
+    priority = models.CharField(
+        max_length=10,
+        choices=Priority.choices,
+        default=Priority.NORMAL  # Default for existing rows
+    )
+    # ... other fields
+```
+---
+
+**2. Create the migration:**
+
+```bash
+python manage.py makemigrations samples
+```
+
+Output:
+```
+Migrations for 'samples':
+  samples/migrations/0002_sample_priority.py
+    - Add field priority to sample
+```
+---
+
+**3. Review the migration file:**
+
+```python
+# samples/migrations/0002_sample_priority.py
+from django.db import migrations, models
+
+class Migration(migrations.Migration):
+    dependencies = [
+        ('samples', '0001_initial'),
+    ]
+
+    operations = [
+        migrations.AddField(
+            model_name='sample',
+            name='priority',
+            field=models.CharField(
+                choices=[('LOW', 'Low'), ('NORMAL', 'Normal'), ('HIGH', 'High'), ('URGENT', 'Urgent')],
+                default='NORMAL',
+                max_length=10
+            ),
+        ),
+    ]
+```
+---
+
+**4. Apply the migration:**
+
+```bash
+python manage.py migrate samples
+```
+
+Output:
+```
+Operations to perform:
+  Apply all migrations: samples
+Running migrations:
+  Applying samples.0002_sample_priority... OK
+```
+
+
+## Common Model Changes {.smaller}
+
+### Adding a Required Field 
+
+If you add a field without a default, Django will ask what to do with existing rows:
+
+```python
+# Adding a required field
+description = models.TextField()
+```
+
+When you run `makemigrations`:
+```
+You are trying to add a non-nullable field 'description' to sample.
+Please select a fix:
+ 1) Provide a one-off default now
+ 2) Quit and add a default in models.py
+Select an option:
+```
+
+**Best practice:** Always provide a default or make the field nullable:
+
+```python
+# Option 1: With default
+description = models.TextField(default="")
+
+# Option 2: Nullable
+description = models.TextField(null=True, blank=True)
+```
+---
+
+### Renaming a Field
+
+```python
+# Before
+client_name = models.CharField(max_length=200)
+
+# After
+customer_name = models.CharField(max_length=200)
+```
+
+When you run `makemigrations`, Django will ask:
+```
+Did you rename sample.client_name to sample.customer_name (a CharField)? [y/N]
+```
+
+Answer `y` to rename (preserves data) or `N` to delete and create (loses data).
+
+---
+
+### Changing Field Type
+
+Be careful when changing field types. Some changes are safe:
+
+- `CharField` max_length increase
+- `IntegerField` to `BigIntegerField`
+
+Some require data migration:
+
+- `CharField` to `IntegerField`
+- `TextField` to `CharField`
+
+---
+
+### Adding a ForeignKey
+
+```python
+# Add relationship to User
+assigned_to = models.ForeignKey(
+    "accounts.User",
+    on_delete=models.SET_NULL,
+    null=True,
+    blank=True
+)
+```
+---
+
+### Removing a Field
+
+Simply delete the field from the model and run `makemigrations`. The data will be permanently deleted.
+
+## Migration Files Explained
+
+Migration files are Python code in `app/migrations/`:
+
+```
+samples/
+└── migrations/
+    ├── __init__.py
+    ├── 0001_initial.py
+    ├── 0002_sample_priority.py
+    └── 0003_sample_notes.py
+```
+
+**File naming:** `NNNN_description.py`
+- `NNNN` - Sequential number
+- `description` - Auto-generated or custom name
+
+---
+
+### Migration Structure
+
+```python
+from django.db import migrations, models
+
+class Migration(migrations.Migration):
+    # Which migrations must be applied first
+    dependencies = [
+        ('samples', '0001_initial'),
+        ('accounts', '0001_initial'),  # Cross-app dependency
+    ]
+
+    # Operations to perform
+    operations = [
+        migrations.AddField(...),
+        migrations.RemoveField(...),
+        migrations.AlterField(...),
+        migrations.CreateModel(...),
+        migrations.DeleteModel(...),
+    ]
+```
+
+
+## Data Migrations
+
+Sometimes you need to migrate data, not just schema. Use `RunPython`:
+
+```python
+from django.db import migrations
+
+def set_default_priority(apps, schema_editor):
+    Sample = apps.get_model('samples', 'Sample')
+    Sample.objects.filter(priority='').update(priority='NORMAL')
+
+def reverse_priority(apps, schema_editor):
+    pass  # Nothing to reverse
+
+class Migration(migrations.Migration):
+    dependencies = [
+        ('samples', '0002_sample_priority'),
+    ]
+
+    operations = [
+        migrations.RunPython(set_default_priority, reverse_priority),
+    ]
+```
+---
+
+**Create an empty migration for data:**
+```bash
+python manage.py makemigrations samples --empty --name populate_priorities
+```
+
+# Working with Teams
+
+## Pulling Changes
+
+When you pull code that includes new migrations:
+
+```bash
+git pull
+python manage.py migrate
+```
+
+## Merge Conflicts
+
+If two developers create migrations with the same number:
+
+```
+0002_alice_changes.py
+0002_bob_changes.py
+```
+
+**Solution 1:** Rename one file and update dependencies:
+```python
+# 0003_bob_changes.py
+dependencies = [
+    ('samples', '0002_alice_changes'),
+]
+```
+
+**Solution 2:** Use `--merge` to create a merge migration:
+```bash
+python manage.py makemigrations --merge samples
+```
+
+## Best Practices
+
+1. **Always commit migrations** with your model changes
+2. **Run `makemigrations` before committing** to ensure migration exists
+3. **Review migration files** before applying
+4. **Never edit applied migrations** - create new ones instead
+5. **Keep migrations small** - one logical change per migration
+
+# Troubleshooting
+
+## "No changes detected"
+
+If `makemigrations` says no changes:
+
+1. Check the app is in `INSTALLED_APPS`
+2. Check for syntax errors in models.py
+3. Try specifying the app: `python manage.py makemigrations appname`
+
+## "Table already exists"
+
+If you get this error when applying migrations:
+
+```bash
+# Fake the migration (mark as applied without running)
+python manage.py migrate appname --fake
+```
+
+**"Column does not exist"**
+
+Your database is out of sync. Try:
+
+```bash
+python manage.py migrate --run-syncdb
+```
+
+## Reset Migrations (Development Only)
+
+**Warning:** This deletes all data. Only use in development.
+
+```bash
+# Delete migration files (keep __init__.py)
+rm samples/migrations/0*.py
+
+# Delete database
+rm db.sqlite3
+
+# Recreate
+python manage.py makemigrations
+python manage.py migrate
+python manage.py createsuperuser
+```
+
+## View Applied Migrations
+
+Check the `django_migrations` table:
+
+```bash
+python manage.py shell
+>>> from django.db import connection
+>>> cursor = connection.cursor()
+>>> cursor.execute("SELECT app, name FROM django_migrations ORDER BY id")
+>>> cursor.fetchall()
+```
+
+## Migration Commands Reference {.smaller}
+
+| Command | Purpose |
+|---------|---------|
+| `makemigrations` | Create migration files from model changes |
+| `migrate` | Apply pending migrations |
+| `showmigrations` | List all migrations and their status |
+| `sqlmigrate app NNNN` | Show SQL for a migration |
+| `migrate app NNNN` | Migrate to a specific migration |
+| `migrate app zero` | Unapply all migrations for an app |
+| `makemigrations --empty` | Create empty migration for data migrations |
+| `makemigrations --merge` | Create merge migration for conflicts |
+| `migrate --fake` | Mark migration as applied without running |
+| `migrate --plan` | Show migration plan without applying |
+
+## Example Workflow
+
+### Adding a New Feature with Model Changes
+
+```bash
+# 1. Create your feature branch
+git checkout -b feature/sample-notes
+
+# 2. Modify models.py
+# (add SampleNote model)
+
+# 3. Create migrations
+python manage.py makemigrations samples
+
+# 4. Review the migration file
+cat samples/migrations/0002_samplenote.py
+
+# 5. Apply migrations locally
+python manage.py migrate
+
+# 6. Test your changes
+python manage.py runserver
+
+# 7. Commit everything
+git add .
+git commit -m "Add sample notes feature"
+
+# 8. Push for review
+git push -u origin feature/sample-notes
+```
+
+---
+
+## Next Steps
+
+- Practice by adding a field to an existing model
+- Look at existing migrations in `samples/migrations/` for examples
+- Read Django's [migration documentation](https://docs.djangoproject.com/en/5.0/topics/migrations/) for advanced topics
+
+
+
+

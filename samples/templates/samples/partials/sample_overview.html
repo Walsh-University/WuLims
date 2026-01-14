@@ -1,0 +1,17 @@
+<div class="card shadow-sm">
+  <div class="card-body">
+    <dl class="row mb-0">
+      <dt class="col-sm-3">Status</dt><dd class="col-sm-9">{{ sample.status }}</dd>
+      <dt class="col-sm-3">Received</dt><dd class="col-sm-9">{{ sample.received_at|date:"Y-m-d H:i" }}</dd>
+      <dt class="col-sm-3">Approved</dt>
+      <dd class="col-sm-9">
+        {% if sample.approved_at %}
+          {{ sample.approved_at|date:"Y-m-d H:i" }}
+          {% if sample.approved_by %} by {{ sample.approved_by.get_full_name|default:sample.approved_by.username }}{% endif %}
+        {% else %}
+          <span class="text-muted">—</span>
+        {% endif %}
+      </dd>
+    </dl>
+  </div>
+</div>

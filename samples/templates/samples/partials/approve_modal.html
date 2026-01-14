@@ -1,0 +1,33 @@
+<div class="modal-backdrop show"></div>
+<div class="modal d-block" tabindex="-1" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Approve Sample {{ sample.sample_id }}</h5>
+        <button type="button" class="btn-close"
+                hx-target="#modal-target"
+                hx-swap="innerHTML"
+                hx-get="about:blank"></button>
+      </div>
+
+      <div class="modal-body">
+        <p class="mb-0">This will mark the sample as <strong>APPROVED</strong>.</p>
+        <p class="text-muted small mb-0">Guardrail: only IN_REVIEW samples can be approved.</p>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary"
+                hx-target="#modal-target"
+                hx-swap="innerHTML"
+                hx-get="about:blank">Cancel</button>
+
+        <button class="btn btn-primary"
+                hx-post="{% url 'samples:approve' sample.id %}"
+                hx-target="#sample-row-{{ sample.id }}"
+                hx-swap="outerHTML">
+          Approve
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

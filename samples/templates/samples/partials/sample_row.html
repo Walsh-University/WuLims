@@ -1,0 +1,26 @@
+<tr id="sample-row-{{ s.id }}">
+  <td><a href="{% url 'samples:detail' s.id %}">{{ s.sample_id }}</a></td>
+  <td>{{ s.client_name }}</td>
+  <td>
+    {% if s.status == "APPROVED" %}
+      <span class="badge bg-success">{{ s.status }}</span>
+    {% elif s.status == "IN_REVIEW" %}
+      <span class="badge bg-warning text-dark">{{ s.status }}</span>
+    {% else %}
+      <span class="badge bg-secondary">{{ s.status }}</span>
+    {% endif %}
+  </td>
+  <td>{{ s.received_at|date:"Y-m-d H:i" }}</td>
+  <td class="text-end">
+    {% if s.status == "IN_REVIEW" %}
+      <button class="btn btn-sm btn-primary"
+              hx-get="{% url 'samples:approve_modal' s.id %}"
+              hx-target="#modal-target"
+              hx-swap="innerHTML">
+        Approve…
+      </button>
+    {% else %}
+      <span class="text-muted small">—</span>
+    {% endif %}
+  </td>
+</tr>

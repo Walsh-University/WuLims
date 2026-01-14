@@ -1,0 +1,32 @@
+{% extends "lims_core/base.html" %}
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-5 col-lg-4">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h1 class="h4 mb-3">Sign in</h1>
+
+        <form method="post">
+          {% csrf_token %}
+          {% for field in form %}
+            <div class="mb-3">
+              <label class="form-label">{{ field.label }}</label>
+              {{ field }}
+              {% if field.errors %}
+                <div class="text-danger small">{{ field.errors|join:", " }}</div>
+              {% endif %}
+            </div>
+          {% endfor %}
+          <button class="btn btn-primary w-100" type="submit">Login</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll("input").forEach(el => el.classList.add("form-control"));
+</script>
+{% endblock %}
