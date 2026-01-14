@@ -2273,6 +2273,335 @@ Select an option:</code></pre>
 <li>Look at existing migrations in <code>samples/migrations/</code> for examples</li>
 <li>Read Django’s <a href="https://docs.djangoproject.com/en/5.0/topics/migrations/">migration documentation</a> for advanced topics</li>
 </ul>
+</section></section>
+<section>
+<section id="testing" class="title-slide slide level1 center">
+<h1>Testing</h1>
+<p>This guide covers how to write and run tests for WuLims.</p>
+</section>
+<section id="overview-2" class="slide level2 smaller">
+<h2>Overview</h2>
+<p>We use <strong>pytest</strong> as our test framework with the following libraries:</p>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>Package</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>pytest</code></td>
+<td>Test framework</td>
+</tr>
+<tr class="even">
+<td><code>pytest-django</code></td>
+<td>Django integration for pytest</td>
+</tr>
+<tr class="odd">
+<td><code>pytest-cov</code></td>
+<td>Code coverage reporting</td>
+</tr>
+<tr class="even">
+<td><code>pytest-mock</code></td>
+<td>Mocking utilities</td>
+</tr>
+<tr class="odd">
+<td><code>assertpy</code></td>
+<td>Fluent assertion library</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="running-tests" class="slide level2">
+<h2>Running Tests</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb115"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb115-1"><a href=""></a><span class="co"># Run all tests</span></span>
+<span id="cb115-2"><a href=""></a><span class="ex">uv</span> run pytest</span>
+<span id="cb115-3"><a href=""></a></span>
+<span id="cb115-4"><a href=""></a><span class="co"># Run with verbose output</span></span>
+<span id="cb115-5"><a href=""></a><span class="ex">uv</span> run pytest <span class="at">-v</span></span>
+<span id="cb115-6"><a href=""></a></span>
+<span id="cb115-7"><a href=""></a><span class="co"># Run a specific test file</span></span>
+<span id="cb115-8"><a href=""></a><span class="ex">uv</span> run pytest tests/test_samples.py</span>
+<span id="cb115-9"><a href=""></a></span>
+<span id="cb115-10"><a href=""></a><span class="co"># Run a specific test class</span></span>
+<span id="cb115-11"><a href=""></a><span class="ex">uv</span> run pytest tests/test_samples.py::TestSampleModel</span>
+<span id="cb115-12"><a href=""></a></span>
+<span id="cb115-13"><a href=""></a><span class="co"># Run a specific test</span></span>
+<span id="cb115-14"><a href=""></a><span class="ex">uv</span> run pytest tests/test_samples.py::TestSampleModel::test_create_sample</span>
+<span id="cb115-15"><a href=""></a></span>
+<span id="cb115-16"><a href=""></a><span class="co"># Run tests matching a pattern</span></span>
+<span id="cb115-17"><a href=""></a><span class="ex">uv</span> run pytest <span class="at">-k</span> <span class="st">"approve"</span></span>
+<span id="cb115-18"><a href=""></a></span>
+<span id="cb115-19"><a href=""></a><span class="co"># Run tests and stop on first failure</span></span>
+<span id="cb115-20"><a href=""></a><span class="ex">uv</span> run pytest <span class="at">-x</span></span>
+<span id="cb115-21"><a href=""></a></span>
+<span id="cb115-22"><a href=""></a><span class="co"># Run tests with print output visible</span></span>
+<span id="cb115-23"><a href=""></a><span class="ex">uv</span> run pytest <span class="at">-s</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="code-coverage" class="slide level2">
+<h2>Code Coverage</h2>
+<p>Coverage is enabled by default. After running tests, you’ll see a coverage summary in the terminal.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb116"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb116-1"><a href=""></a><span class="co"># View the HTML coverage report</span></span>
+<span id="cb116-2"><a href=""></a><span class="ex">open</span> htmlcov/index.html  <span class="co"># macOS</span></span>
+<span id="cb116-3"><a href=""></a><span class="fu">xdg-open</span> htmlcov/index.html  <span class="co"># Linux</span></span>
+<span id="cb116-4"><a href=""></a><span class="ex">start</span> htmlcov/index.html  <span class="co"># Windows</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The HTML report shows line-by-line coverage, highlighting which lines were executed during tests.</p>
+</section>
+<section id="test-organization" class="slide level2">
+<h2>Test Organization</h2>
+<p>Tests live in the <code>tests/</code> directory:</p>
+<pre><code>tests/
+├── __init__.py
+├── conftest.py          # Shared fixtures
+├── test_accounts.py     # Tests for accounts app
+└── test_samples.py      # Tests for samples app</code></pre>
+</section>
+<section class="slide level2">
+
+<h3 id="naming-conventions-1">Naming Conventions</h3>
+<ul>
+<li>Test files: <code>test_&lt;module&gt;.py</code></li>
+<li>Test classes: <code>Test&lt;Feature&gt;</code></li>
+<li>Test functions: <code>test_&lt;behavior&gt;</code></li>
+</ul>
+<p>Example:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb118"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb118-1"><a href=""></a><span class="kw">class</span> TestSampleModel:</span>
+<span id="cb118-2"><a href=""></a>    <span class="kw">def</span> test_create_sample(<span class="va">self</span>, db):</span>
+<span id="cb118-3"><a href=""></a>        ...</span>
+<span id="cb118-4"><a href=""></a></span>
+<span id="cb118-5"><a href=""></a>    <span class="kw">def</span> test_sample_id_unique(<span class="va">self</span>, sample, db):</span>
+<span id="cb118-6"><a href=""></a>        ...</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="writing-tests" class="slide level2 smaller">
+<h2>Writing Tests</h2>
+<h3 id="using-fixtures">Using Fixtures</h3>
+<p>Fixtures provide reusable test data. They’re defined in <code>conftest.py</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb119"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb119-1"><a href=""></a><span class="co"># Available fixtures:</span></span>
+<span id="cb119-2"><a href=""></a></span>
+<span id="cb119-3"><a href=""></a><span class="at">@pytest.fixture</span></span>
+<span id="cb119-4"><a href=""></a><span class="kw">def</span> user(db) <span class="op">-&gt;</span> User:</span>
+<span id="cb119-5"><a href=""></a>    <span class="co">"""A basic test user."""</span></span>
+<span id="cb119-6"><a href=""></a></span>
+<span id="cb119-7"><a href=""></a><span class="at">@pytest.fixture</span></span>
+<span id="cb119-8"><a href=""></a><span class="kw">def</span> admin_user(db) <span class="op">-&gt;</span> User:</span>
+<span id="cb119-9"><a href=""></a>    <span class="co">"""An admin/superuser."""</span></span>
+<span id="cb119-10"><a href=""></a></span>
+<span id="cb119-11"><a href=""></a><span class="at">@pytest.fixture</span></span>
+<span id="cb119-12"><a href=""></a><span class="kw">def</span> authenticated_client(client, user) <span class="op">-&gt;</span> Client:</span>
+<span id="cb119-13"><a href=""></a>    <span class="co">"""Django test client logged in as the test user."""</span></span>
+<span id="cb119-14"><a href=""></a></span>
+<span id="cb119-15"><a href=""></a><span class="at">@pytest.fixture</span></span>
+<span id="cb119-16"><a href=""></a><span class="kw">def</span> sample(db) <span class="op">-&gt;</span> Sample:</span>
+<span id="cb119-17"><a href=""></a>    <span class="co">"""A sample in RECEIVED status."""</span></span>
+<span id="cb119-18"><a href=""></a></span>
+<span id="cb119-19"><a href=""></a><span class="at">@pytest.fixture</span></span>
+<span id="cb119-20"><a href=""></a><span class="kw">def</span> sample_in_review(db) <span class="op">-&gt;</span> Sample:</span>
+<span id="cb119-21"><a href=""></a>    <span class="co">"""A sample in IN_REVIEW status (ready for approval)."""</span></span>
+<span id="cb119-22"><a href=""></a></span>
+<span id="cb119-23"><a href=""></a><span class="at">@pytest.fixture</span></span>
+<span id="cb119-24"><a href=""></a><span class="kw">def</span> approved_sample(db, user) <span class="op">-&gt;</span> Sample:</span>
+<span id="cb119-25"><a href=""></a>    <span class="co">"""An already-approved sample."""</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section class="slide level2">
+
+<p>Use fixtures by adding them as test function parameters:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb120"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb120-1"><a href=""></a><span class="kw">def</span> test_approve_success(<span class="va">self</span>, authenticated_client, sample_in_review, user):</span>
+<span id="cb120-2"><a href=""></a>    response <span class="op">=</span> authenticated_client.post(</span>
+<span id="cb120-3"><a href=""></a>        reverse(<span class="st">"samples:approve"</span>, args<span class="op">=</span>[sample_in_review.pk])</span>
+<span id="cb120-4"><a href=""></a>    )</span>
+<span id="cb120-5"><a href=""></a>    assert_that(response.status_code).is_equal_to(<span class="dv">200</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section class="slide level2">
+
+<h3 id="database-access">Database Access</h3>
+<p>Tests that need database access must use the <code>db</code> fixture:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb121"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb121-1"><a href=""></a><span class="kw">def</span> test_create_sample(<span class="va">self</span>, db):  <span class="co"># &lt;-- db fixture enables database</span></span>
+<span id="cb121-2"><a href=""></a>    sample <span class="op">=</span> Sample.objects.create(</span>
+<span id="cb121-3"><a href=""></a>        sample_id<span class="op">=</span><span class="st">"TEST-001"</span>,</span>
+<span id="cb121-4"><a href=""></a>        client_name<span class="op">=</span><span class="st">"Test Client"</span>,</span>
+<span id="cb121-5"><a href=""></a>    )</span>
+<span id="cb121-6"><a href=""></a>    assert_that(sample.pk).is_not_none()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Other fixtures like <code>user</code>, <code>sample</code>, etc. already depend on <code>db</code>, so you don’t need to include it explicitly when using those.</p>
+</section>
+<section class="slide level2">
+
+<h3 id="using-assertpy">Using assertpy</h3>
+<p>We use <code>assertpy</code> for fluent, readable assertions:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb122"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb122-1"><a href=""></a><span class="im">from</span> assertpy <span class="im">import</span> assert_that</span>
+<span id="cb122-2"><a href=""></a></span>
+<span id="cb122-3"><a href=""></a><span class="co"># Basic assertions</span></span>
+<span id="cb122-4"><a href=""></a>assert_that(response.status_code).is_equal_to(<span class="dv">200</span>)</span>
+<span id="cb122-5"><a href=""></a>assert_that(sample.approved_at).is_not_none()</span>
+<span id="cb122-6"><a href=""></a>assert_that(sample.approved_by).is_none()</span>
+<span id="cb122-7"><a href=""></a></span>
+<span id="cb122-8"><a href=""></a><span class="co"># String assertions</span></span>
+<span id="cb122-9"><a href=""></a>assert_that(response.content.decode()).contains(<span class="st">"TEST-001"</span>)</span>
+<span id="cb122-10"><a href=""></a>assert_that(<span class="bu">str</span>(sample)).is_equal_to(<span class="st">"TEST-001"</span>)</span>
+<span id="cb122-11"><a href=""></a></span>
+<span id="cb122-12"><a href=""></a><span class="co"># Collection assertions</span></span>
+<span id="cb122-13"><a href=""></a>assert_that(statuses).contains(<span class="st">"RECEIVED"</span>, <span class="st">"APPROVED"</span>)</span>
+<span id="cb122-14"><a href=""></a>assert_that(results).is_empty()</span>
+<span id="cb122-15"><a href=""></a></span>
+<span id="cb122-16"><a href=""></a><span class="co"># Boolean assertions</span></span>
+<span id="cb122-17"><a href=""></a>assert_that(user.is_active).is_true()</span>
+<span id="cb122-18"><a href=""></a>assert_that(user.is_superuser).is_false()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section class="slide level2">
+
+<h3 id="testing-views">Testing Views</h3>
+<p>Test both authentication requirements and functionality:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb123"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb123-1"><a href=""></a><span class="kw">class</span> TestSampleListView:</span>
+<span id="cb123-2"><a href=""></a>    <span class="kw">def</span> test_list_requires_login(<span class="va">self</span>, client):</span>
+<span id="cb123-3"><a href=""></a>        <span class="co">"""Unauthenticated users are redirected to login."""</span></span>
+<span id="cb123-4"><a href=""></a>        response <span class="op">=</span> client.get(reverse(<span class="st">"samples:list"</span>))</span>
+<span id="cb123-5"><a href=""></a></span>
+<span id="cb123-6"><a href=""></a>        assert_that(response.status_code).is_equal_to(<span class="dv">302</span>)</span>
+<span id="cb123-7"><a href=""></a>        assert_that(response.url).contains(<span class="st">"login"</span>)</span>
+<span id="cb123-8"><a href=""></a></span>
+<span id="cb123-9"><a href=""></a>    <span class="kw">def</span> test_list_accessible_when_authenticated(<span class="va">self</span>, authenticated_client):</span>
+<span id="cb123-10"><a href=""></a>        <span class="co">"""Authenticated users can access the list."""</span></span>
+<span id="cb123-11"><a href=""></a>        response <span class="op">=</span> authenticated_client.get(reverse(<span class="st">"samples:list"</span>))</span>
+<span id="cb123-12"><a href=""></a></span>
+<span id="cb123-13"><a href=""></a>        assert_that(response.status_code).is_equal_to(<span class="dv">200</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section class="slide level2">
+
+<h3 id="testing-post-endpoints">Testing POST Endpoints</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb124"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb124-1"><a href=""></a><span class="kw">def</span> test_approve_requires_post(<span class="va">self</span>, authenticated_client, sample_in_review):</span>
+<span id="cb124-2"><a href=""></a>    <span class="co">"""GET requests are rejected."""</span></span>
+<span id="cb124-3"><a href=""></a>    response <span class="op">=</span> authenticated_client.get(</span>
+<span id="cb124-4"><a href=""></a>        reverse(<span class="st">"samples:approve"</span>, args<span class="op">=</span>[sample_in_review.pk])</span>
+<span id="cb124-5"><a href=""></a>    )</span>
+<span id="cb124-6"><a href=""></a>    assert_that(response.status_code).is_equal_to(<span class="dv">400</span>)</span>
+<span id="cb124-7"><a href=""></a></span>
+<span id="cb124-8"><a href=""></a><span class="kw">def</span> test_approve_success(<span class="va">self</span>, authenticated_client, sample_in_review, user):</span>
+<span id="cb124-9"><a href=""></a>    <span class="co">"""Sample can be approved when in IN_REVIEW status."""</span></span>
+<span id="cb124-10"><a href=""></a>    response <span class="op">=</span> authenticated_client.post(</span>
+<span id="cb124-11"><a href=""></a>        reverse(<span class="st">"samples:approve"</span>, args<span class="op">=</span>[sample_in_review.pk])</span>
+<span id="cb124-12"><a href=""></a>    )</span>
+<span id="cb124-13"><a href=""></a></span>
+<span id="cb124-14"><a href=""></a>    assert_that(response.status_code).is_equal_to(<span class="dv">200</span>)</span>
+<span id="cb124-15"><a href=""></a></span>
+<span id="cb124-16"><a href=""></a>    <span class="co"># Refresh from database to see changes</span></span>
+<span id="cb124-17"><a href=""></a>    sample_in_review.refresh_from_db()</span>
+<span id="cb124-18"><a href=""></a>    assert_that(sample_in_review.status).is_equal_to(Sample.Status.APPROVED)</span>
+<span id="cb124-19"><a href=""></a>    assert_that(sample_in_review.approved_by).is_equal_to(user)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section class="slide level2">
+
+<h3 id="testing-for-exceptions">Testing for Exceptions</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb125"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb125-1"><a href=""></a><span class="im">from</span> django.db <span class="im">import</span> IntegrityError</span>
+<span id="cb125-2"><a href=""></a></span>
+<span id="cb125-3"><a href=""></a><span class="kw">def</span> test_sample_id_unique(<span class="va">self</span>, sample, db):</span>
+<span id="cb125-4"><a href=""></a>    <span class="co">"""Sample IDs must be unique."""</span></span>
+<span id="cb125-5"><a href=""></a>    <span class="cf">with</span> pytest.raises(IntegrityError):</span>
+<span id="cb125-6"><a href=""></a>        Sample.objects.create(</span>
+<span id="cb125-7"><a href=""></a>            sample_id<span class="op">=</span><span class="st">"TEST-001"</span>,  <span class="co"># Same as fixture</span></span>
+<span id="cb125-8"><a href=""></a>            client_name<span class="op">=</span><span class="st">"Different Client"</span>,</span>
+<span id="cb125-9"><a href=""></a>        )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="mocking" class="slide level2">
+<h2>Mocking</h2>
+<p>Use <code>pytest-mock</code> for mocking external dependencies:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb126"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb126-1"><a href=""></a><span class="kw">def</span> test_with_mock(<span class="va">self</span>, mocker):</span>
+<span id="cb126-2"><a href=""></a>    <span class="co"># Mock a function</span></span>
+<span id="cb126-3"><a href=""></a>    mock_send <span class="op">=</span> mocker.patch(<span class="st">"samples.views.send_notification"</span>)</span>
+<span id="cb126-4"><a href=""></a></span>
+<span id="cb126-5"><a href=""></a>    <span class="co"># ... test code that calls send_notification ...</span></span>
+<span id="cb126-6"><a href=""></a></span>
+<span id="cb126-7"><a href=""></a>    <span class="co"># Verify mock was called</span></span>
+<span id="cb126-8"><a href=""></a>    mock_send.assert_called_once_with(sample_id<span class="op">=</span><span class="st">"TEST-001"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section></section>
+<section>
+<section id="code-quality" class="title-slide slide level1 center">
+<h1>Code Quality</h1>
+
+</section>
+<section id="linting-with-ruff" class="slide level2">
+<h2>Linting with Ruff</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb127"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb127-1"><a href=""></a><span class="co"># Check for issues</span></span>
+<span id="cb127-2"><a href=""></a><span class="ex">uv</span> run ruff check .</span>
+<span id="cb127-3"><a href=""></a></span>
+<span id="cb127-4"><a href=""></a><span class="co"># Auto-fix issues</span></span>
+<span id="cb127-5"><a href=""></a><span class="ex">uv</span> run ruff check <span class="at">--fix</span> .</span>
+<span id="cb127-6"><a href=""></a></span>
+<span id="cb127-7"><a href=""></a><span class="co"># Format code</span></span>
+<span id="cb127-8"><a href=""></a><span class="ex">uv</span> run ruff format .</span>
+<span id="cb127-9"><a href=""></a></span>
+<span id="cb127-10"><a href=""></a><span class="co"># Check formatting without changing files</span></span>
+<span id="cb127-11"><a href=""></a><span class="ex">uv</span> run ruff format <span class="at">--check</span> .</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="type-checking-with-ty" class="slide level2">
+<h2>Type Checking with ty</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb128"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb128-1"><a href=""></a><span class="ex">uv</span> run ty check .</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="cicd" class="slide level2">
+<h2>CI/CD</h2>
+<p>Tests run automatically on GitHub Actions when you:</p>
+<ul>
+<li>Push to any branch (except <code>main</code>)</li>
+<li>Open a pull request to <code>main</code></li>
+</ul>
+<p>The CI pipeline runs three parallel jobs:</p>
+<ol type="1">
+<li><strong>Lint</strong> - Ruff check and format verification</li>
+<li><strong>Type Check</strong> - ty type checking</li>
+<li><strong>Test</strong> - pytest with coverage</li>
+</ol>
+<p>Coverage reports are uploaded as artifacts and available for download from the Actions tab.</p>
+</section>
+<section id="best-practices-1" class="slide level2 smaller">
+<h2>Best Practices</h2>
+<ol type="1">
+<li><p><strong>Test behavior, not implementation</strong> - Focus on what the code does, not how it does it</p></li>
+<li><p><strong>One assertion per concept</strong> - Multiple assertions are fine if they test the same thing</p></li>
+<li><p><strong>Use descriptive test names</strong> - <code>test_approve_fails_when_sample_not_in_review</code> is better than <code>test_approve_error</code></p></li>
+<li><p><strong>Keep tests independent</strong> - Each test should work in isolation</p></li>
+<li><p><strong>Use fixtures for setup</strong> - Don’t repeat object creation across tests</p></li>
+<li><p><strong>Test edge cases</strong> - Empty inputs, None values, boundary conditions</p></li>
+<li><p><strong>Test error conditions</strong> - Ensure proper error handling and messages</p></li>
+</ol>
+</section>
+<section id="adding-tests-for-new-features" class="slide level2 smaller">
+<h2>Adding Tests for New Features</h2>
+<p>When adding a new feature:</p>
+<ol type="1">
+<li><strong>Add fixtures</strong> to <code>conftest.py</code> if you need new test data</li>
+<li><strong>Create test class</strong> with descriptive name (e.g., <code>TestNewFeature</code>)</li>
+<li><strong>Write tests</strong> covering:
+<ol type="1">
+<li>Happy path (normal usage)</li>
+<li>Authentication requirements</li>
+<li>Validation errors</li>
+<li>Edge cases</li>
+</ol></li>
+<li><strong>Run tests</strong> to verify they pass</li>
+<li><strong>Check coverage</strong> to ensure new code is tested</li>
+</ol>
+</section>
+<section id="example-template" class="slide level2">
+<h2>Example template:</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb129"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb129-1"><a href=""></a><span class="kw">class</span> TestNewFeature:</span>
+<span id="cb129-2"><a href=""></a>    <span class="co">"""Tests for the new feature."""</span></span>
+<span id="cb129-3"><a href=""></a></span>
+<span id="cb129-4"><a href=""></a>    <span class="kw">def</span> test_requires_login(<span class="va">self</span>, client):</span>
+<span id="cb129-5"><a href=""></a>        <span class="co">"""Unauthenticated users are redirected."""</span></span>
+<span id="cb129-6"><a href=""></a>        response <span class="op">=</span> client.get(reverse(<span class="st">"app:new-feature"</span>))</span>
+<span id="cb129-7"><a href=""></a>        assert_that(response.status_code).is_equal_to(<span class="dv">302</span>)</span>
+<span id="cb129-8"><a href=""></a></span>
+<span id="cb129-9"><a href=""></a>    <span class="kw">def</span> test_happy_path(<span class="va">self</span>, authenticated_client):</span>
+<span id="cb129-10"><a href=""></a>        <span class="co">"""Feature works correctly for authenticated users."""</span></span>
+<span id="cb129-11"><a href=""></a>        response <span class="op">=</span> authenticated_client.get(reverse(<span class="st">"app:new-feature"</span>))</span>
+<span id="cb129-12"><a href=""></a>        assert_that(response.status_code).is_equal_to(<span class="dv">200</span>)</span>
+<span id="cb129-13"><a href=""></a></span>
+<span id="cb129-14"><a href=""></a>    <span class="kw">def</span> test_with_invalid_input(<span class="va">self</span>, authenticated_client):</span>
+<span id="cb129-15"><a href=""></a>        <span class="co">"""Proper error for invalid input."""</span></span>
+<span id="cb129-16"><a href=""></a>        response <span class="op">=</span> authenticated_client.post(</span>
+<span id="cb129-17"><a href=""></a>            reverse(<span class="st">"app:new-feature"</span>),</span>
+<span id="cb129-18"><a href=""></a>            {<span class="st">"invalid"</span>: <span class="st">"data"</span>},</span>
+<span id="cb129-19"><a href=""></a>        )</span>
+<span id="cb129-20"><a href=""></a>        assert_that(response.status_code).is_equal_to(<span class="dv">400</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 
 </section></section>
     </div>

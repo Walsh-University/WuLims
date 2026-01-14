@@ -10,6 +10,7 @@ Welcome to the WuLims project! This is a Laboratory Information Management Syste
 | [Project Structure](project-structure.md) | Directory layout and file organization |
 | [Architecture](architecture.md) | HTMX patterns, template hierarchy, and design decisions |
 | [Creating Views](creating-views.md) | How to create new views and HTMX endpoints |
+| [Testing](testing.md) | Writing and running tests, code coverage, and CI/CD |
 | [Migrations](migrations.md) | Database migrations and model changes |
 
 ## Tech Stack

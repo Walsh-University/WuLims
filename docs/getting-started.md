@@ -238,12 +238,23 @@ python manage.py createsuperuser
 # Open Django shell
 python manage.py shell
 
-# Run tests
-python manage.py test
+# Run tests with coverage
+uv run pytest
 
-# Check for issues
+# Run linter
+uv run ruff check .
+
+# Run type checker
+uv run ty check .
+
+# Format code
+uv run ruff format .
+
+# Check for Django issues
 python manage.py check
 ```
+
+See [Testing](testing.md) for more details on writing and running tests.
 
 ---
 
@@ -310,3 +321,4 @@ Make sure you have write permissions to the project directory.
 - Read [Project Structure](project-structure.md) to understand the codebase layout
 - Read [Architecture](architecture.md) to learn about HTMX patterns
 - Read [Creating Views](creating-views.md) when you're ready to add features
+- Read [Testing](testing.md) to learn how to write and run tests
