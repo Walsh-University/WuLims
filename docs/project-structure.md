@@ -10,6 +10,7 @@ WuLims/
 ├── accounts/               # User authentication app
 ├── lims_core/              # Core app (base templates, shared components)
 ├── samples/                # Sample management app
+├── tests/                  # Test suite (pytest)
 ├── static/                 # Static files (CSS, JS, images)
 ├── docs/                   # Documentation (you are here)
 ├── manage.py               # Django CLI entry point
