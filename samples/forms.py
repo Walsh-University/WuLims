@@ -1,5 +1,7 @@
 from django import forms
+
 from .models import Sample
+
 
 class SampleFilterForm(forms.Form):
     q = forms.CharField(required=False, label="Search")

@@ -7,3 +7,85 @@ dependencies = [
     "django>=6.0.1",
     "psycopg2-binary>=2.9.11",
 ]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-django>=4.8",
+    "pytest-cov>=4.1",
+    "pytest-mock>=3.12",
+    "assertpy>=1.1",
+    "ruff>=0.9",
+    "ty>=0.0.1a7",
+]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings"
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--strict-markers",
+    "-ra",
+    "--cov=accounts",
+    "--cov=samples",
+    "--cov=lims_core",
+    "--cov-report=term-missing",
+    "--cov-report=html:htmlcov",
+]
+testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true
+source = ["accounts", "samples", "lims_core"]
+omit = ["*/migrations/*", "*/__init__.py"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise NotImplementedError",
+]
+
+[tool.ruff]
+target-version = "py313"
+line-length = 120
+exclude = [
+    ".venv",
+    "migrations",
+    "__pycache__",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # Pyflakes
+    "I",      # isort
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "UP",     # pyupgrade
+    "DJ",     # flake8-django
+]
+ignore = [
+    "E501",   # line too long (handled by formatter)
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["accounts", "samples", "lims_core", "config"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.ty.environment]
+python-version = "3.13"
+
+[tool.ty.rules]
+# Disable rules that don't work well with Django's ORM metaclasses
+unresolved-attribute = "ignore"
+# Django model fields return str at runtime but ty sees them as CharField
+invalid-return-type = "warn"
+
+[tool.ty.src]
+exclude = ["migrations"]

@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+
 class User(AbstractUser):
     # Future-proof fields for AD/SSO
     external_id = models.CharField(max_length=255, blank=True, default="", help_text="SSO subject / GUID")
