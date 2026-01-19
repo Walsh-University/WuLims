@@ -3,6 +3,11 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Static files (CSS, JavaScript, Images) configuration
+#   required for Docker
+STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
 SECRET_KEY = "dev-only-change-me"
 DEBUG = True
 ALLOWED_HOSTS = ["*"]

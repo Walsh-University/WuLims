@@ -12,6 +12,7 @@ Welcome to the WuLims project! This is a Laboratory Information Management Syste
 | [Creating Views](creating-views.md) | How to create new views and HTMX endpoints |
 | [Testing](testing.md) | Writing and running tests, code coverage, and CI/CD |
 | [Migrations](migrations.md) | Database migrations and model changes |
+| [Docker](docker.md) | Container setup and running WuLims in Docker |
 
 ## Tech Stack
 

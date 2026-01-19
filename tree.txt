@@ -1,0 +1,251 @@
+.
+├── LICENSE
+├── README.md
+├── __init__.py
+├── __pycache__
+│   └── __init__.cpython-313.pyc
+├── accounts
+│   ├── __init__.py
+│   ├── __pycache__
+│   │   ├── __init__.cpython-313.pyc
+│   │   ├── admin.cpython-313.pyc
+│   │   ├── apps.cpython-313.pyc
+│   │   └── models.cpython-313.pyc
+│   ├── admin.py
+│   ├── apps.py
+│   ├── migrations
+│   │   ├── 0001_initial.py
+│   │   ├── __init__.py
+│   │   └── __pycache__
+│   │       ├── 0001_initial.cpython-313.pyc
+│   │       └── __init__.cpython-313.pyc
+│   ├── models.py
+│   └── templates
+│       └── accounts
+│           └── login.html
+├── config
+│   ├── __init__.py
+│   ├── __pycache__
+│   │   ├── __init__.cpython-313.pyc
+│   │   ├── settings.cpython-313.pyc
+│   │   ├── urls.cpython-313.pyc
+│   │   └── wsgi.cpython-313.pyc
+│   ├── asgi.py
+│   ├── settings.py
+│   ├── urls.py
+│   └── wsgi.py
+├── coverage.xml
+├── docker-compose.yml
+├── docs
+│   ├── README.md
+│   ├── architecture.md
+│   ├── creating-views.md
+│   ├── getting-started.md
+│   ├── migrations.md
+│   ├── project-structure.md
+│   ├── quarto
+│   │   ├── _quarto.yml
+│   │   ├── custom.scss
+│   │   ├── intro.html
+│   │   ├── intro.qmd
+│   │   └── intro_files
+│   │       └── libs
+│   │           ├── bootstrap
+│   │           │   ├── bootstrap-d6a003b94517c951b2d65075d42fb01b.min.css
+│   │           │   ├── bootstrap-icons.css
+│   │           │   ├── bootstrap-icons.woff
+│   │           │   └── bootstrap.min.js
+│   │           ├── clipboard
+│   │           │   └── clipboard.min.js
+│   │           ├── quarto-html
+│   │           │   ├── anchor.min.js
+│   │           │   ├── axe
+│   │           │   │   └── axe-check.js
+│   │           │   ├── light-border.css
+│   │           │   ├── popper.min.js
+│   │           │   ├── quarto-syntax-highlighting-587c61ba64f3a5504c4d52d930310e48.css
+│   │           │   ├── quarto-syntax-highlighting-dark-1b3db88def35042d172274863c1cdcf0.css
+│   │           │   ├── quarto.js
+│   │           │   ├── tabby.min.js
+│   │           │   ├── tabsets
+│   │           │   │   └── tabsets.js
+│   │           │   ├── tippy.css
+│   │           │   └── tippy.umd.min.js
+│   │           └── revealjs
+│   │               ├── dist
+│   │               │   ├── reset.css
+│   │               │   ├── reveal.css
+│   │               │   ├── reveal.esm.js
+│   │               │   ├── reveal.esm.js.map
+│   │               │   ├── reveal.js
+│   │               │   ├── reveal.js.map
+│   │               │   └── theme
+│   │               │       ├── fonts
+│   │               │       │   ├── league-gothic
+│   │               │       │   │   ├── LICENSE
+│   │               │       │   │   ├── league-gothic.css
+│   │               │       │   │   ├── league-gothic.eot
+│   │               │       │   │   ├── league-gothic.ttf
+│   │               │       │   │   └── league-gothic.woff
+│   │               │       │   └── source-sans-pro
+│   │               │       │       ├── LICENSE
+│   │               │       │       ├── source-sans-pro-italic.eot
+│   │               │       │       ├── source-sans-pro-italic.ttf
+│   │               │       │       ├── source-sans-pro-italic.woff
+│   │               │       │       ├── source-sans-pro-regular.eot
+│   │               │       │       ├── source-sans-pro-regular.ttf
+│   │               │       │       ├── source-sans-pro-regular.woff
+│   │               │       │       ├── source-sans-pro-semibold.eot
+│   │               │       │       ├── source-sans-pro-semibold.ttf
+│   │               │       │       ├── source-sans-pro-semibold.woff
+│   │               │       │       ├── source-sans-pro-semibolditalic.eot
+│   │               │       │       ├── source-sans-pro-semibolditalic.ttf
+│   │               │       │       ├── source-sans-pro-semibolditalic.woff
+│   │               │       │       └── source-sans-pro.css
+│   │               │       └── quarto-3dfedfd06b04e992143df888089923b1.css
+│   │               └── plugin
+│   │                   ├── highlight
+│   │                   │   ├── highlight.esm.js
+│   │                   │   ├── highlight.js
+│   │                   │   ├── monokai.css
+│   │                   │   ├── plugin.js
+│   │                   │   └── zenburn.css
+│   │                   ├── markdown
+│   │                   │   ├── markdown.esm.js
+│   │                   │   ├── markdown.js
+│   │                   │   └── plugin.js
+│   │                   ├── math
+│   │                   │   ├── katex.js
+│   │                   │   ├── math.esm.js
+│   │                   │   ├── math.js
+│   │                   │   ├── mathjax2.js
+│   │                   │   ├── mathjax3.js
+│   │                   │   └── plugin.js
+│   │                   ├── notes
+│   │                   │   ├── notes.esm.js
+│   │                   │   ├── notes.js
+│   │                   │   ├── plugin.js
+│   │                   │   └── speaker-view.html
+│   │                   ├── pdf-export
+│   │                   │   ├── pdfexport.js
+│   │                   │   └── plugin.yml
+│   │                   ├── quarto-line-highlight
+│   │                   │   ├── line-highlight.css
+│   │                   │   ├── line-highlight.js
+│   │                   │   └── plugin.yml
+│   │                   ├── quarto-support
+│   │                   │   ├── footer.css
+│   │                   │   ├── plugin.yml
+│   │                   │   └── support.js
+│   │                   ├── reveal-menu
+│   │                   │   ├── menu.css
+│   │                   │   ├── menu.js
+│   │                   │   ├── plugin.yml
+│   │                   │   ├── quarto-menu.css
+│   │                   │   └── quarto-menu.js
+│   │                   ├── search
+│   │                   │   ├── plugin.js
+│   │                   │   ├── search.esm.js
+│   │                   │   └── search.js
+│   │                   └── zoom
+│   │                       ├── plugin.js
+│   │                       ├── zoom.esm.js
+│   │                       └── zoom.js
+│   └── testing.md
+├── htmlcov
+│   ├── class_index.html
+│   ├── coverage_html_cb_dd2e7eb5.js
+│   ├── favicon_32_cb_c827f16f.png
+│   ├── function_index.html
+│   ├── index.html
+│   ├── keybd_closed_cb_900cfef5.png
+│   ├── status.json
+│   ├── style_cb_9ff733b0.css
+│   ├── z_4048b6c9d93ba923_apps_py.html
+│   ├── z_4048b6c9d93ba923_urls_py.html
+│   ├── z_4048b6c9d93ba923_views_py.html
+│   ├── z_509fd8af0f7a1b49_admin_py.html
+│   ├── z_509fd8af0f7a1b49_apps_py.html
+│   ├── z_509fd8af0f7a1b49_models_py.html
+│   ├── z_fd003194bc69d7fb_admin_py.html
+│   ├── z_fd003194bc69d7fb_apps_py.html
+│   ├── z_fd003194bc69d7fb_forms_py.html
+│   ├── z_fd003194bc69d7fb_models_py.html
+│   ├── z_fd003194bc69d7fb_urls_py.html
+│   └── z_fd003194bc69d7fb_views_py.html
+├── lims_core
+│   ├── __init__.py
+│   ├── __pycache__
+│   │   ├── __init__.cpython-313.pyc
+│   │   ├── apps.cpython-313.pyc
+│   │   ├── urls.cpython-313.pyc
+│   │   └── views.cpython-313.pyc
+│   ├── apps.py
+│   ├── domain
+│   ├── migrations
+│   │   ├── __init__.py
+│   │   └── __pycache__
+│   │       └── __init__.cpython-313.pyc
+│   ├── services
+│   ├── templates
+│   │   └── lims_core
+│   │       ├── base.html
+│   │       ├── home.html
+│   │       └── partials
+│   │           └── toast.html
+│   ├── urls.py
+│   ├── views.py
+│   └── web
+│       └── templates
+│           └── core
+│               └── base.html
+├── manage.py
+├── pyproject.toml
+├── samples
+│   ├── __init__.py
+│   ├── __pycache__
+│   │   ├── __init__.cpython-313.pyc
+│   │   ├── admin.cpython-313.pyc
+│   │   ├── apps.cpython-313.pyc
+│   │   ├── forms.cpython-313.pyc
+│   │   ├── models.cpython-313.pyc
+│   │   ├── urls.cpython-313.pyc
+│   │   └── views.cpython-313.pyc
+│   ├── admin.py
+│   ├── apps.py
+│   ├── forms.py
+│   ├── migrations
+│   │   ├── 0001_initial.py
+│   │   ├── __init__.py
+│   │   └── __pycache__
+│   │       ├── 0001_initial.cpython-313.pyc
+│   │       └── __init__.cpython-313.pyc
+│   ├── models.py
+│   ├── templates
+│   │   └── samples
+│   │       ├── partials
+│   │       │   ├── approve_modal.html
+│   │       │   ├── sample_chain_of_custody.html
+│   │       │   ├── sample_filters.html
+│   │       │   ├── sample_overview.html
+│   │       │   ├── sample_row.html
+│   │       │   └── sample_table.html
+│   │       ├── sample_detail.html
+│   │       └── sample_list.html
+│   ├── urls.py
+│   └── views.py
+├── static
+├── tests
+│   ├── __init__.py
+│   ├── __pycache__
+│   │   ├── __init__.cpython-313.pyc
+│   │   ├── conftest.cpython-313-pytest-9.0.2.pyc
+│   │   ├── test_accounts.cpython-313-pytest-9.0.2.pyc
+│   │   └── test_samples.cpython-313-pytest-9.0.2.pyc
+│   ├── conftest.py
+│   ├── test_accounts.py
+│   └── test_samples.py
+├── tree.txt
+└── uv.lock
+
+59 directories, 190 files
