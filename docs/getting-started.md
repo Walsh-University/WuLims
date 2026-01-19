@@ -9,9 +9,18 @@ This guide covers environment setup and Django fundamentals for new developers.
 - A code editor
   - PyCharm (recommended)
   - VS Code (also good)
-  - Zed (lightweight)
+- Zed (lightweight)
   - Any IDE that supports Python and Django
 - Docker 
+
+## Docker vs Local Dev (Quick Note)
+
+You can run WuLims in two ways:
+
+- **Local dev**: Use `uv`, run `python manage.py runserver`, and use SQLite or Postgres (recommended for realism).
+- **Docker**: Run the app in a container with Gunicorn, automatic migrations, and static file collection. This is closer to production and avoids local dependency drift.
+
+Most students should start with **local dev** for easier debugging, then try Docker once the basics feel comfortable.
 
 ## Environment Setup
 
