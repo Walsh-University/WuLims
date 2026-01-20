@@ -1,0 +1,68 @@
+############################
+# Builder (Alpine)
+############################
+FROM python:3.13-alpine AS builder
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    VIRTUAL_ENV=/opt/venv \
+    PATH="/opt/venv/bin:${PATH}"
+
+WORKDIR /app
+
+# Build deps (Alpine equivalents)
+# - build-base = gcc/make/musl-dev
+# - postgresql-dev = headers for libpq
+# - libffi-dev/openssl-dev often needed (cryptography, etc.)
+# - cargo/rust can be needed for some modern deps
+RUN apk add --no-cache \
+    build-base \
+    postgresql-dev \
+    libffi-dev \
+    openssl-dev \
+    cargo \
+    curl
+
+# Create venv
+RUN python -m venv "${VIRTUAL_ENV}"
+
+# Install uv in builder only (choose one method)
+# 1) pip (easy):
+RUN pip install --no-cache-dir uv
+# or 2) astral installer (also fine):
+# RUN curl -LsSf https://astral.sh/uv/install.sh | sh && ln -s /root/.local/bin/uv /usr/local/bin/uv
+
+# Dependency layer
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen --no-dev
+
+# App code
+COPY . .
+
+############################
+# Runtime (Alpine, no uv)
+############################
+FROM python:3.13-alpine AS runtime
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PORT=8000 \
+    VIRTUAL_ENV=/opt/venv \
+    PATH="/opt/venv/bin:${PATH}"
+
+WORKDIR /app
+
+# Runtime libs only
+# - libpq is the runtime Postgres client library
+# - bash only if your entrypoint requires bash; otherwise drop it.
+RUN apk add --no-cache \
+    libpq \
+    bash
+
+COPY --from=builder /opt/venv /opt/venv
+COPY --from=builder /app /app
+
+RUN chmod +x docker/entrypoint.sh
+
+EXPOSE 8000
+CMD ["bash", "-lc", "docker/entrypoint.sh"]

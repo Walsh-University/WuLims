@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+export PATH="/opt/venv/bin:${PATH}"
+
 : "${DJANGO_SETTINGS_MODULE:=config.settings}"
 export DJANGO_SETTINGS_MODULE
 
@@ -11,7 +13,7 @@ echo "PORT=${PORT:-8000}"
 # Wait for DB if DATABASE_URL is set (optional)
 if [[ -n "${DATABASE_URL:-}" ]]; then
   echo "DATABASE_URL is set; waiting briefly for database..."
-  uv run --no-sync python - <<'PY'
+  python - <<'PY'
 import os, time, sys, urllib.parse, socket
 url = os.environ["DATABASE_URL"]
 u = urllib.parse.urlparse(url)
@@ -31,13 +33,13 @@ PY
 fi
 
 echo "Running migrations..."
-uv run --no-sync python manage.py migrate --noinput
+python manage.py migrate --noinput
 
 echo "Collecting static files..."
-uv run --no-sync python manage.py collectstatic --noinput
+python manage.py collectstatic --noinput
 
 echo "Launching gunicorn..."
-exec uv run --no-sync gunicorn config.wsgi:application \
+exec gunicorn config.wsgi:application \
   --bind "0.0.0.0:${PORT:-8000}" \
   --workers "${GUNICORN_WORKERS:-3}" \
   --timeout "${GUNICORN_TIMEOUT:-60}" \
