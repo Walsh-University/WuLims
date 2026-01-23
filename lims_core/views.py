@@ -6,6 +6,9 @@ from django.shortcuts import render
 def home(request):
     return render(request, "lims_core/home.html")
 
+@login_required
+def dashboard(request):
+    return render(request, "lims_core/dashboard.html")
 
 def search(request):
     q = (request.GET.get("q") or "").strip()
