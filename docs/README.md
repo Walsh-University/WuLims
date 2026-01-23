@@ -4,15 +4,16 @@ Welcome to the WuLims project! This is a Laboratory Information Management Syste
 
 ## Documentation Index
 
-| Document | Description |
-|----------|-------------|
-| [Getting Started](getting-started.md) | Environment setup, Django basics, and running the project |
-| [Project Structure](project-structure.md) | Directory layout and file organization |
-| [Architecture](architecture.md) | HTMX patterns, template hierarchy, and design decisions |
-| [Creating Views](creating-views.md) | How to create new views and HTMX endpoints |
-| [Testing](testing.md) | Writing and running tests, code coverage, and CI/CD |
-| [Migrations](migrations.md) | Database migrations and model changes |
-| [Docker](docker.md) | Container setup and running WuLims in Docker |
+| Document                                  | Description                                               |
+|-------------------------------------------|-----------------------------------------------------------|
+| [Getting Started](getting-started.md)     | Environment setup, Django basics, and running the project |
+| [Project Structure](project-structure.md) | Directory layout and file organization                    |
+| [Architecture](architecture.md)           | HTMX patterns, template hierarchy, and design decisions   |
+| [Creating Views](creating-views.md)       | How to create new views and HTMX endpoints                |
+| [Styling](styling.md)                     | SCSS, Bootstrap theming, and CSS build workflow           |
+| [UI Conventions](ui-conventions.md)       | UI Conventinos for WuLims                       |
+| [Migrations](migrations.md)               | Database migrations and model changes                     |
+| [Docker](docker.md)                       | Container setup and running WuLims in Docker              |
 
 ## Tech Stack
 

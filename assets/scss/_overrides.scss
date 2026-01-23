@@ -1,0 +1,159 @@
+
+// Gold accent for active nav items
+.navbar .nav-link.active {
+  color: $walsh-gold !important;
+  font-weight: 600;
+}
+
+// Subtle gold badge
+.badge-accent {
+  background-color: $walsh-gold;
+  color: #212529;
+}
+
+// Primary buttons: slightly richer maroon
+.btn-primary {
+  background-color: $walsh-maroon;
+  border-color: $walsh-maroon;
+
+  &:hover {
+    background-color: darken($walsh-maroon, 6%);
+    border-color: darken($walsh-maroon, 6%);
+  }
+}
+
+// Primary buttons: slightly richer maroon
+.btn-secondary {
+  background-color: $walsh-maroon;
+  border-color: $walsh-maroon;
+
+  &:hover {
+    background-color: darken($walsh-maroon, 6%);
+    border-color: darken($walsh-maroon, 6%);
+  }
+}
+
+// --- Gold accent utilities ---
+.text-accent { color: $walsh-gold !important; }
+.bg-accent { background-color: $walsh-gold !important; color: #212529 !important; }
+.border-accent { border-color: $walsh-gold !important; }
+.badge-accent { background-color: $walsh-gold; color: #212529; }
+
+// --- Sidebar sizing & feel ---
+.sidebar {
+  border-right: 1px solid rgba(0,0,0,.08);
+}
+
+.sidebar .offcanvas-body {
+  overflow-x: hidden;
+}
+
+@media (min-width: 768px) {
+  .sidebar {
+    position: sticky;
+    top: 56px; // navbar height
+    height: calc(100vh - 56px);
+  }
+
+  /* Important: make the offcanvas content fill and scroll vertically */
+  .sidebar .offcanvas-body {
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+}
+
+.sidebar .nav-link {
+  border-radius: .5rem;
+}
+
+.sidebar .nav-link.active {
+  background-color: rgba($walsh-maroon, .12);
+  color: $walsh-maroon;
+  font-weight: 600;
+  border-left: 4px solid $walsh-gold;
+}
+
+// --- Dark mode tweaks (Bootstrap 5.3 uses data-bs-theme) ---
+// Keep these minimal; let Bootstrap handle most colors.
+:root[data-bs-theme="dark"] {
+  // Gold reads GREAT in dark mode, maroon can go muddy.
+  // Use gold as the “accent line” and let primary remain maroon for buttons.
+  .sidebar {
+    border-right-color: rgba(255,255,255,.08);
+  }
+
+  .sidebar .nav-link.active {
+    background-color: rgba(253, 199, 40, .12);
+    color: #fff;
+    border-left-color: $walsh-gold;
+  }
+
+  .table thead.table-light {
+    // Bootstrap's "table-light" is too bright in dark mode.
+    // Keep header subdued.
+    background-color: rgba(255,255,255,.06) !important;
+  }
+}
+
+// --- Print-friendly styles (lab reports) ---
+@media print {
+  // Hide chrome
+  nav.navbar,
+  .sidebar,
+  .offcanvas-backdrop {
+    display: none !important;
+  }
+
+  // Expand content
+  main {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  // Clean typography for paper
+  body {
+    font-size: 11pt;
+    color: #000 !important;
+    background: #fff !important;
+  }
+
+  // Don’t print buttons/interactive bits
+  .btn, .dropdown, .nav, .offcanvas {
+    display: none !important;
+  }
+
+  // Tables should print nicely
+  table {
+    page-break-inside: auto;
+  }
+  tr, td, th {
+    page-break-inside: avoid;
+  }
+
+  // Links: show URL if you want (optional)
+  a[href]:after {
+    content: " (" attr(href) ")";
+    font-size: 9pt;
+    color: #444;
+  }
+}
+
+
+// Search bar subtle styling
+.searchbar .input-group-text {
+  border-right: 0;
+}
+.searchbar .form-control {
+  border-left: 0;
+}
+
+// Toast spacing / readability
+.toast {
+  box-shadow: 0 8px 24px rgba(0,0,0,.15);
+  border: 0;
+}
+:root[data-bs-theme="dark"] .toast {
+  box-shadow: 0 8px 24px rgba(0,0,0,.45);
+}
