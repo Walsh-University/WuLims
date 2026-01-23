@@ -6,4 +6,5 @@ app_name = "lims_core"
 
 urlpatterns = [
     path("", views.home, name="home"),
+    path("search/", views.search, name="search"),
 ]
