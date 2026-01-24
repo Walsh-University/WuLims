@@ -1,5 +1,4 @@
-from config.settings.settings import *  # noqa
-
+from .base import *  # noqa
 
 # Force SQLite for tests (no external services needed)
 DATABASES = {
@@ -8,7 +7,9 @@ DATABASES = {
         "NAME": BASE_DIR / "test_db.sqlite3",  # noqa
     }
 }
-
+STORAGES = {
+        "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"}
+}
 # Make tests a little faster / quieter
 PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.MD5PasswordHasher",
