@@ -1,4 +1,4 @@
-from .settings import *  # noqa
+from config.settings.settings import *  # noqa
 
 
 # Force SQLite for tests (no external services needed)
