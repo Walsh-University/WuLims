@@ -2,6 +2,8 @@ import os
 from pathlib import Path
 from urllib.parse import urlparse
 
+import dj_database_url
+
 # ---------------------------------------------------------------------
 # Paths
 # ---------------------------------------------------------------------
@@ -19,16 +21,6 @@ def env_bool(name: str, default: str = "0") -> bool:
 def env_list(name: str, default: str = "") -> list[str]:
     raw = os.getenv(name, default)
     return [x.strip() for x in raw.split(",") if x.strip()]
-
-
-def build_db_from_url(url: str) -> dict:
-    # Django accepts a DSN-style NAME for psycopg2, so this is enough:
-    # "postgresql://user:pass@host:5432/dbname"
-    return {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": url,
-        "CONN_MAX_AGE": int(os.getenv("DB_CONN_MAX_AGE", "60")),
-    }
 
 
 # ---------------------------------------------------------------------
@@ -104,7 +96,12 @@ TEMPLATES = [
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 
 if DATABASE_URL:
-    DATABASES = {"default": build_db_from_url(DATABASE_URL)}
+    DATABASES = {
+        "default": dj_database_url.parse(
+            DATABASE_URL,
+            conn_max_age=int(os.getenv("DB_CONN_MAX_AGE", "600")),
+        )
+    }
 else:
     DATABASES = {
         "default": {
@@ -117,7 +114,6 @@ else:
             "CONN_MAX_AGE": int(os.getenv("DB_CONN_MAX_AGE", "60")),
         }
     }
-
 
 # ---------------------------------------------------------------------
 # Auth
