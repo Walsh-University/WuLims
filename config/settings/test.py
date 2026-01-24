@@ -7,9 +7,7 @@ DATABASES = {
         "NAME": BASE_DIR / "test_db.sqlite3",  # noqa
     }
 }
-STORAGES = {
-        "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"}
-}
+STORAGES = {"staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"}}
 # Make tests a little faster / quieter
 PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.MD5PasswordHasher",
