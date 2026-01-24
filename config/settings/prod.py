@@ -9,6 +9,7 @@ if SECRET_KEY == "dev-only-change-me":  # noqa
 # Hosts (Traefik + kube probes)
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "").split()
 ALLOWED_HOSTS = [h for h in ALLOWED_HOSTS if h]  # drop empties
+DJANGO_ALLOWED_HOSTS = ALLOWED_HOSTS  # for base.py usage
 
 # CSRF
 CSRF_TRUSTED_ORIGINS = os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS", "").split()
