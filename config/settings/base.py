@@ -21,6 +21,16 @@ def env_list(name: str, default: str = "") -> list[str]:
     return [x.strip() for x in raw.split(",") if x.strip()]
 
 
+def build_db_from_url(url: str) -> dict:
+    # Django accepts a DSN-style NAME for psycopg2, so this is enough:
+    # "postgresql://user:pass@host:5432/dbname"
+    return {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": url,
+            "CONN_MAX_AGE": int(os.getenv("DB_CONN_MAX_AGE", "60")),
+    }
+
+
 # ---------------------------------------------------------------------
 # Core settings
 # ---------------------------------------------------------------------
@@ -91,16 +101,23 @@ TEMPLATES = [
 # ---------------------------------------------------------------------
 # Database (PostgreSQL)
 # ---------------------------------------------------------------------
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ.get("DB_NAME", "wulims"),
-        "USER": os.environ.get("DB_USER", "wulims"),
-        "PASSWORD": os.environ.get("DB_PASSWORD", "wulims_dev_password"),
-        "HOST": os.environ.get("DB_HOST", "localhost"),
-        "PORT": os.environ.get("DB_PORT", "5432"),
+DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
+
+if DATABASE_URL:
+    DATABASES = {"default": build_db_from_url(DATABASE_URL)}
+else:
+    DATABASES = {
+            "default": {
+                    "ENGINE": "django.db.backends.postgresql",
+                    "NAME": os.environ.get("DB_NAME", "wulims"),
+                    "USER": os.environ.get("DB_USER", "wulims"),
+                    "PASSWORD": os.environ.get("DB_PASSWORD", "wulims_dev_password"),
+                    "HOST": os.environ.get("DB_HOST", "localhost"),
+                    "PORT": os.environ.get("DB_PORT", "5432"),
+                    "CONN_MAX_AGE": int(os.getenv("DB_CONN_MAX_AGE", "60")),
+            }
     }
-}
+
 
 # ---------------------------------------------------------------------
 # Auth
