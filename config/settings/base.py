@@ -44,6 +44,20 @@ if DJANGO_PUBLIC_URL:
         if origin not in CSRF_TRUSTED_ORIGINS:
             CSRF_TRUSTED_ORIGINS.append(origin)
 
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {"console": {"class": "logging.StreamHandler"}},
+    "loggers": {
+        "django.security.DisallowedHost": {
+            "handlers": ["console"],
+            "level": "ERROR",
+            "propagate": False,
+        }
+    },
+}
+
 # ---------------------------------------------------------------------
 # Apps / middleware
 # ---------------------------------------------------------------------
