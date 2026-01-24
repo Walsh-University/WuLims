@@ -95,3 +95,8 @@ invalid-return-type = "warn"
 
 [tool.ty.src]
 exclude = ["migrations"]
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.5.1",
+]
