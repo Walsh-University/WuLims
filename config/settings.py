@@ -9,8 +9,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Static files (CSS, JavaScript, Images) configuration
 #   required for Docker
-STATIC_URL = "static/"
-STATIC_ROOT = BASE_DIR / "staticfiles"
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "/staticfiles"
+
 
 SECRET_KEY = "dev-only-change-me"
 DEBUG = True
@@ -31,6 +32,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -57,28 +59,26 @@ TEMPLATES = [
     },
 ]
 
+if DEBUG:
+    STORAGES = {"staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"}}
+else:
+    STORAGES = {"staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"}}
+
+
 WSGI_APPLICATION = "config.wsgi.application"
 
 # Database
 # Uses PostgreSQL when DB_NAME is set (e.g., via docker-compose), otherwise SQLite.
-if os.environ.get("DB_NAME"):
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": os.environ.get("DB_NAME", "wulims"),
-            "USER": os.environ.get("DB_USER", "wulims"),
-            "PASSWORD": os.environ.get("DB_PASSWORD", "wulims_dev_password"),
-            "HOST": os.environ.get("DB_HOST", "localhost"),
-            "PORT": os.environ.get("DB_PORT", "5432"),
-        }
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.environ.get("DB_NAME", "wulims"),
+        "USER": os.environ.get("DB_USER", "wulims"),
+        "PASSWORD": os.environ.get("DB_PASSWORD", "wulims_dev_password"),
+        "HOST": os.environ.get("DB_HOST", "localhost"),
+        "PORT": os.environ.get("DB_PORT", "5432"),
     }
-else:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
-        }
-    }
+}
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
