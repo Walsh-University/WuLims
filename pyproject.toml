@@ -4,9 +4,12 @@ version = "0.1.0"
 description = "Add your description here"
 requires-python = ">=3.13"
 dependencies = [
+    "dj-database-url>=3.1.0",
     "django>=6.0.1",
+    "dotenv>=0.9.9",
     "gunicorn>=23.0.0",
     "psycopg2-binary>=2.9.11",
+    "whitenoise>=6.11.0",
 ]
 
 [project.optional-dependencies]
@@ -21,11 +24,12 @@ dev = [
 ]
 
 [tool.pytest.ini_options]
-DJANGO_SETTINGS_MODULE = "config.settings"
+DJANGO_SETTINGS_MODULE = "config.settings.test"
 python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 addopts = [
+    "-q",
     "--strict-markers",
     "-ra",
     "--cov=accounts",
@@ -35,6 +39,7 @@ addopts = [
     "--cov-report=html:htmlcov",
 ]
 testpaths = ["tests"]
+
 
 [tool.coverage.run]
 branch = true
@@ -90,3 +95,8 @@ invalid-return-type = "warn"
 
 [tool.ty.src]
 exclude = ["migrations"]
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.5.1",
+]
