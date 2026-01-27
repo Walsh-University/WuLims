@@ -78,7 +78,7 @@
               <a class="nav-link" href="#">Projects</a>
               <a class="nav-link" href="#">Experiments</a>
               <a class="nav-link" href="#">Instruments</a>
-              <a class="nav-link" href="{% url 'samples:list' %}">Samples</a>
+              <a class="nav-link {% block nav_samples_active %}{% endblock %}" href="{% url 'samples:list' %}">Samples</a>
 
               <hr class="my-2">
 
@@ -118,9 +118,8 @@
 
 <!-- JS: load once, at the bottom -->
 <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
-<!-- (Also load htmx here if you want global toasts) -->
-{# <script src="{% static 'js/htmx.min.js' %}"></script> #}
-
+<script src="https://unpkg.com/htmx.org@1.9.12"></script>
+<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 <!-- Toast + HTMX hooks (after Bootstrap) -->
 <script>
   (function () {
