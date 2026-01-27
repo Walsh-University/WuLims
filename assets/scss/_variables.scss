@@ -1,0 +1,42 @@
+
+$enable-dark-mode: true;
+// --- Brand colors ---
+$walsh-maroon: #6d0120;
+$walsh-gold:   #fdc728;
+
+// --- Bootstrap core theme ---
+$primary:   $walsh-maroon;
+$secondary: #4a4a4a;
+$success:   #2f855a;
+$info:      #2b6cb0;
+$warning:   $walsh-gold;
+$danger:    #c53030;
+$light:     #f8f9fa;
+$dark:      #212529;
+
+// --- Typography ---
+$font-family-sans-serif: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+$headings-font-weight: 600;
+
+// --- Buttons ---
+$btn-font-weight: 500;
+$btn-border-radius: .4rem;
+
+// --- Links ---
+$link-color: $primary;
+$link-hover-color: darken($primary, 10%);
+
+// --- Navbar ---
+$navbar-dark-bg: $walsh-maroon;
+$navbar-dark-color: rgba(#fff, .85);
+$navbar-dark-hover-color: #fff;
+$navbar-dark-active-color: $walsh-gold;
+
+// --- Forms ---
+$form-focus-border-color: $walsh-maroon;
+$form-focus-box-shadow: 0 0 0 .2rem rgba($walsh-maroon, .25);
+
+// --- Tables ---
+$table-striped-bg: rgba($walsh-maroon, .03);
+
+
