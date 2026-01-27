@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class Experiment(models.Model):
     class Status(models.TextChoices):
         CREATED = "CREATED"
@@ -14,3 +15,6 @@ class Experiment(models.Model):
     version = models.CharField(max_length=20)
     #Remove comment once projects app is added
     #project_id = models.ForeignKey(Project, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.id
