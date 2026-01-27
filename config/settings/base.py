@@ -70,6 +70,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # local apps
     "accounts",
+    "experiments",
     "lims_core",
     "samples",
 ]
