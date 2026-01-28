@@ -75,3 +75,7 @@ def approve_sample(request, pk: int):
     oob = toast_html + '<div id="modal-target" hx-swap-oob="innerHTML"></div>'
 
     return HttpResponse((row_html + oob).encode("utf-8"))
+
+
+def sample_add():
+    pass
