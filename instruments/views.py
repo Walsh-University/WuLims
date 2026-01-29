@@ -1,12 +1,10 @@
 from django.contrib.auth.decorators import login_required
-
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, render
 from django.template.loader import render_to_string
 
 from .forms import InstrumentFilterForm
 from .models import Instrument
-
 
 
 @login_required
@@ -35,7 +33,7 @@ def instrument_table(request):
     return render(
         request,
         "instruments/partials/instrument_table.html",
-        {"instruments": qs, "form": form}
+        {"instruments": qs, "form": form},
     )
 
 
