@@ -2,7 +2,6 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, render
 from django.template.loader import render_to_string
-from django.utils import timezone
 
 from .forms import InstrumentFilterForm
 from .models import Instrument
@@ -53,7 +52,6 @@ def toggle_active(request, pk: int):
     instrument.is_active = not instrument.is_active
     instrument.save()
 
-    # Передаем в шаблон правильную переменную 'i', чтобы совпадало с instrument_row.html
     row_html = render_to_string(
         "instruments/partials/instrument_row.html", {"i": instrument}, request=request
     )
@@ -64,6 +62,5 @@ def toggle_active(request, pk: int):
         request=request,
     )
 
-    # Out-of-band для закрытия модалки
     oob = toast_html + '<div id="modal-target" hx-swap-oob="innerHTML"></div>'
     return HttpResponse((row_html + oob).encode("utf-8"))

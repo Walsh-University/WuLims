@@ -1,25 +1,26 @@
 import pytest
-from django.urls import reverse
 from django.contrib.auth import get_user_model
+from django.urls import reverse
+
 from instruments.models import Instrument
 
 User = get_user_model()
 
 
 # --------------------------
-# Фикстуры
+# Fixtures
 # --------------------------
 @pytest.fixture
 def authenticated_client(client, db):
-    """Клиент с авторизованным пользователем."""
-    user = User.objects.create_user(username="testuser", password="password")
+    """Client with an authenticated user."""
+    User.objects.create_user(username="testuser", password="password")
     client.login(username="testuser", password="password")
     return client
 
 
 @pytest.fixture
 def instrument(db):
-    """Простой инструмент с обязательными полями."""
+    """Simple instrument with required fields."""
     return Instrument.objects.create(
         name="TestInstrument",
         serial_number="12345",
@@ -30,7 +31,7 @@ def instrument(db):
 
 
 # --------------------------
-# Тесты вьюшек Instruments
+# Instrument Views Tests
 # --------------------------
 @pytest.mark.django_db
 class TestInstrumentViews:
