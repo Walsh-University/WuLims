@@ -71,6 +71,7 @@ INSTALLED_APPS = [
     # local apps
     "accounts",
     "lims_core",
+    "projects",
     "samples",
 ]
 
