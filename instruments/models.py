@@ -1,5 +1,5 @@
-from django.db import settings
-from django.conf import models
+from django.db import models
+from django.conf import settings
 
 
 class Instrument(models.Model):
