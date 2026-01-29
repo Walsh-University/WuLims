@@ -1,3 +1,5 @@
+import uuid
+
 from django.conf import settings
 from django.db import models
 
@@ -10,7 +12,7 @@ class Sample(models.Model):
         APPROVED = "APPROVED"
         REJECTED = "REJECTED"
 
-    sample_id = models.CharField(max_length=32, unique=True)
+    sample_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     client_name = models.CharField(max_length=200)
     received_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.RECEIVED)
@@ -19,4 +21,4 @@ class Sample(models.Model):
     approved_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL)
 
     def __str__(self):
-        return self.sample_id
+        return str(self.sample_id)

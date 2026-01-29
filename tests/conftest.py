@@ -40,7 +40,6 @@ def authenticated_client(client: Client, user: User) -> Client:
 def sample(db) -> Sample:
     """Create a basic sample in RECEIVED status."""
     return Sample.objects.create(
-        sample_id="TEST-001",
         client_name="Test Client",
         status=Sample.Status.RECEIVED,
     )
@@ -50,7 +49,6 @@ def sample(db) -> Sample:
 def sample_in_review(db) -> Sample:
     """Create a sample in IN_REVIEW status (ready for approval)."""
     return Sample.objects.create(
-        sample_id="TEST-002",
         client_name="Test Client",
         status=Sample.Status.IN_REVIEW,
     )
@@ -62,7 +60,6 @@ def approved_sample(db, user: User) -> Sample:
     from django.utils import timezone
 
     return Sample.objects.create(
-        sample_id="TEST-003",
         client_name="Test Client",
         status=Sample.Status.APPROVED,
         approved_at=timezone.now(),

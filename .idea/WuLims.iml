@@ -14,7 +14,14 @@
   </component>
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
+      <excludeFolder url="file://$MODULE_DIR$/.idea/dataSources" />
+      <excludeFolder url="file://$MODULE_DIR$/.memory-bank" />
+      <excludeFolder url="file://$MODULE_DIR$/.sass-cache" />
       <excludeFolder url="file://$MODULE_DIR$/.venv" />
+      <excludeFolder url="file://$MODULE_DIR$/docs/quarto/.quarto" />
+      <excludeFolder url="file://$MODULE_DIR$/docs/quarto/docker_files/libs/revealjs/dist" />
+      <excludeFolder url="file://$MODULE_DIR$/docs/quarto/intro_files/libs/revealjs/dist" />
+      <excludeFolder url="file://$MODULE_DIR$/htmlcov" />
     </content>
     <orderEntry type="jdk" jdkName="uv (WuLims)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

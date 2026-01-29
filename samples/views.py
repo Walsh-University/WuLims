@@ -1,10 +1,14 @@
+import uuid
+
 from django.contrib.auth.decorators import login_required
+from django.db.models import CharField, Q
+from django.db.models.functions import Cast
 from django.http import HttpResponse, HttpResponseBadRequest
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.utils import timezone
 
-from .forms import SampleFilterForm
+from .forms import SampleFilterForm, SampleForm
 from .models import Sample
 
 
@@ -25,13 +29,14 @@ def sample_table(request):
         if status:
             qs = qs.filter(status=status)
         if q:
-            qs = qs.filter(sample_id__icontains=q) | qs.filter(client_name__icontains=q)
+            qs = qs.annotate(sample_id_str=Cast("sample_id", output_field=CharField()))
+            qs = qs.filter(Q(sample_id_str__icontains=q) | Q(client_name__icontains=q))
 
     return render(request, "samples/partials/sample_table.html", {"samples": qs, "form": form})
 
 
 @login_required
-def sample_detail(request, pk: int):
+def sample_detail(request, pk: uuid.UUID):
     sample = get_object_or_404(Sample, pk=pk)
     tab = request.GET.get("tab")
 
@@ -44,13 +49,13 @@ def sample_detail(request, pk: int):
 
 
 @login_required
-def approve_modal(request, pk: int):
+def approve_modal(request, pk: uuid.UUID):
     sample = get_object_or_404(Sample, pk=pk)
     return render(request, "samples/partials/approve_modal.html", {"sample": sample})
 
 
 @login_required
-def approve_sample(request, pk: int):
+def approve_sample(request, pk: uuid.UUID):
     if request.method != "POST":
         return HttpResponseBadRequest("POST required")
 
@@ -77,5 +82,14 @@ def approve_sample(request, pk: int):
     return HttpResponse((row_html + oob).encode("utf-8"))
 
 
-def sample_add():
-    pass
+@login_required
+def sample_add(request):
+    if request.method == "POST":
+        form = SampleForm(request.POST)
+        if form.is_valid():
+            sample = form.save()
+            return redirect("samples:detail", pk=sample.pk)
+    else:
+        form = SampleForm()
+
+    return render(request, "samples/sample_form.html", {"form": form})
