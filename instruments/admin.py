@@ -2,6 +2,7 @@ from django.contrib import admin
 
 from .models import Instrument
 
+
 @admin.register(Instrument)
 class InstrumentAdmin(admin.ModelAdmin):
     list_display = (
@@ -15,8 +16,5 @@ class InstrumentAdmin(admin.ModelAdmin):
     )
 
     search_fields = ("name", "manufacturer", "model", "serial_number")
-
     list_filter = ("is_active", "manufacturer")
-
     ordering = ("name",)
-

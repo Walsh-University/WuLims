@@ -1,9 +1,7 @@
 from django.contrib.auth.decorators import login_required
 
 from django.http import HttpResponse, HttpResponseBadRequest
-
 from django.shortcuts import get_object_or_404, render
-
 from django.template.loader import render_to_string
 
 from .forms import InstrumentFilterForm
