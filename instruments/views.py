@@ -8,6 +8,7 @@ from .forms import InstrumentFilterForm
 from .models import Instrument
 
 
+
 @login_required
 def instrument_list(request):
     form = InstrumentFilterForm(request.GET or None)
