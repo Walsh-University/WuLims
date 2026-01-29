@@ -1,4 +1,6 @@
 from django import forms
+
+
 class InstrumentFilterForm(forms.Form):
     # Search query
     q = forms.CharField(required=False, label="Search")
