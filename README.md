@@ -1,3 +1,5 @@
+![Django](https://img.shields.io/badge/django-%23092E20.svg?style=for-the-badge&logo=django&logoColor=white) ![Build Status](https://github.com/walsh-university/WuLims/actions/workflows/test.yml/badge.svg)
+
 # WuLims (Django + HTMX + Bootstrap starter)
 
 A student-friendly starter for a LIMS-style app using:
