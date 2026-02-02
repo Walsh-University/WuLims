@@ -12,7 +12,7 @@
   </td>
   <td>{{ s.received_at|date:"Y-m-d H:i" }}</td>
   <td class="text-end">
-    {% if s.status == "IN_REVIEW" %}
+    {% if s.status == "IN_REVIEW" and perms.samples.approve_sample %}
       <button class="btn btn-sm btn-primary"
               hx-get="{% url 'samples:approve_modal' s.pk %}"
               hx-target="#modal-target"
