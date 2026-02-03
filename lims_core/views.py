@@ -1,8 +1,8 @@
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
 from django.http import JsonResponse
-from .status import get_system_status
+from django.shortcuts import render
 
+from .status import get_system_status
 
 
 @login_required
