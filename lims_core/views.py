@@ -20,6 +20,7 @@ def search(request):
     # Later: search Customers/Projects/Experiments/Samples
     return render(request, "lims_core/search.html", {"q": q})
 
+
 @login_required
 def status_public(request):
     # Customer-safe response (no internal details)
