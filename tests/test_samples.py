@@ -1,5 +1,7 @@
 """Tests for the samples app."""
 
+import uuid
+
 import pytest
 from assertpy import assert_that
 from django.db import IntegrityError
@@ -14,24 +16,24 @@ class TestSampleModel:
     def test_create_sample(self, db):
         """Sample can be created with required fields."""
         sample = Sample.objects.create(
-            sample_id="SAMP-001",
             client_name="Acme Corp",
         )
 
-        assert_that(sample.sample_id).is_equal_to("SAMP-001")
+        assert_that(sample.sample_id).is_instance_of(uuid.UUID)
         assert_that(sample.client_name).is_equal_to("Acme Corp")
         assert_that(sample.status).is_equal_to(Sample.Status.RECEIVED)
         assert_that(sample.received_at).is_not_none()
 
     def test_sample_str(self, sample):
         """Sample string representation is the sample_id."""
-        assert_that(str(sample)).is_equal_to("TEST-001")
+        assert_that(str(sample)).is_equal_to(str(sample.sample_id))
 
     def test_sample_id_unique(self, sample, db):
         """Sample IDs must be unique."""
+        sample_id = sample.sample_id
         with pytest.raises(IntegrityError):
             Sample.objects.create(
-                sample_id="TEST-001",
+                sample_id=sample_id,
                 client_name="Different Client",
             )
 
@@ -50,7 +52,6 @@ class TestSampleModel:
     def test_sample_approval_fields_nullable(self, db):
         """Approval fields are null by default."""
         sample = Sample.objects.create(
-            sample_id="SAMP-002",
             client_name="Test",
         )
 
@@ -89,7 +90,7 @@ class TestSampleTableView:
         response = authenticated_client.get(reverse("samples:table"))
 
         assert_that(response.status_code).is_equal_to(200)
-        assert_that(response.content.decode()).contains("TEST-001")
+        assert_that(response.content.decode()).contains(str(sample.sample_id))
 
     def test_table_filters_by_status(self, authenticated_client, sample, sample_in_review):
         """Table can be filtered by status."""
@@ -99,13 +100,13 @@ class TestSampleTableView:
         )
 
         content = response.content.decode()
-        assert_that(content).contains("TEST-002")
-        assert_that(content).does_not_contain("TEST-001")
+        assert_that(content).contains(str(sample_in_review.sample_id))
+        assert_that(content).does_not_contain(str(sample.sample_id))
 
     def test_table_filters_by_search(self, authenticated_client, db):
         """Table can be filtered by search query."""
-        Sample.objects.create(sample_id="ABC-100", client_name="Alpha Corp")
-        Sample.objects.create(sample_id="XYZ-200", client_name="Beta Inc")
+        Sample.objects.create(client_name="Alpha Corp")
+        Sample.objects.create(client_name="Beta Inc")
 
         response = authenticated_client.get(
             reverse("samples:table"),
@@ -113,8 +114,41 @@ class TestSampleTableView:
         )
 
         content = response.content.decode()
-        assert_that(content).contains("ABC-100")
-        assert_that(content).does_not_contain("XYZ-200")
+        assert_that(content).contains("Alpha Corp")
+        assert_that(content).does_not_contain("Beta Inc")
+
+
+class TestSampleAddView:
+    """Tests for the sample add view."""
+
+    def test_add_requires_login(self, client):
+        """Unauthenticated users are redirected to login."""
+        response = client.get(reverse("samples:add"))
+
+        assert_that(response.status_code).is_equal_to(302)
+        assert_that(response.url).contains("login")
+
+    def test_add_renders_form_for_authenticated_user(self, authenticated_client):
+        """Authenticated users can access the add form."""
+        response = authenticated_client.get(reverse("samples:add"))
+
+        assert_that(response.status_code).is_equal_to(200)
+        assert_that(response.content.decode()).contains("Add Sample")
+
+    def test_add_creates_sample_and_redirects(self, authenticated_client, db):
+        """Valid post creates a sample and redirects to detail."""
+        response = authenticated_client.post(
+            reverse("samples:add"),
+            {"client_name": "Acme Labs", "status": Sample.Status.RECEIVED},
+        )
+
+        sample = Sample.objects.get(client_name="Acme Labs")
+        assert_that(sample.client_name).is_equal_to("Acme Labs")
+        assert_that(sample.status).is_equal_to(Sample.Status.RECEIVED)
+        assert_that(sample.sample_id).is_instance_of(uuid.UUID)
+
+        assert_that(response.status_code).is_equal_to(302)
+        assert_that(response.url).is_equal_to(reverse("samples:detail", args=[sample.pk]))
 
 
 class TestSampleDetailView:
@@ -131,11 +165,11 @@ class TestSampleDetailView:
         response = authenticated_client.get(reverse("samples:detail", args=[sample.pk]))
 
         assert_that(response.status_code).is_equal_to(200)
-        assert_that(response.content.decode()).contains("TEST-001")
+        assert_that(response.content.decode()).contains(str(sample.sample_id))
 
     def test_detail_404_for_nonexistent(self, authenticated_client):
         """Returns 404 for nonexistent sample."""
-        response = authenticated_client.get(reverse("samples:detail", args=[99999]))
+        response = authenticated_client.get(reverse("samples:detail", args=[uuid.uuid4()]))
 
         assert_that(response.status_code).is_equal_to(404)
 
@@ -221,4 +255,4 @@ class TestApproveModalView:
         response = authenticated_client.get(reverse("samples:approve_modal", args=[sample_in_review.pk]))
 
         assert_that(response.status_code).is_equal_to(200)
-        assert_that(response.content.decode()).contains("TEST-002")
+        assert_that(response.content.decode()).contains(str(sample_in_review.sample_id))
