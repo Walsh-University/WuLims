@@ -20,5 +20,10 @@ class Sample(models.Model):
     approved_at = models.DateTimeField(null=True, blank=True)
     approved_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL)
 
+    class Meta:
+        permissions = [
+            ("approve_sample", "Can approve sample"),
+        ]
+
     def __str__(self):
         return str(self.sample_id)
