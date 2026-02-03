@@ -12,8 +12,6 @@ class Project(models.Model):
     start_date = models.DateField()
     completed_date = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    # Remove comment once customers app is added
-    # customer_id = models.ForeignKey(Project, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.id
