@@ -1,4 +1,4 @@
-# Getting Started
+doc# Getting Started
 
 This guide covers environment setup and Django fundamentals for new developers.
 
