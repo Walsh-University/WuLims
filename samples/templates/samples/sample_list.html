@@ -7,7 +7,9 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
   <h1 class="h3 mb-0">Samples</h1>
 
-  <a class="btn btn-sm btn-primary" href="{% url 'samples:add' %}">Add Sample</a>
+  {% if perms.samples.add_sample %}
+    <a class="btn btn-sm btn-primary" href="{% url 'samples:add' %}">Add Sample</a>
+  {% endif %}
 </div>
 
 <div

@@ -8,7 +8,7 @@
     <div class="text-muted">{{ sample.client_name }} • {{ sample.status }}</div>
   </div>
 
-  {% if sample.status == "IN_REVIEW" %}
+  {% if sample.status == "IN_REVIEW" and perms.samples.approve_sample %}
     <button class="btn btn-primary"
             hx-get="{% url 'samples:approve_modal' sample.pk %}"
             hx-target="#modal-target"
