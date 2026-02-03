@@ -1,6 +1,8 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+
 from django.db import connections
 from django.db.utils import OperationalError
+
 
 def check_database():
     try:
@@ -25,7 +27,7 @@ def get_system_status(include_internal: bool = False):
 
     payload = {
         "status": status,
-        "last_checked": datetime.now(timezone.utc).isoformat(),
+        "last_checked": datetime.now(UTC).isoformat(),
     }
 
     if include_internal:
