@@ -1,8 +1,11 @@
 """Tests for the accounts app."""
 
 from assertpy import assert_that
+from django.contrib.auth.models import Group
 
-from accounts.models import User
+from accounts.audit import role_audit_actor
+from accounts.models import RoleAssignmentAudit, User
+from accounts.roles import ROLE_PERMISSIONS
 
 
 class TestUserModel:
@@ -97,3 +100,49 @@ class TestUserDisplayName:
         )
 
         assert_that(user.display_name()).is_equal_to("spacey@example.com")
+
+
+class TestRoleAssignments:
+    """Tests for role creation and role audit tracking."""
+
+    def test_baseline_roles_exist(self, db):
+        role_names = list(Group.objects.values_list("name", flat=True))
+
+        assert_that(role_names).contains(*ROLE_PERMISSIONS.keys())
+
+    def test_baseline_roles_have_documented_permissions(self, db):
+        for role_name, expected_permissions in ROLE_PERMISSIONS.items():
+            group = Group.objects.get(name=role_name)
+            actual_permissions = {
+                f"{permission.content_type.app_label}.{permission.codename}" for permission in group.permissions.all()
+            }
+            assert_that(actual_permissions).is_equal_to(expected_permissions)
+
+    def test_role_assignment_is_audited(self, db):
+        actor = User.objects.create_superuser(username="adminrole", password="pass")
+        target = User.objects.create_user(username="staffrole", password="pass")
+        role = Group.objects.get(name="Lab Tech")
+
+        with role_audit_actor(actor):
+            target.groups.add(role)
+
+        audit = RoleAssignmentAudit.objects.get(user=target, role_name="Lab Tech")
+        assert_that(audit.action).is_equal_to(RoleAssignmentAudit.Action.ASSIGNED)
+        assert_that(audit.changed_by).is_equal_to(actor)
+        assert_that(audit.changed_at).is_not_none()
+
+    def test_role_removal_is_audited(self, db):
+        actor = User.objects.create_superuser(username="adminremove", password="pass")
+        target = User.objects.create_user(username="staffremove", password="pass")
+        role = Group.objects.get(name="Analyst")
+        target.groups.add(role)
+
+        with role_audit_actor(actor):
+            target.groups.remove(role)
+
+        audit = RoleAssignmentAudit.objects.filter(
+            user=target,
+            role_name="Analyst",
+            action=RoleAssignmentAudit.Action.REMOVED,
+        ).latest("changed_at")
+        assert_that(audit.changed_by).is_equal_to(actor)

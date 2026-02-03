@@ -13,6 +13,7 @@ Welcome to the WuLims project! This is a Laboratory Information Management Syste
 | [Styling](styling.md)                     | SCSS, Bootstrap theming, and CSS build workflow           |
 | [UI Conventions](ui-conventions.md)       | UI Conventinos for WuLims                       |
 | [Migrations](migrations.md)               | Database migrations and model changes                     |
+| [Roles & Permissions](roles-and-permissions.md) | Default roles, group permissions, and enforcement rules |
 | [Docker](docker.md)                       | Container setup and running WuLims in Docker              |
 
 ## Tech Stack

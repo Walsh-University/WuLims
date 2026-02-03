@@ -1,6 +1,6 @@
 import uuid
 
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.db.models import CharField, Q
 from django.db.models.functions import Cast
 from django.http import HttpResponse, HttpResponseBadRequest
@@ -13,12 +13,14 @@ from .models import Sample
 
 
 @login_required
+@permission_required("samples.view_sample", raise_exception=True)
 def sample_list(request):
     form = SampleFilterForm(request.GET or None)
     return render(request, "samples/sample_list.html", {"form": form})
 
 
 @login_required
+@permission_required("samples.view_sample", raise_exception=True)
 def sample_table(request):
     form = SampleFilterForm(request.GET or None)
     qs = Sample.objects.all().order_by("-received_at")
@@ -36,6 +38,7 @@ def sample_table(request):
 
 
 @login_required
+@permission_required("samples.view_sample", raise_exception=True)
 def sample_detail(request, pk: uuid.UUID):
     sample = get_object_or_404(Sample, pk=pk)
     tab = request.GET.get("tab")
@@ -49,12 +52,14 @@ def sample_detail(request, pk: uuid.UUID):
 
 
 @login_required
+@permission_required("samples.approve_sample", raise_exception=True)
 def approve_modal(request, pk: uuid.UUID):
     sample = get_object_or_404(Sample, pk=pk)
     return render(request, "samples/partials/approve_modal.html", {"sample": sample})
 
 
 @login_required
+@permission_required("samples.approve_sample", raise_exception=True)
 def approve_sample(request, pk: uuid.UUID):
     if request.method != "POST":
         return HttpResponseBadRequest("POST required")
@@ -83,6 +88,7 @@ def approve_sample(request, pk: uuid.UUID):
 
 
 @login_required
+@permission_required("samples.add_sample", raise_exception=True)
 def sample_add(request):
     if request.method == "POST":
         form = SampleForm(request.POST)
