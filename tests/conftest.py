@@ -6,8 +6,8 @@ from django.contrib.contenttypes.models import ContentType
 from django.test import Client
 
 from accounts.models import User
-from projects.models import Project
 from accounts.roles import ROLE_PERMISSIONS
+from projects.models import Project
 from samples.models import Sample
 
 
