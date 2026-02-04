@@ -475,4 +475,6 @@ pyrightconfig.json
 /.claude/
 /.idea
 /staticfiles/
+__pycache__/
+*.pyc
 
