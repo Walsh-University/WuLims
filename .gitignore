@@ -183,6 +183,9 @@ cython_debug/
 .idea/**/dictionaries
 .idea/**/shelf
 
+# Memory bank (AI session artifacts)
+.memory-bank/
+
 # AWS User-specific
 .idea/**/aws.xml
 
@@ -466,5 +469,12 @@ poetry.toml
 # LSP config files
 pyrightconfig.json
 
+
+
 # End of https://www.toptal.com/developers/gitignore/api/PyCharm,Python,Django
+/.claude/
+/.idea
+/staticfiles/
+__pycache__/
+*.pyc
 

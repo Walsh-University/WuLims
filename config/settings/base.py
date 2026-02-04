@@ -71,7 +71,9 @@ INSTALLED_APPS = [
     # local apps
     "accounts",
     "lims_core",
+    "projects",
     "samples",
+    "instruments",
 ]
 
 MIDDLEWARE = [
@@ -81,6 +83,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "accounts.audit.RoleAuditActorMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
