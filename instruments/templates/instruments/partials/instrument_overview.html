@@ -1,0 +1,41 @@
+<div class="card shadow-sm">
+  <div class="card-body">
+    <dl class="row mb-0">
+      <dt class="col-sm-3">Status</dt>
+      <dd class="col-sm-9">
+        {% if instrument.is_active %}
+          Active
+        {% else %}
+          Inactive
+        {% endif %}
+      </dd>
+
+      <dt class="col-sm-3">Manufacturer</dt>
+      <dd class="col-sm-9">{{ instrument.manufacturer }}</dd>
+
+      <dt class="col-sm-3">Model</dt>
+      <dd class="col-sm-9">{{ instrument.model }}</dd>
+
+      <dt class="col-sm-3">Serial Number</dt>
+      <dd class="col-sm-9">{{ instrument.serial_number }}</dd>
+
+      <dt class="col-sm-3">Last Calibration</dt>
+      <dd class="col-sm-9">
+        {% if instrument.last_calibration_date %}
+          {{ instrument.last_calibration_date|date:"Y-m-d" }}
+        {% else %}
+          <span class="text-muted">—</span>
+        {% endif %}
+      </dd>
+
+      <dt class="col-sm-3">Last Maintenance</dt>
+      <dd class="col-sm-9">
+        {% if instrument.last_maintenance_date %}
+          {{ instrument.last_maintenance_date|date:"Y-m-d" }}
+        {% else %}
+          <span class="text-muted">—</span>
+        {% endif %}
+      </dd>
+    </dl>
+  </div>
+</div>

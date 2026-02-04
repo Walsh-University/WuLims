@@ -1,0 +1,34 @@
+<tr id="instrument-row-{{ i.id }}">
+  <td>
+    <a href="{% url 'instruments:detail' i.id %}">
+      {{ i.name }}
+    </a>
+  </td>
+
+  <td>{{ i.manufacturer }}</td>
+  <td>{{ i.model }}</td>
+
+  <td>
+    {% if i.is_active %}
+      <span class="badge bg-success">Active</span>
+    {% else %}
+      <span class="badge bg-secondary">Inactive</span>
+    {% endif %}
+  </td>
+
+  <td>
+    {% if i.last_calibration_date %}
+      {{ i.last_calibration_date|date:"Y-m-d" }}
+    {% else %}
+      <span class="text-muted small">—</span>
+    {% endif %}
+  </td>
+
+  <td class="text-end">
+    {% if i.is_active %}
+      <span class="text-muted small">—</span>
+    {% else %}
+      <span class="text-muted small">—</span>
+    {% endif %}
+  </td>
+</tr>
