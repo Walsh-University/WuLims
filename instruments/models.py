@@ -1,5 +1,5 @@
-from django.db import models
 from django.conf import settings
+from django.db import models
 
 
 class Instrument(models.Model):
@@ -12,18 +12,10 @@ class Instrument(models.Model):
     last_calibration_date = models.DateField(null=True, blank=True)
     last_maintenance_date = models.DateField(null=True, blank=True)
     created_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        related_name="instruments_created"
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="instruments_created"
     )
     updated_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        related_name="instruments_updated"
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="instruments_updated"
     )
 
     def __str__(self):

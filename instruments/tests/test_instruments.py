@@ -35,7 +35,6 @@ def instrument(db):
 # --------------------------
 @pytest.mark.django_db
 class TestInstrumentViews:
-
     def test_list_requires_login(self, client):
         url = reverse("instruments:list")
         response = client.get(url)

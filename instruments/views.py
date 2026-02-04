@@ -52,9 +52,7 @@ def toggle_active(request, pk: int):
     instrument.is_active = not instrument.is_active
     instrument.save()
 
-    row_html = render_to_string(
-        "instruments/partials/instrument_row.html", {"i": instrument}, request=request
-    )
+    row_html = render_to_string("instruments/partials/instrument_row.html", {"i": instrument}, request=request)
 
     toast_html = render_to_string(
         "lims_core/partials/toast.html",
