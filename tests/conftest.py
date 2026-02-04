@@ -7,6 +7,7 @@ from django.test import Client
 
 from accounts.models import User
 from accounts.roles import ROLE_PERMISSIONS
+from projects.models import Project
 from samples.models import Sample
 
 
@@ -145,3 +146,9 @@ def approved_sample(db, user: User) -> Sample:
         approved_at=timezone.now(),
         approved_by=user,
     )
+
+
+@pytest.fixture
+def project(db) -> Project:
+    """Create a basic project."""
+    return Project.objects.create(name="Test Project", start_date="2026-01-01")
