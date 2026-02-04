@@ -8,9 +8,9 @@
     <div class="text-muted">{{ sample.client_name }} • {{ sample.status }}</div>
   </div>
 
-  {% if sample.status == "IN_REVIEW" %}
+  {% if sample.status == "IN_REVIEW" and perms.samples.approve_sample %}
     <button class="btn btn-primary"
-            hx-get="{% url 'samples:approve_modal' sample.id %}"
+            hx-get="{% url 'samples:approve_modal' sample.pk %}"
             hx-target="#modal-target"
             hx-swap="innerHTML">
       Approve…
@@ -21,20 +21,20 @@
 <ul class="nav nav-tabs">
   <li class="nav-item">
     <a class="nav-link active"
-       hx-get="{% url 'samples:detail' sample.id %}?tab=overview"
+       hx-get="{% url 'samples:detail' sample.pk %}?tab=overview"
        hx-target="#tab-target"
        hx-swap="innerHTML">Overview</a>
   </li>
   <li class="nav-item">
     <a class="nav-link"
-       hx-get="{% url 'samples:detail' sample.id %}?tab=coc"
+       hx-get="{% url 'samples:detail' sample.pk %}?tab=coc"
        hx-target="#tab-target"
        hx-swap="innerHTML">Chain of Custody</a>
   </li>
 </ul>
 
 <div id="tab-target" class="mt-3"
-     hx-get="{% url 'samples:detail' sample.id %}?tab=overview"
+     hx-get="{% url 'samples:detail' sample.pk %}?tab=overview"
      hx-trigger="load"
      hx-target="#tab-target"
      hx-swap="innerHTML"></div>
