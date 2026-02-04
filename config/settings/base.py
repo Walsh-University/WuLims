@@ -73,6 +73,7 @@ INSTALLED_APPS = [
     "lims_core",
     "projects",
     "samples",
+    "instruments",
 ]
 
 MIDDLEWARE = [

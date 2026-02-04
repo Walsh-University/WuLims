@@ -1,0 +1,28 @@
+<form id="filter-form" class="card card-body">
+  <div class="row g-2 align-items-end">
+    <div class="col-md-6">
+      <label class="form-label">{{ form.q.label }}</label>
+      {{ form.q }}
+    </div>
+
+    <div class="col-md-4">
+      <label class="form-label">{{ form.is_active.label }}</label>
+      {{ form.is_active }}
+    </div>
+
+    <div class="col-md-2">
+      <button class="btn btn-secondary w-100" type="button"
+              hx-get="{% url 'instruments:table' %}"
+              hx-target="#table-target"
+              hx-include="#filter-form">
+        Refresh
+      </button>
+    </div>
+  </div>
+</form>
+
+<script>
+  document.querySelectorAll("#filter-form input, #filter-form select").forEach(el => {
+    el.classList.add("form-control");
+  });
+</script>

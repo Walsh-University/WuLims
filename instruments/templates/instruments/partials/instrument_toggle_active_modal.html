@@ -1,0 +1,55 @@
+<div class="modal-backdrop show"></div>
+<div class="modal d-block" tabindex="-1" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          {% if i.is_active %}
+            Deactivate Instrument {{ i.name }}
+          {% else %}
+            Activate Instrument {{ i.name }}
+          {% endif %}
+        </h5>
+
+        <button type="button" class="btn-close"
+                hx-target="#modal-target"
+                hx-swap="innerHTML"
+                hx-get="about:blank"></button>
+      </div>
+
+      <div class="modal-body">
+        {% if i.is_active %}
+          <p class="mb-0">
+            This will mark the instrument as <strong>INACTIVE</strong>.
+          </p>
+          <p class="text-muted small mb-0">
+            Inactive instruments cannot be used in experiments.
+          </p>
+        {% else %}
+          <p class="mb-0">
+            This will mark the instrument as <strong>ACTIVE</strong>.
+          </p>
+          <p class="text-muted small mb-0">
+            Active instruments can be referenced in experiments.
+          </p>
+        {% endif %}
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary"
+                hx-target="#modal-target"
+                hx-swap="innerHTML"
+                hx-get="about:blank">
+          Cancel
+        </button>
+
+        <button class="btn btn-primary"
+                hx-post="{% url 'instruments:toggle_active' i.id %}"
+                hx-target="#instrument-row-{{ i.id }}"
+                hx-swap="outerHTML">
+          Confirm
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
