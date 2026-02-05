@@ -2,7 +2,7 @@
 
 This document defines **how UI elements should look and behave** in WuLims.
 
-The goal is **consistency**, not creativity.  
+The goal is **consistency**, not creativity.
 A consistent UI is easier to learn, easier to maintain, and feels professional.
 
 When in doubt: **copy an existing pattern**.
@@ -94,7 +94,7 @@ Forms should be boring and predictable.
 
 **Layout Rules**
 - One column by default
-- Group related fields 
+- Group related fields
 - Labels always above inputs
 
 **Required Structure**

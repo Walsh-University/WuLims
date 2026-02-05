@@ -13,8 +13,8 @@ class Author(models.Model):
 
 class Book(models.Model):
     title = models.CharField(max_length=100)
-    author = models.ForeignKey(Author, 
-                               on_delete=models.CASCADE, 
+    author = models.ForeignKey(Author,
+                               on_delete=models.CASCADE,
                                related_name='books')
 ```
 Books can be accessed from an Author instance using `author_instance.books.all()`.
@@ -34,7 +34,7 @@ class Student(models.Model):
 
 class Course(models.Model):
     title = models.CharField(max_length=100)
-    students = models.ManyToManyField(Student, 
+    students = models.ManyToManyField(Student,
                                       related_name='courses')
 ```
 
@@ -52,8 +52,8 @@ A simple example of a OneToOneField relationship:
 from django.db import models
 
 class UserProfile(models.Model):
-    user = models.OneToOneField('auth.User', 
-                                on_delete=models.CASCADE, 
+    user = models.OneToOneField('auth.User',
+                                on_delete=models.CASCADE,
                                 related_name='profile')
     bio = models.TextField()
 ```
@@ -94,8 +94,8 @@ class Person(models.Model):
 
 ```
 
-In this example, a `Person` is related to a `Customer` via a ForeignKey, indicating that each customer can have 
-multiple people associated with them. The `PersonEmail` model also uses a ForeignKey to relate email addresses 
+In this example, a `Person` is related to a `Customer` via a ForeignKey, indicating that each customer can have
+multiple people associated with them. The `PersonEmail` model also uses a ForeignKey to relate email addresses
 to a specific person, allowing each person to have multiple email addresses.
 
 ## Understanding `related_name`
