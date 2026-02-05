@@ -1,3 +1,5 @@
+import uuid
+
 from django.db import models
 
 
@@ -6,7 +8,7 @@ class Customer(models.Model):
         ACTIVE = "ACTIVE"
         INACTIVE = "INACTIVE"
 
-    customer_id = models.CharField(max_length=32, unique=True)
+    customer_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     customer_name = models.CharField(max_length=200)
     external_id = models.CharField(max_length=32, unique=True)
     customer_type = models.CharField(max_length=200)
