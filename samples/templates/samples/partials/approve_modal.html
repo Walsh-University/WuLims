@@ -22,8 +22,8 @@
                 hx-get="about:blank">Cancel</button>
 
         <button class="btn btn-primary"
-                hx-post="{% url 'samples:approve' sample.id %}"
-                hx-target="#sample-row-{{ sample.id }}"
+                hx-post="{% url 'samples:approve' sample.pk %}"
+                hx-target="#sample-row-{{ sample.pk }}"
                 hx-swap="outerHTML">
           Approve
         </button>
