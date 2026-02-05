@@ -77,7 +77,7 @@
               <a class="nav-link" href="#">Customers</a>
               <a class="nav-link" href="#">Projects</a>
               <a class="nav-link" href="#">Experiments</a>
-              <a class="nav-link" href="#">Instruments</a>
+              <a class="nav-link {% block nav_instruments_active %}{% endblock %}" href="{% url 'instruments:list' %}">Instruments</a>
               <a class="nav-link {% block nav_samples_active %}{% endblock %}" href="{% url 'samples:list' %}">Samples</a>
 
               <hr class="my-2">
