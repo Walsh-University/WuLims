@@ -17,5 +17,4 @@ urlpatterns = [
     path("samples/", include("samples.urls")),
     path("", include("lims_core.urls")),
     path("instruments/", include("instruments.urls")),
-    path("", include("lims_core.urls")),
 ]
