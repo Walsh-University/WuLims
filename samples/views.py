@@ -23,7 +23,7 @@ def sample_list(request):
 @permission_required("samples.view_sample", raise_exception=True)
 def sample_table(request):
     form = SampleFilterForm(request.GET or None)
-    qs = Sample.objects.all().order_by("-received_at")
+    qs = Sample.objects.select_related("project").all().order_by("-received_at")
 
     if form.is_valid():
         status = form.cleaned_data.get("status")
@@ -40,7 +40,7 @@ def sample_table(request):
 @login_required
 @permission_required("samples.view_sample", raise_exception=True)
 def sample_detail(request, pk: uuid.UUID):
-    sample = get_object_or_404(Sample, pk=pk)
+    sample = get_object_or_404(Sample.objects.select_related("project"), pk=pk)
     tab = request.GET.get("tab")
 
     if tab == "overview":

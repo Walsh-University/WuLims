@@ -461,14 +461,14 @@ dependencies = [
     { name = "gunicorn" },
     { name = "packaging" },
     { name = "psycopg2-binary" },
-    { name = "pytest" },
     { name = "python-dotenv" },
     { name = "whitenoise" },
 ]
 
-[package.optional-dependencies]
+[package.dev-dependencies]
 dev = [
     { name = "assertpy" },
+    { name = "pre-commit" },
     { name = "pytest" },
     { name = "pytest-cov" },
     { name = "pytest-django" },
@@ -477,31 +477,26 @@ dev = [
     { name = "ty" },
 ]
 
-[package.dev-dependencies]
-dev = [
-    { name = "pre-commit" },
-]
-
 [package.metadata]
 requires-dist = [
     { name = "asgiref", specifier = "==3.11.1" },
-    { name = "assertpy", marker = "extra == 'dev'", specifier = ">=1.1" },
     { name = "dj-database-url", specifier = ">=3.1.0" },
     { name = "django", specifier = "==6.0.2" },
     { name = "gunicorn", specifier = "==25.0.1" },
     { name = "packaging", specifier = "==26.0" },
     { name = "psycopg2-binary", specifier = ">=2.9.11" },
-    { name = "pytest", specifier = ">=9.0.2" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=9.0.2" },
-    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=5.0.0" },
-    { name = "pytest-django", marker = "extra == 'dev'", specifier = ">=4.11.1" },
-    { name = "pytest-mock", marker = "extra == 'dev'", specifier = ">=3.15.1" },
     { name = "python-dotenv", specifier = ">=1.2.1" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.15.0" },
-    { name = "ty", marker = "extra == 'dev'", specifier = ">=0.0.15" },
     { name = "whitenoise", specifier = ">=6.11.0" },
 ]
-provides-extras = ["dev"]
 
 [package.metadata.requires-dev]
-dev = [{ name = "pre-commit", specifier = ">=4.5.1" }]
+dev = [
+    { name = "assertpy", specifier = ">=1.1" },
+    { name = "pre-commit", specifier = ">=4.5.1" },
+    { name = "pytest", specifier = ">=9.0.2" },
+    { name = "pytest-cov", specifier = ">=5.0.0" },
+    { name = "pytest-django", specifier = ">=4.11.1" },
+    { name = "pytest-mock", specifier = ">=3.15.1" },
+    { name = "ruff", specifier = ">=0.15.0" },
+    { name = "ty", specifier = ">=0.0.15" },
+]

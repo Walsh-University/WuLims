@@ -5,7 +5,7 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
   <div>
     <h1 class="h3 mb-0">Sample {{ sample.sample_id }}</h1>
-    <div class="text-muted">{{ sample.client_name }} • {{ sample.status }}</div>
+    <div class="text-muted">{{ sample.project.name|default:"No Project" }} • {{ sample.client_name }} • {{ sample.status }}</div>
   </div>
 
   {% if sample.status == "IN_REVIEW" and perms.samples.approve_sample %}
