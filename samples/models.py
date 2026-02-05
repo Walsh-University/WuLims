@@ -13,6 +13,7 @@ class Sample(models.Model):
         REJECTED = "REJECTED"
 
     sample_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    project = models.ForeignKey("projects.Project", null=True, on_delete=models.PROTECT, related_name="samples")
     client_name = models.CharField(max_length=200)
     received_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.RECEIVED)

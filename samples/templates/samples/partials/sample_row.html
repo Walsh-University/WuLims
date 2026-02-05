@@ -1,5 +1,6 @@
 <tr id="sample-row-{{ s.pk }}">
   <td><a href="{% url 'samples:detail' s.pk %}">{{ s.sample_id }}</a></td>
+  <td>{{ s.project.name|default:"—" }}</td>
   <td>{{ s.client_name }}</td>
   <td>
     {% if s.status == "APPROVED" %}

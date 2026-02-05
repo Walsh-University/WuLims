@@ -45,7 +45,7 @@ jobs:
         run: uv python install 3.13
 
       - name: Install dependencies
-        run: uv sync --frozen --extra dev
+        run: uv sync --frozen --group dev
 
       - name: Run ruff check
         run: uv run ruff check .

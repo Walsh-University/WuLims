@@ -13,9 +13,10 @@ from samples.models import Sample
 class TestSampleModel:
     """Tests for the Sample model."""
 
-    def test_create_sample(self, db):
+    def test_create_sample(self, db, project):
         """Sample can be created with required fields."""
         sample = Sample.objects.create(
+            project=project,
             client_name="Acme Corp",
         )
 
@@ -34,6 +35,7 @@ class TestSampleModel:
         with pytest.raises(IntegrityError):
             Sample.objects.create(
                 sample_id=sample_id,
+                project=sample.project,
                 client_name="Different Client",
             )
 
@@ -49,9 +51,10 @@ class TestSampleModel:
             "REJECTED",
         )
 
-    def test_sample_approval_fields_nullable(self, db):
+    def test_sample_approval_fields_nullable(self, db, project):
         """Approval fields are null by default."""
         sample = Sample.objects.create(
+            project=project,
             client_name="Test",
         )
 
@@ -103,10 +106,10 @@ class TestSampleTableView:
         assert_that(content).contains(str(sample_in_review.sample_id))
         assert_that(content).does_not_contain(str(sample.sample_id))
 
-    def test_table_filters_by_search(self, authenticated_client, db):
+    def test_table_filters_by_search(self, authenticated_client, db, project):
         """Table can be filtered by search query."""
-        Sample.objects.create(client_name="Alpha Corp")
-        Sample.objects.create(client_name="Beta Inc")
+        Sample.objects.create(project=project, client_name="Alpha Corp")
+        Sample.objects.create(project=project, client_name="Beta Inc")
 
         response = authenticated_client.get(
             reverse("samples:table"),
@@ -135,14 +138,15 @@ class TestSampleAddView:
         assert_that(response.status_code).is_equal_to(200)
         assert_that(response.content.decode()).contains("Add Sample")
 
-    def test_add_creates_sample_and_redirects(self, manager_client, db):
+    def test_add_creates_sample_and_redirects(self, manager_client, db, project):
         """Valid post creates a sample and redirects to detail."""
         response = manager_client.post(
             reverse("samples:add"),
-            {"client_name": "Acme Labs", "status": Sample.Status.RECEIVED},
+            {"project": project.pk, "client_name": "Acme Labs", "status": Sample.Status.RECEIVED},
         )
 
         sample = Sample.objects.get(client_name="Acme Labs")
+        assert_that(sample.project).is_equal_to(project)
         assert_that(sample.client_name).is_equal_to("Acme Labs")
         assert_that(sample.status).is_equal_to(Sample.Status.RECEIVED)
         assert_that(sample.sample_id).is_instance_of(uuid.UUID)
