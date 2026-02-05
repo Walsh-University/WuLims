@@ -75,6 +75,7 @@ INSTALLED_APPS = [
     "projects",
     "samples",
     "instruments",
+    "audit",
 ]
 
 MIDDLEWARE = [
