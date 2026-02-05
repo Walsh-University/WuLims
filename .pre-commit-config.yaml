@@ -21,3 +21,4 @@ repos:
     rev: v1.4.0
     hooks:
       - id: detect-secrets
+        exclude: ^tests/|docker-compose.yml

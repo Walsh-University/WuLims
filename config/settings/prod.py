@@ -3,7 +3,7 @@ import os
 
 DEBUG = False
 
-if SECRET_KEY == "dev-only-change-me":  # noqa
+if SECRET_KEY == "dev-only-change-me":  # noqa # pragma: allowlist secret
     raise RuntimeError("DJANGO_SECRET_KEY must be set in production")
 
 # Hosts (Traefik + kube probes)
