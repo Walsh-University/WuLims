@@ -14,18 +14,8 @@ dependencies = [
     "whitenoise>=6.11.0",
 ]
 
-[project.optional-dependencies]
-dev = [
-    "pytest>=9.0.2",
-    "pytest-django>=4.11.1",
-    "pytest-cov>=5.0.0",
-    "pytest-mock>=3.15.1",
-    "assertpy>=1.1",
-    "ruff>=0.15.0",
-    "ty>=0.0.15",
-]
-
 [tool.pytest.ini_options]
+minversion = "9.0"
 DJANGO_SETTINGS_MODULE = "config.settings.test"
 python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]
@@ -34,9 +24,8 @@ addopts = [
     "-q",
     "--strict-markers",
     "-ra",
-    "--cov=accounts",
-    "--cov=samples",
-    "--cov=lims_core",
+    "--cov",
+    "--cov-fail-under=80",
     "--cov-report=term-missing",
     "--cov-report=html:htmlcov",
 ]
@@ -45,8 +34,15 @@ testpaths = ["tests"]
 
 [tool.coverage.run]
 branch = true
+relative_files = true
 source = ["accounts", "samples", "lims_core", "projects", "instruments", "customers", "experiments"]
 omit = ["*/migrations/*", "*/__init__.py"]
+
+[tool.coverage.paths]
+source = [
+    ".",
+    "*/WuLims",
+]
 
 [tool.coverage.report]
 exclude_lines = [
@@ -80,7 +76,14 @@ ignore = [
 ]
 
 [tool.ruff.lint.isort]
-known-first-party = ["accounts", "samples", "lims_core", "config"]
+known-first-party = ["accounts",
+    "samples",
+    "lims_core",
+    "config",
+    "experiments",
+    "instruments",
+    "projects",
+    "customers"]
 
 [tool.ruff.format]
 quote-style = "double"
@@ -100,5 +103,12 @@ exclude = ["migrations"]
 
 [dependency-groups]
 dev = [
+    "assertpy>=1.1",
     "pre-commit>=4.5.1",
+    "pytest>=9.0.2",
+    "pytest-cov>=5.0.0",
+    "pytest-django>=4.11.1",
+    "pytest-mock>=3.15.1",
+    "ruff>=0.15.0",
+    "ty>=0.0.15",
 ]

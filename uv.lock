@@ -461,6 +461,7 @@ dependencies = [
     { name = "gunicorn" },
     { name = "packaging" },
     { name = "psycopg2-binary" },
+    { name = "pytest" },
     { name = "python-dotenv" },
     { name = "whitenoise" },
 ]
@@ -490,6 +491,7 @@ requires-dist = [
     { name = "gunicorn", specifier = "==25.0.1" },
     { name = "packaging", specifier = "==26.0" },
     { name = "psycopg2-binary", specifier = ">=2.9.11" },
+    { name = "pytest", specifier = ">=9.0.2" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=9.0.2" },
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=5.0.0" },
     { name = "pytest-django", marker = "extra == 'dev'", specifier = ">=4.11.1" },
