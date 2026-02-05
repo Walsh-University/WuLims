@@ -23,7 +23,7 @@ INSTALLED_APPS = [
     "accounts",
     "lims_core",
     "samples",
-    "customers"
+    "customers",
 ]
 
 MIDDLEWARE = [
