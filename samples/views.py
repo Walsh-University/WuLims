@@ -1,23 +1,29 @@
-from django.contrib.auth.decorators import login_required
+import uuid
+
+from django.contrib.auth.decorators import login_required, permission_required
+from django.db.models import CharField, Q
+from django.db.models.functions import Cast
 from django.http import HttpResponse, HttpResponseBadRequest
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.utils import timezone
 
-from .forms import SampleFilterForm
+from .forms import SampleFilterForm, SampleForm
 from .models import Sample
 
 
 @login_required
+@permission_required("samples.view_sample", raise_exception=True)
 def sample_list(request):
     form = SampleFilterForm(request.GET or None)
     return render(request, "samples/sample_list.html", {"form": form})
 
 
 @login_required
+@permission_required("samples.view_sample", raise_exception=True)
 def sample_table(request):
     form = SampleFilterForm(request.GET or None)
-    qs = Sample.objects.all().order_by("-received_at")
+    qs = Sample.objects.select_related("project").all().order_by("-received_at")
 
     if form.is_valid():
         status = form.cleaned_data.get("status")
@@ -25,14 +31,16 @@ def sample_table(request):
         if status:
             qs = qs.filter(status=status)
         if q:
-            qs = qs.filter(sample_id__icontains=q) | qs.filter(client_name__icontains=q)
+            qs = qs.annotate(sample_id_str=Cast("sample_id", output_field=CharField()))
+            qs = qs.filter(Q(sample_id_str__icontains=q) | Q(client_name__icontains=q))
 
     return render(request, "samples/partials/sample_table.html", {"samples": qs, "form": form})
 
 
 @login_required
-def sample_detail(request, pk: int):
-    sample = get_object_or_404(Sample, pk=pk)
+@permission_required("samples.view_sample", raise_exception=True)
+def sample_detail(request, pk: uuid.UUID):
+    sample = get_object_or_404(Sample.objects.select_related("project"), pk=pk)
     tab = request.GET.get("tab")
 
     if tab == "overview":
@@ -44,13 +52,15 @@ def sample_detail(request, pk: int):
 
 
 @login_required
-def approve_modal(request, pk: int):
+@permission_required("samples.approve_sample", raise_exception=True)
+def approve_modal(request, pk: uuid.UUID):
     sample = get_object_or_404(Sample, pk=pk)
     return render(request, "samples/partials/approve_modal.html", {"sample": sample})
 
 
 @login_required
-def approve_sample(request, pk: int):
+@permission_required("samples.approve_sample", raise_exception=True)
+def approve_sample(request, pk: uuid.UUID):
     if request.method != "POST":
         return HttpResponseBadRequest("POST required")
 
@@ -75,3 +85,17 @@ def approve_sample(request, pk: int):
     oob = toast_html + '<div id="modal-target" hx-swap-oob="innerHTML"></div>'
 
     return HttpResponse((row_html + oob).encode("utf-8"))
+
+
+@login_required
+@permission_required("samples.add_sample", raise_exception=True)
+def sample_add(request):
+    if request.method == "POST":
+        form = SampleForm(request.POST)
+        if form.is_valid():
+            sample = form.save()
+            return redirect("samples:detail", pk=sample.pk)
+    else:
+        form = SampleForm()
+
+    return render(request, "samples/sample_form.html", {"form": form})

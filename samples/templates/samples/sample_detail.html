@@ -1,16 +1,17 @@
 {% extends "lims_core/base.html" %}
+{% block nav_samples_active %}active{% endblock %}
 {% block title %}Sample {{ sample.sample_id }} - WuLims{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
   <div>
     <h1 class="h3 mb-0">Sample {{ sample.sample_id }}</h1>
-    <div class="text-muted">{{ sample.client_name }} • {{ sample.status }}</div>
+    <div class="text-muted">{{ sample.project.name|default:"No Project" }} • {{ sample.client_name }} • {{ sample.status }}</div>
   </div>
 
-  {% if sample.status == "IN_REVIEW" %}
+  {% if sample.status == "IN_REVIEW" and perms.samples.approve_sample %}
     <button class="btn btn-primary"
-            hx-get="{% url 'samples:approve_modal' sample.id %}"
+            hx-get="{% url 'samples:approve_modal' sample.pk %}"
             hx-target="#modal-target"
             hx-swap="innerHTML">
       Approve…
@@ -21,20 +22,20 @@
 <ul class="nav nav-tabs">
   <li class="nav-item">
     <a class="nav-link active"
-       hx-get="{% url 'samples:detail' sample.id %}?tab=overview"
+       hx-get="{% url 'samples:detail' sample.pk %}?tab=overview"
        hx-target="#tab-target"
        hx-swap="innerHTML">Overview</a>
   </li>
   <li class="nav-item">
     <a class="nav-link"
-       hx-get="{% url 'samples:detail' sample.id %}?tab=coc"
+       hx-get="{% url 'samples:detail' sample.pk %}?tab=coc"
        hx-target="#tab-target"
        hx-swap="innerHTML">Chain of Custody</a>
   </li>
 </ul>
 
 <div id="tab-target" class="mt-3"
-     hx-get="{% url 'samples:detail' sample.id %}?tab=overview"
+     hx-get="{% url 'samples:detail' sample.pk %}?tab=overview"
      hx-trigger="load"
      hx-target="#tab-target"
      hx-swap="innerHTML"></div>

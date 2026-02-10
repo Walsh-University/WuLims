@@ -11,7 +11,7 @@ This guide covers environment setup and Django fundamentals for new developers.
   - VS Code (also good)
 - Zed (lightweight)
   - Any IDE that supports Python and Django
-- Docker 
+- Docker
 
 ## Docker vs Local Dev (Quick Note)
 
@@ -87,7 +87,7 @@ cp .env.example .env
 source .env  # or use a tool like direnv
 ```
 
-DO NOT COMMIT `.env` TO VERSION CONTROL.  .env is a local configuration file with secrets (passwords) and 
+DO NOT COMMIT `.env` TO VERSION CONTROL.  .env is a local configuration file with secrets (passwords) and
 development keys.  It should never be shared or committed.
 
 To stop PostgreSQL later:
