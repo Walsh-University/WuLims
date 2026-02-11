@@ -1,0 +1,27 @@
+<tr id="results-row-{{ r.pk }}">
+    <td><a href="{% url 'results:detail' r.pk %}">{{ r.id }}</a></td>
+    <td>{{ r.project.name|default:"—" }}</td>
+    <td>{{ r.sample.sample_id|default:"-" }}</td>
+    <td>
+        {% if r.status == "ACQUIRED" %}
+            <span class="badge bg-success">{{ r.status }}</span>
+        {% elif s.status == "IN_REVIEW" %}
+            <span class="badge bg-warning text-dark">{{ r.status }}</span>
+        {% else %}
+            <span class="badge bg-secondary">{{ r.status }}</span>
+        {% endif %}
+    </td>
+    <td>{{ r.completed_at|date:"Y-m-d H:i" }}</td>
+    <td class="text-end">
+        {% if r.status == "IN_REVIEW" and perms.results.approve_result %}
+            <button class="btn btn-sm btn-primary"
+                    hx-get="{% url 'results:approve_modal' r.pk %}"
+                    hx-target="#modal-target"
+                    hx-swap="innerHTML">
+                Approve…
+            </button>
+        {% else %}
+            <span class="text-muted small">—</span>
+        {% endif %}
+    </td>
+</tr>

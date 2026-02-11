@@ -1,0 +1,26 @@
+{% extends "lims_core/base.html" %}
+{% block title %}Results - WuLims{% endblock %}
+{% block nav_results_active %}active{% endblock %}
+{% block breadcrumb_current %}Results{% endblock %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h3 mb-0">Results</h1>
+
+        {% if perms.results.add_result %}
+            <a class="btn btn-sm btn-primary" href="{% url 'results:add' %}">Add Result</a>
+        {% endif %}
+    </div>
+
+    <div
+            hx-get="{% url 'results:table' %}"
+            hx-trigger="load, keyup changed delay:300ms from:#filter-form, change from:#filter-form"
+            hx-target="#table-target"
+            hx-include="#filter-form"
+    >
+        {% include "results/partials/results_filters.html" %}
+    </div>
+
+    <div id="table-target" class="mt-3"></div>
+    <div id="modal-target"></div>
+{% endblock %}

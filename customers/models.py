@@ -17,4 +17,4 @@ class Customer(models.Model):
     is_active = models.CharField(max_length=20, choices=Active.choices, default=Active.INACTIVE)
 
     def __str__(self):
-        return self.customer_id
+        return self.customer_name
