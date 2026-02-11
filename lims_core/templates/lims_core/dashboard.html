@@ -38,7 +38,7 @@
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
                         <div class="text-secondary small">Samples Received</div>
-                        <div class="display-6 mb-0">34</div>
+                        <div class="display-6 mb-0">{{ samples_received }}</div>
                     </div>
                     <span class="badge badge-accent">New</span>
                 </div>
@@ -53,7 +53,7 @@
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
                         <div class="text-secondary small">Instruments Online</div>
-                        <div class="display-6 mb-0">5</div>
+                        <div class="display-6 mb-0">{{ instruments_online }}</div>
                     </div>
                     <span class="badge text-bg-success">OK</span>
                 </div>
@@ -129,7 +129,7 @@
             <div class="card-header bg-body fw-semibold">Quick Actions</div>
             <div class="card-body d-grid gap-2">
                 <button class="btn btn-primary">Create Experiment</button>
-                <button class="btn btn-outline-secondary">Receive Sample</button>
+                <a class="btn btn-outline-secondary" href="{% url 'samples:add' %}">Receive Sample</a>
                 <button class="btn btn-outline-secondary">Log Instrument Maintenance</button>
                 <button class="btn btn-outline-secondary">Generate Report</button>
             </div>

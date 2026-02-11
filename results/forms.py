@@ -20,6 +20,6 @@ class ResultForm(forms.ModelForm):
             "project": forms.Select(attrs={"class": "form-select"}),
             "sample": forms.Select(attrs={"class": "form-select"}),
             "title": forms.TextInput(attrs={"class": "form-control"}),
-            "description": forms.TextInput(attrs={"class": "form-control"}),
+            "description": forms.Textarea(attrs={"class": "form-control"}),
             "status": forms.Select(attrs={"class": "form-select"}),
         }
