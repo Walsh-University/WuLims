@@ -87,12 +87,16 @@
             </div>
           </div>
 
-          <!-- Status pinned to bottom -->
-          <div class="mt-auto p-3 border-top small text-secondary">
-            <span class="me-2">Status:</span>
-            <!-- This is hooked up to some JS to reflect connection status -->
-            <span id="appStatus" class="badge text-bg-success">Connected</span>
-          </div>
+          <!-- System status pinned to bottom -->
+            <div class="mt-auto p-3 border-top small">
+              <div class="d-flex align-items-center gap-2">
+                <span id="systemStatusDot"
+                      class="rounded-circle"
+                      style="width:8px;height:8px;background:#adb5bd;"></span>
+                <span class="text-secondary">System:</span>
+                <span id="systemStatusText" class="fw-semibold text-secondary">Checking…</span>
+              </div>
+            </div>
         </div>
       </div>
     </aside>
@@ -120,6 +124,42 @@
 <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
 <script src="https://unpkg.com/htmx.org@1.9.12"></script>
 <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+<script>
+  (function () {
+    async function loadSystemStatus() {
+      const dot = document.getElementById("systemStatusDot");
+      const text = document.getElementById("systemStatusText");
+      if (!dot || !text) return;
+
+      try {
+        const res = await fetch("{% url 'lims_core:status_public' %}");
+        const data = await res.json();
+
+        text.textContent = data.status;
+
+        if (data.status === "Operational") {
+          dot.style.background = "green";
+          text.className = "fw-semibold text-success";
+        } else if (data.status === "Degraded") {
+          dot.style.background = "orange";
+          text.className = "fw-semibold text-warning";
+        } else {
+          dot.style.background = "red";
+          text.className = "fw-semibold text-danger";
+        }
+      } catch (e) {
+        dot.style.background = "red";
+        text.textContent = "Unavailable";
+        text.className = "fw-semibold text-danger";
+      }
+    }
+
+    loadSystemStatus();
+    setInterval(loadSystemStatus, 60000);
+  })();
+</script>
+
 <!-- Toast + HTMX hooks (after Bootstrap) -->
 <script>
   (function () {
