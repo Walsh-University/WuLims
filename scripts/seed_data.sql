@@ -7,16 +7,6 @@ BEGIN;
   TRUNCATE TABLE instruments_instrument RESTART IDENTITY CASCADE;
   TRUNCATE TABLE customers_customer RESTART IDENTITY CASCADE;
   TRUNCATE TABLE projects_project RESTART IDENTITY CASCADE;
-  TRUNCATE TABLE accounts_user RESTART IDENTITY CASCADE;
-
-  -- 1) Users (accounts.User)
-INSERT INTO accounts_user (
-    id, password, last_login, is_superuser, username, first_name, last_name, email,
-    is_staff, is_active, date_joined, external_id, employee_id, department
-) VALUES
-      (1001, 'pbkdf2_sha256$720000$demo$demo_hash_replace_me', NULL, false, 'labtech1', 'Lab', 'Tech', 'labtech1@example.com', true, true, NOW(), '', 'E1001', 'QA'),
-      (1002, 'pbkdf2_sha256$720000$demo$demo_hash_replace_me', NULL, false, 'reviewer1', 'Result', 'Reviewer', 'reviewer1@example.com', true, true, NOW(), '', 'E1002', 'Science')
-    ON CONFLICT (id) DO NOTHING;
 
 -- 2) Projects
 INSERT INTO projects_project (
@@ -84,7 +74,6 @@ INSERT INTO experiments_experiment (
     ON CONFLICT (id) DO NOTHING;
 
 -- Keep sequences aligned after explicit IDs
-SELECT setval(pg_get_serial_sequence('accounts_user', 'id'),        GREATEST((SELECT COALESCE(MAX(id),1) FROM accounts_user), 1), true);
 SELECT setval(pg_get_serial_sequence('projects_project', 'id'),      GREATEST((SELECT COALESCE(MAX(id),1) FROM projects_project), 1), true);
 SELECT setval(pg_get_serial_sequence('instruments_instrument', 'id'),GREATEST((SELECT COALESCE(MAX(id),1) FROM instruments_instrument), 1), true);
 SELECT setval(pg_get_serial_sequence('results_result', 'id'),        GREATEST((SELECT COALESCE(MAX(id),1) FROM results_result), 1), true);
