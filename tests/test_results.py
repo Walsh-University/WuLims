@@ -3,6 +3,7 @@
 import pytest
 from assertpy import assert_that
 from django.core.exceptions import ValidationError
+from django.urls import reverse
 from django.utils import timezone
 
 from results.models import Result
@@ -178,3 +179,233 @@ class TestResultModel:
             )
 
         assert_that(exc.value.message_dict).contains_key("status")
+
+
+class TestResultListView:
+    """Tests for the result list page."""
+
+    def test_list_requires_login(self, client):
+        response = client.get(reverse("results:list"))
+
+        assert_that(response.status_code).is_equal_to(302)
+        assert_that(response.url).contains("login")
+
+    def test_list_accessible_when_authenticated(self, authenticated_client):
+        response = authenticated_client.get(reverse("results:list"))
+
+        assert_that(response.status_code).is_equal_to(200)
+        assert_that(response.content.decode()).contains("Results")
+
+
+class TestResultTableView:
+    """Tests for the HTMX result table endpoint."""
+
+    def test_table_requires_login(self, client):
+        response = client.get(reverse("results:table"))
+
+        assert_that(response.status_code).is_equal_to(302)
+
+    def test_table_returns_results(self, authenticated_client, sample, project):
+        result = Result.objects.create(
+            title="Lead Panel",
+            description="Initial acquisition",
+            sample=sample,
+            project=project,
+        )
+
+        response = authenticated_client.get(reverse("results:table"))
+        content = response.content.decode()
+
+        assert_that(response.status_code).is_equal_to(200)
+        assert_that(content).contains(str(result.id))
+        assert_that(content).contains(project.name)
+        assert_that(content).contains(str(sample.sample_id))
+
+    def test_table_filters_by_status(self, authenticated_client, sample, project):
+        acquired = Result.objects.create(
+            title="Acquired Result",
+            description="A",
+            sample=sample,
+            project=project,
+            status=Result.Status.ACQUIRED,
+        )
+        in_review = Result.objects.create(
+            title="Review Result",
+            description="B",
+            sample=sample,
+            project=project,
+            status=Result.Status.IN_REVIEW,
+        )
+
+        response = authenticated_client.get(reverse("results:table"), {"status": Result.Status.IN_REVIEW})
+        content = response.content.decode()
+
+        assert_that(response.status_code).is_equal_to(200)
+        assert_that(content).contains(f"results-row-{in_review.id}")
+        assert_that(content).does_not_contain(f"results-row-{acquired.id}")
+
+    def test_table_filters_by_search_query(self, authenticated_client, sample):
+        project_alpha = sample.project
+        project_alpha.name = "Alpha Project"
+        project_alpha.save(update_fields=["name"])
+        project_beta = type(project_alpha).objects.create(name="Beta Project", start_date="2026-01-10")
+        beta_sample = type(sample).objects.create(project=project_beta, client_name="Beta Client")
+
+        alpha_result = Result.objects.create(
+            title="Alpha Result",
+            description="A",
+            sample=sample,
+            project=project_alpha,
+        )
+        beta_result = Result.objects.create(
+            title="Beta Result",
+            description="B",
+            sample=beta_sample,
+            project=project_beta,
+        )
+
+        response = authenticated_client.get(reverse("results:table"), {"q": "Alpha"})
+        content = response.content.decode()
+
+        assert_that(response.status_code).is_equal_to(200)
+        assert_that(content).contains(f"results-row-{alpha_result.id}")
+        assert_that(content).does_not_contain(f"results-row-{beta_result.id}")
+
+    def test_table_invalid_status_does_not_crash(self, authenticated_client, sample, project):
+        result = Result.objects.create(
+            title="Stable Result",
+            description="Validation should fail but response should render.",
+            sample=sample,
+            project=project,
+        )
+
+        response = authenticated_client.get(reverse("results:table"), {"status": "INVALID"})
+        content = response.content.decode()
+
+        assert_that(response.status_code).is_equal_to(200)
+        assert_that(content).contains(str(result.id))
+
+
+class TestResultAddView:
+    """Tests for result creation."""
+
+    def test_add_requires_login(self, client):
+        response = client.get(reverse("results:add"))
+
+        assert_that(response.status_code).is_equal_to(302)
+
+    def test_add_renders_form_when_authenticated(self, authenticated_client):
+        response = authenticated_client.get(reverse("results:add"))
+
+        assert_that(response.status_code).is_equal_to(200)
+        assert_that(response.content.decode()).contains("Add Result")
+
+    def test_add_creates_result_and_redirects(self, authenticated_client, sample, project):
+        response = authenticated_client.post(
+            reverse("results:add"),
+            {
+                "project": project.pk,
+                "sample": sample.pk,
+                "title": "Created via Test",
+                "description": "Created from add view post",
+                "status": Result.Status.ACQUIRED,
+            },
+        )
+
+        result = Result.objects.get(title="Created via Test")
+        assert_that(result.project).is_equal_to(project)
+        assert_that(result.sample).is_equal_to(sample)
+
+        assert_that(response.status_code).is_equal_to(302)
+        assert_that(response.url).is_equal_to(reverse("results:detail", args=[result.pk]))
+
+    def test_add_invalid_payload_re_renders_form(self, authenticated_client, sample, project):
+        response = authenticated_client.post(
+            reverse("results:add"),
+            {
+                "project": project.pk,
+                "sample": sample.pk,
+                "title": "",
+                "description": "Missing title",
+                "status": Result.Status.ACQUIRED,
+            },
+        )
+
+        assert_that(response.status_code).is_equal_to(200)
+        assert_that(Result.objects.filter(description="Missing title").exists()).is_false()
+
+
+class TestResultDetailView:
+    """Tests for result detail and partial rendering."""
+
+    def test_detail_requires_login(self, client, sample, project):
+        result = Result.objects.create(
+            title="Login Required",
+            description="D",
+            sample=sample,
+            project=project,
+        )
+        response = client.get(reverse("results:detail", args=[result.pk]))
+
+        assert_that(response.status_code).is_equal_to(302)
+
+    def test_detail_returns_result(self, authenticated_client, sample, project):
+        result = Result.objects.create(
+            title="Detail Result",
+            description="D",
+            sample=sample,
+            project=project,
+        )
+        response = authenticated_client.get(reverse("results:detail", args=[result.pk]))
+
+        assert_that(response.status_code).is_equal_to(200)
+        assert_that(response.content.decode()).contains("Result")
+        assert_that(response.content.decode()).contains(str(result.id))
+
+    def test_detail_404_for_missing_result(self, authenticated_client):
+        response = authenticated_client.get(reverse("results:detail", args=[999999]))
+
+        assert_that(response.status_code).is_equal_to(404)
+
+    def test_detail_overview_tab_returns_partial(self, authenticated_client, sample, project):
+        result = Result.objects.create(
+            title="Overview Result",
+            description="Overview Description",
+            sample=sample,
+            project=project,
+        )
+        response = authenticated_client.get(reverse("results:detail", args=[result.pk]), {"tab": "overview"})
+        content = response.content.decode()
+
+        assert_that(response.status_code).is_equal_to(200)
+        assert_that(content).contains("Overview Result")
+        assert_that(content).contains("Overview Description")
+
+
+class TestApproveModalView:
+    """Tests for approve modal endpoint."""
+
+    def test_approve_modal_requires_login(self, client, sample, project):
+        result = Result.objects.create(
+            title="Approve Modal",
+            description="Modal test",
+            sample=sample,
+            project=project,
+            status=Result.Status.IN_REVIEW,
+        )
+        response = client.get(reverse("results:approve_modal", args=[result.pk]))
+
+        assert_that(response.status_code).is_equal_to(302)
+
+    def test_approve_modal_renders(self, authenticated_client, sample, project):
+        result = Result.objects.create(
+            title="Approve Modal",
+            description="Modal test",
+            sample=sample,
+            project=project,
+            status=Result.Status.IN_REVIEW,
+        )
+        response = authenticated_client.get(reverse("results:approve_modal", args=[result.pk]))
+
+        assert_that(response.status_code).is_equal_to(200)
+        assert_that(response.content.decode()).contains(f"Approve Result {result.id}")

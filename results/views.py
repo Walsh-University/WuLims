@@ -54,7 +54,7 @@ def results_table(request):
             qs = qs.filter(status=status)
         if q:
             qs = qs.annotate(id_str=Cast("id", output_field=CharField()))
-            qs = qs.filter(Q(id_str__icontains=q) | Q(project_name__icontains=q))
+            qs = qs.filter(Q(id_str__icontains=q) | Q(project__name__icontains=q))
 
     return render(request, "results/partials/results_table.html", {"results": qs, "form": form})
 
