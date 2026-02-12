@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.http import JsonResponse
@@ -34,3 +35,6 @@ urlpatterns = [
     path("experiments/", include("experiments.urls")),
     path("projects/", include("projects.urls")),
 ]
+
+if settings.OIDC_ENABLED:
+    urlpatterns.append(path("oidc/", include("mozilla_django_oidc.urls")))
