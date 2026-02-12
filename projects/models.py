@@ -14,7 +14,7 @@ class Project(models.Model):
     start_date = models.DateField()
     completed_date = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    customer_id = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    customer_id = models.ForeignKey(Customer, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return self.id
