@@ -469,6 +469,11 @@ poetry.toml
 # LSP config files
 pyrightconfig.json
 
+
+
 # End of https://www.toptal.com/developers/gitignore/api/PyCharm,Python,Django
 /.claude/
 /.idea
+/staticfiles/
+__pycache__/
+*.pyc

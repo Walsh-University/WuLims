@@ -90,7 +90,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
 ```
 
---- 
+---
 
 ### 2. Clone and Set Up the Project
 
@@ -110,7 +110,7 @@ source .venv/bin/activate  # macOS/Linux
 uv sync
 ```
 
---- 
+---
 
 ### 3. Database Setup
 
@@ -132,7 +132,7 @@ cp .env.example .env
 source .env  # or use a tool like direnv
 ```
 
-**DO NOT COMMIT `.env` TO VERSION CONTROL.**  
+**DO NOT COMMIT `.env` TO VERSION CONTROL.**
 
 .env is a local configuration file with secrets (passwords) and
 development keys.  It should never be shared or committed.
@@ -165,7 +165,7 @@ python manage.py migrate
 # Create an admin account
 python manage.py createsuperuser
 ```
---- 
+---
 
 ### 5. Run the Development Server
 
@@ -455,7 +455,7 @@ urlpatterns = [
 
 ## Apps
 
-Django apps are self-contained modules. 
+Django apps are self-contained modules.
 
 Each app handles a specific feature.
 
@@ -474,7 +474,7 @@ accounts/
     └── accounts/
         └── login.html  # Login page
 ```
---- 
+---
 
 **Key file - `models.py`:**
 
@@ -1144,7 +1144,7 @@ def sample_list(request):
 - `request` - Contains HTTP request data (GET params, POST data, user, etc.)
 - `render()` - Combines template with context data
 
---- 
+---
 
 ### Step 2: Create the URL Pattern
 
@@ -1893,7 +1893,7 @@ Running migrations:
 
 ## Common Model Changes {.smaller}
 
-### Adding a Required Field 
+### Adding a Required Field
 
 If you add a field without a default, Django will ask what to do with existing rows:
 
@@ -2544,6 +2544,3 @@ class TestNewFeature:
         )
         assert_that(response.status_code).is_equal_to(400)
 ```
-
-
-

@@ -1,0 +1,24 @@
+{% extends "lims_core/base.html" %}
+{% block title %}Instruments - WuLims{% endblock %}
+{% block nav_instruments_active %}active{% endblock %}
+{% block breadcrumb_current %}Instruments{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-0">Instruments</h1>
+
+  <a class="btn btn-sm btn-outline-secondary" href="{% url 'admin:instruments_instrument_add' %}">Add instrument (admin)</a>
+</div>
+
+<div
+  hx-get="{% url 'instruments:table' %}"
+  hx-trigger="load, keyup changed delay:300ms from:#filter-form, change from:#filter-form"
+  hx-target="#table-target"
+  hx-include="#filter-form"
+>
+  {% include "instruments/partials/instrument_filters.html" %}
+</div>
+
+<div id="table-target" class="mt-3"></div>
+<div id="modal-target"></div>
+{% endblock %}

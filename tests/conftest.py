@@ -118,29 +118,32 @@ def viewer_client(client: Client, viewer_user: User) -> Client:
 
 
 @pytest.fixture
-def sample(db) -> Sample:
+def sample(db, project: Project) -> Sample:
     """Create a basic sample in RECEIVED status."""
     return Sample.objects.create(
+        project=project,
         client_name="Test Client",
         status=Sample.Status.RECEIVED,
     )
 
 
 @pytest.fixture
-def sample_in_review(db) -> Sample:
+def sample_in_review(db, project: Project) -> Sample:
     """Create a sample in IN_REVIEW status (ready for approval)."""
     return Sample.objects.create(
+        project=project,
         client_name="Test Client",
         status=Sample.Status.IN_REVIEW,
     )
 
 
 @pytest.fixture
-def approved_sample(db, user: User) -> Sample:
+def approved_sample(db, user: User, project: Project) -> Sample:
     """Create an already-approved sample."""
     from django.utils import timezone
 
     return Sample.objects.create(
+        project=project,
         client_name="Test Client",
         status=Sample.Status.APPROVED,
         approved_at=timezone.now(),

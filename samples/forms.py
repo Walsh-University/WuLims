@@ -15,7 +15,10 @@ class SampleFilterForm(forms.Form):
 class SampleForm(forms.ModelForm):
     class Meta:
         model = Sample
-        fields = ["client_name", "status", "approved_at", "approved_by"]
+        fields = ["project", "client_name", "status", "approved_at", "approved_by"]
         widgets = {
+            "project": forms.Select(attrs={"class": "form-select"}),
             "client_name": forms.TextInput(attrs={"class": "form-control"}),
+            "status": forms.Select(attrs={"class": "form-select"}),
+            "approved_by": forms.Select(attrs={"class": "form-select"}),
         }
