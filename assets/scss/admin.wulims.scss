@@ -1,0 +1,125 @@
+:root {
+  --wulims-primary: #6d0120;
+  --wulims-primary-dark: #560018;
+  --wulims-accent: #fdc728;
+  --wulims-surface: #fff8ec;
+  --wulims-surface-soft: #fffdf8;
+  --wulims-border: #e8dcc4;
+  --wulims-text: #212529;
+}
+
+body {
+  background: var(--wulims-surface-soft);
+}
+
+@media (prefers-color-scheme: dark) {
+  html,
+  body,
+  #container,
+  #content,
+  #nav-sidebar {
+    background: var(--wulims-surface-soft);
+    color: var(--wulims-text);
+  }
+}
+
+#header {
+  background: linear-gradient(90deg, #7a1230 0%, var(--wulims-primary) 78%, var(--wulims-accent) 100%);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+#site-name a,
+#user-tools,
+#user-tools a,
+#header a:link,
+#header a:visited {
+  color: #fff;
+}
+
+.wulims-admin-back-link {
+  display: inline-block;
+  margin-left: 12px;
+  padding: 6px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.wulims-admin-back-link:hover,
+.wulims-admin-back-link:focus {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: var(--wulims-accent);
+  text-decoration: none;
+}
+
+#content-main .module h2,
+.inline-group h2 {
+  background: var(--wulims-surface);
+  color: var(--wulims-text);
+  border-bottom: 1px solid var(--wulims-border);
+}
+
+.module caption {
+  background: var(--wulims-primary);
+  color: #fff;
+  border-bottom: 1px solid var(--wulims-primary-dark);
+}
+
+.module,
+#changelist-filter,
+#changelist .paginator,
+.submit-row {
+  background: #fff;
+  border-color: var(--wulims-border);
+}
+
+#nav-sidebar {
+  background: var(--wulims-surface);
+  border-right: 1px solid var(--wulims-border);
+}
+
+.module caption a:link,
+.module caption a:visited {
+  color: #fff;
+}
+
+.module caption a:hover,
+.module caption a:focus {
+  color: var(--wulims-accent);
+}
+
+.button,
+input[type="submit"],
+input[type="button"],
+.submit-row input,
+a.button {
+  background: var(--wulims-primary);
+  border-color: var(--wulims-primary);
+  color: #fff;
+}
+
+.button:hover,
+input[type="submit"]:hover,
+input[type="button"]:hover,
+.submit-row input:hover,
+a.button:hover {
+  background: var(--wulims-primary-dark);
+}
+
+.object-tools a:link,
+.object-tools a:visited {
+  background: var(--wulims-primary);
+}
+
+.object-tools a:hover,
+.object-tools a:focus {
+  background: var(--wulims-primary-dark);
+}
+
+#nav-sidebar .current-model,
+#nav-sidebar .current-app .section {
+  background: rgba(109, 1, 32, 0.12);
+  border-left: 3px solid var(--wulims-accent);
+}

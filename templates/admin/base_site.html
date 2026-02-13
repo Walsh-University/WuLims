@@ -1,0 +1,19 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}
+  {% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | WuLims Admin
+{% endblock %}
+
+{% block extrastyle %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/admin.wulims.min.css' %}">
+{% endblock %}
+
+{% block branding %}
+  <h1 id="site-name"><a href="{% url 'admin:index' %}">WuLims Administration</a></h1>
+{% endblock %}
+
+{% block nav-global %}
+  <a class="wulims-admin-back-link" href="{% url 'lims_core:dashboard' %}">Back to WuLims App</a>
+{% endblock %}
