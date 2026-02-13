@@ -2,6 +2,7 @@
 
 from assertpy import assert_that
 from django.contrib.auth.models import Group
+from django.urls import reverse
 
 from accounts.audit import role_audit_actor
 from accounts.models import RoleAssignmentAudit, User
@@ -146,3 +147,18 @@ class TestRoleAssignments:
             action=RoleAssignmentAudit.Action.REMOVED,
         ).latest("changed_at")
         assert_that(audit.changed_by).is_equal_to(actor)
+
+
+class TestAdminSiteBranding:
+    """Tests for admin branding and navigation affordances."""
+
+    def test_admin_index_has_wulims_brand_and_back_link(self, client, admin_user):
+        client.force_login(admin_user)
+
+        response = client.get(reverse("admin:index"))
+        content = response.content.decode()
+
+        assert_that(response.status_code).is_equal_to(200)
+        assert_that(content).contains("WuLims Administration")
+        assert_that(content).contains("Back to WuLims App")
+        assert_that(content).contains(reverse("lims_core:dashboard"))
