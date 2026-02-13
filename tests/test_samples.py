@@ -5,9 +5,10 @@ import uuid
 import pytest
 from assertpy import assert_that
 from django.db import IntegrityError
+from django.db.models import ProtectedError
 from django.urls import reverse
 
-from samples.models import Sample
+from samples.models import AnalysisType, Sample, SampleAnalysis
 
 
 class TestSampleModel:
@@ -16,11 +17,13 @@ class TestSampleModel:
     def test_create_sample(self, db, project):
         """Sample can be created with required fields."""
         sample = Sample.objects.create(
+            sample_name="Drinking Water Grab",
             project=project,
             client_name="Acme Corp",
         )
 
         assert_that(sample.sample_id).is_instance_of(uuid.UUID)
+        assert_that(sample.sample_name).is_equal_to("Drinking Water Grab")
         assert_that(sample.client_name).is_equal_to("Acme Corp")
         assert_that(sample.status).is_equal_to(Sample.Status.RECEIVED)
         assert_that(sample.received_at).is_not_none()
@@ -35,6 +38,7 @@ class TestSampleModel:
         with pytest.raises(IntegrityError):
             Sample.objects.create(
                 sample_id=sample_id,
+                sample_name="Duplicate ID Sample",
                 project=sample.project,
                 client_name="Different Client",
             )
@@ -54,6 +58,7 @@ class TestSampleModel:
     def test_sample_approval_fields_nullable(self, db, project):
         """Approval fields are null by default."""
         sample = Sample.objects.create(
+            sample_name="Approval Nullable Test",
             project=project,
             client_name="Test",
         )
@@ -108,8 +113,8 @@ class TestSampleTableView:
 
     def test_table_filters_by_search(self, authenticated_client, db, project):
         """Table can be filtered by search query."""
-        Sample.objects.create(project=project, client_name="Alpha Corp")
-        Sample.objects.create(project=project, client_name="Beta Inc")
+        Sample.objects.create(sample_name="Alpha Sample", project=project, client_name="Alpha Corp")
+        Sample.objects.create(sample_name="Beta Sample", project=project, client_name="Beta Inc")
 
         response = authenticated_client.get(
             reverse("samples:table"),
@@ -142,7 +147,12 @@ class TestSampleAddView:
         """Valid post creates a sample and redirects to detail."""
         response = manager_client.post(
             reverse("samples:add"),
-            {"project": project.pk, "client_name": "Acme Labs", "status": Sample.Status.RECEIVED},
+            {
+                "sample_name": "Acme Sample",
+                "project": project.pk,
+                "client_name": "Acme Labs",
+                "status": Sample.Status.RECEIVED,
+            },
         )
 
         sample = Sample.objects.get(client_name="Acme Labs")
@@ -166,6 +176,26 @@ class TestSampleAddView:
 
         assert_that(response.status_code).is_equal_to(403)
 
+    def test_add_creates_selected_analysis_types(self, manager_client, project):
+        analysis_1 = AnalysisType.objects.create(code="METALS", name="Metals Panel", sort_order=1)
+        analysis_2 = AnalysisType.objects.create(code="VOC", name="VOC Screen", sort_order=2)
+
+        response = manager_client.post(
+            reverse("samples:add"),
+            {
+                "sample_name": "Sample With Analyses",
+                "project": project.pk,
+                "client_name": "Acme Labs",
+                "status": Sample.Status.RECEIVED,
+                "analysis_types": [str(analysis_1.pk), str(analysis_2.pk)],
+            },
+        )
+
+        sample = Sample.objects.get(sample_name="Sample With Analyses")
+        selected_codes = set(sample.analyses.values_list("analysis_type__code", flat=True))
+        assert_that(response.status_code).is_equal_to(302)
+        assert_that(selected_codes).is_equal_to({"METALS", "VOC"})
+
 
 class TestSampleDetailView:
     """Tests for the sample detail view."""
@@ -183,6 +213,20 @@ class TestSampleDetailView:
         assert_that(response.status_code).is_equal_to(200)
         assert_that(response.content.decode()).contains(str(sample.sample_id))
 
+    def test_detail_shows_edit_button_with_permission(self, manager_client, sample):
+        """Users with change_sample permission can see Edit action."""
+        response = manager_client.get(reverse("samples:detail", args=[sample.pk]))
+
+        assert_that(response.status_code).is_equal_to(200)
+        assert_that(response.content.decode()).contains(reverse("samples:edit", args=[sample.pk]))
+
+    def test_detail_hides_edit_button_without_permission(self, authenticated_client, sample):
+        """Users without change_sample permission do not see Edit action."""
+        response = authenticated_client.get(reverse("samples:detail", args=[sample.pk]))
+
+        assert_that(response.status_code).is_equal_to(200)
+        assert_that(response.content.decode()).does_not_contain(reverse("samples:edit", args=[sample.pk]))
+
     def test_detail_404_for_nonexistent(self, authenticated_client):
         """Returns 404 for nonexistent sample."""
         response = authenticated_client.get(reverse("samples:detail", args=[uuid.uuid4()]))
@@ -197,6 +241,18 @@ class TestSampleDetailView:
         )
 
         assert_that(response.status_code).is_equal_to(200)
+
+    def test_detail_overview_shows_analysis_types(self, authenticated_client, sample):
+        analysis = AnalysisType.objects.create(code="NUTRIENTS", name="Nutrients Panel")
+        SampleAnalysis.objects.create(sample=sample, analysis_type=analysis)
+
+        response = authenticated_client.get(
+            reverse("samples:detail", args=[sample.pk]),
+            {"tab": "overview"},
+        )
+
+        assert_that(response.status_code).is_equal_to(200)
+        assert_that(response.content.decode()).contains("Nutrients Panel")
 
     def test_detail_coc_tab(self, authenticated_client, sample):
         """Chain of custody tab returns partial."""
@@ -284,3 +340,137 @@ class TestApproveModalView:
         response = authenticated_client.get(reverse("samples:approve_modal", args=[sample_in_review.pk]))
 
         assert_that(response.status_code).is_equal_to(403)
+
+
+class TestSampleEditView:
+    """Tests for sample edit functionality."""
+
+    def test_edit_requires_login(self, client, sample):
+        response = client.get(reverse("samples:edit", args=[sample.pk]))
+
+        assert_that(response.status_code).is_equal_to(302)
+        assert_that(response.url).contains("login")
+
+    def test_edit_forbidden_without_permission(self, authenticated_client, sample):
+        response = authenticated_client.get(reverse("samples:edit", args=[sample.pk]))
+
+        assert_that(response.status_code).is_equal_to(403)
+
+    def test_edit_renders_form_for_manager(self, manager_client, sample):
+        response = manager_client.get(reverse("samples:edit", args=[sample.pk]))
+
+        assert_that(response.status_code).is_equal_to(200)
+        assert_that(response.content.decode()).contains("Edit Sample")
+        assert_that(response.content.decode()).contains(sample.sample_name)
+
+    def test_edit_updates_sample_and_redirects(self, manager_client, sample, project):
+        response = manager_client.post(
+            reverse("samples:edit", args=[sample.pk]),
+            {
+                "sample_name": "Updated Sample Name",
+                "project": project.pk,
+                "client_name": "Updated Client",
+                "status": Sample.Status.IN_PROGRESS,
+                "approved_at": "",
+                "approved_by": "",
+            },
+        )
+
+        sample.refresh_from_db()
+        assert_that(sample.sample_name).is_equal_to("Updated Sample Name")
+        assert_that(sample.client_name).is_equal_to("Updated Client")
+        assert_that(sample.status).is_equal_to(Sample.Status.IN_PROGRESS)
+        assert_that(response.status_code).is_equal_to(302)
+        assert_that(response.url).is_equal_to(reverse("samples:detail", args=[sample.pk]))
+
+    def test_edit_updates_analysis_types(self, manager_client, sample, project):
+        analysis_1 = AnalysisType.objects.create(code="PH", name="pH")
+        analysis_2 = AnalysisType.objects.create(code="TSS", name="Total Suspended Solids")
+        analysis_3 = AnalysisType.objects.create(code="COD", name="Chemical Oxygen Demand")
+        SampleAnalysis.objects.create(sample=sample, analysis_type=analysis_1)
+        SampleAnalysis.objects.create(sample=sample, analysis_type=analysis_2)
+
+        response = manager_client.post(
+            reverse("samples:edit", args=[sample.pk]),
+            {
+                "sample_name": sample.sample_name,
+                "project": project.pk,
+                "client_name": sample.client_name,
+                "status": sample.status,
+                "approved_at": "",
+                "approved_by": "",
+                "analysis_types": [str(analysis_2.pk), str(analysis_3.pk)],
+            },
+        )
+
+        sample.refresh_from_db()
+        selected_codes = set(sample.analyses.values_list("analysis_type__code", flat=True))
+        assert_that(response.status_code).is_equal_to(302)
+        assert_that(selected_codes).is_equal_to({"TSS", "COD"})
+
+
+class TestSampleRowActions:
+    """Tests for sample row action rendering."""
+
+    def test_table_row_shows_edit_action_with_permission(self, manager_client, sample):
+        response = manager_client.get(reverse("samples:table"))
+
+        assert_that(response.status_code).is_equal_to(200)
+        assert_that(response.content.decode()).contains(reverse("samples:edit", args=[sample.pk]))
+
+    def test_table_row_hides_edit_action_without_permission(self, authenticated_client, sample):
+        response = authenticated_client.get(reverse("samples:table"))
+
+        assert_that(response.status_code).is_equal_to(200)
+        assert_that(response.content.decode()).does_not_contain(reverse("samples:edit", args=[sample.pk]))
+
+
+class TestAnalysisTypeModel:
+    """Tests for analysis type catalog model."""
+
+    def test_create_analysis_type(self, db):
+        analysis = AnalysisType.objects.create(code="VOC", name="Volatile Organics", sort_order=2)
+
+        assert_that(analysis.analysis_type_id).is_instance_of(uuid.UUID)
+        assert_that(analysis.code).is_equal_to("VOC")
+        assert_that(analysis.name).is_equal_to("Volatile Organics")
+        assert_that(analysis.is_active).is_true()
+
+    def test_analysis_type_str(self, analysis_type):
+        assert_that(str(analysis_type)).is_equal_to("Metals Panel")
+
+    def test_analysis_type_code_unique(self, db):
+        AnalysisType.objects.create(code="NUTRIENTS", name="Nutrients")
+
+        with pytest.raises(IntegrityError):
+            AnalysisType.objects.create(code="NUTRIENTS", name="Different Name")
+
+
+class TestSampleAnalysisModel:
+    """Tests for sample-to-analysis assignment model."""
+
+    def test_create_sample_analysis(self, sample, analysis_type):
+        sample_analysis = SampleAnalysis.objects.create(sample=sample, analysis_type=analysis_type)
+
+        assert_that(sample_analysis.sample_analysis_id).is_instance_of(uuid.UUID)
+        assert_that(sample_analysis.sample).is_equal_to(sample)
+        assert_that(sample_analysis.analysis_type).is_equal_to(analysis_type)
+        assert_that(sample_analysis.requested_at).is_not_none()
+
+    def test_unique_sample_analysis_pair(self, sample, analysis_type):
+        SampleAnalysis.objects.create(sample=sample, analysis_type=analysis_type)
+
+        with pytest.raises(IntegrityError):
+            SampleAnalysis.objects.create(sample=sample, analysis_type=analysis_type)
+
+    def test_deleting_sample_cascades_sample_analysis(self, sample, analysis_type):
+        sample_analysis = SampleAnalysis.objects.create(sample=sample, analysis_type=analysis_type)
+        sample.delete()
+
+        assert_that(SampleAnalysis.objects.filter(pk=sample_analysis.pk).exists()).is_false()
+
+    def test_deleting_analysis_type_is_protected(self, sample, analysis_type):
+        SampleAnalysis.objects.create(sample=sample, analysis_type=analysis_type)
+
+        with pytest.raises(ProtectedError):
+            analysis_type.delete()

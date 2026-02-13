@@ -219,7 +219,7 @@ class TestResultTableView:
         assert_that(response.status_code).is_equal_to(200)
         assert_that(content).contains(str(result.id))
         assert_that(content).contains(project.name)
-        assert_that(content).contains(str(sample.sample_name))
+        assert_that(content).contains(str(sample.client_name))
 
     def test_table_filters_by_status(self, authenticated_client, sample, project):
         acquired = Result.objects.create(
@@ -249,7 +249,11 @@ class TestResultTableView:
         project_alpha.name = "Alpha Project"
         project_alpha.save(update_fields=["name"])
         project_beta = type(project_alpha).objects.create(name="Beta Project", start_date="2026-01-10")
-        beta_sample = type(sample).objects.create(project=project_beta, client_name="Beta Client")
+        beta_sample = type(sample).objects.create(
+            sample_name="Beta Sample",
+            project=project_beta,
+            client_name="Beta Client",
+        )
 
         alpha_result = Result.objects.create(
             title="Alpha Result",

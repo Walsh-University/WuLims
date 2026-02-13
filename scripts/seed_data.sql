@@ -3,6 +3,8 @@ BEGIN;
   -- Optional cleanup (uncomment if you want a fresh reset)
   TRUNCATE TABLE results_result RESTART IDENTITY CASCADE;
   TRUNCATE TABLE experiments_experiment RESTART IDENTITY CASCADE;
+  TRUNCATE TABLE samples_sampleanalysis RESTART IDENTITY CASCADE;
+  TRUNCATE TABLE samples_analysistype RESTART IDENTITY CASCADE;
   TRUNCATE TABLE samples_sample RESTART IDENTITY CASCADE;
   TRUNCATE TABLE instruments_instrument RESTART IDENTITY CASCADE;
   TRUNCATE TABLE customers_customer RESTART IDENTITY CASCADE;
@@ -38,16 +40,39 @@ INSERT INTO instruments_instrument (
 
 -- 5) Samples (UUID PK)
 INSERT INTO samples_sample (
-    sample_id, project_id, client_name, received_at, status, approved_at, approved_by_id
+    sample_id, sample_name, project_id, client_name, received_at, status, approved_at, approved_by_id
 ) VALUES
-      ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1', 2001, 'Springfield Utilities', NOW() - INTERVAL '5 days', 'RECEIVED',    NULL, NULL),
-      ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa2', 2001, 'Springfield Utilities', NOW() - INTERVAL '4 days', 'IN_PROGRESS', NULL, NULL),
-      ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa3', 2002, 'GreenField Farms',      NOW() - INTERVAL '3 days', 'IN_REVIEW',   NULL, NULL),
-      ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa4', 2002, 'GreenField Farms',      NOW() - INTERVAL '2 days', 'APPROVED',    NOW() - INTERVAL '1 day', 1002),
-      ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa5', 2003, 'Legacy Client',         NOW() - INTERVAL '10 days','REJECTED',    NULL, NULL)
+      ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1', 'WQ-Grab-001', 2001, 'Springfield Utilities', NOW() - INTERVAL '5 days', 'RECEIVED',    NULL, NULL),
+      ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa2', 'WQ-Grab-002', 2001, 'Springfield Utilities', NOW() - INTERVAL '4 days', 'IN_PROGRESS', NULL, NULL),
+      ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa3', 'Soil-Core-001', 2002, 'GreenField Farms',      NOW() - INTERVAL '3 days', 'IN_REVIEW',   NULL, NULL),
+      ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa4', 'Soil-Core-002', 2002, 'GreenField Farms',      NOW() - INTERVAL '2 days', 'APPROVED',    NOW() - INTERVAL '1 day', 1002),
+      ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa5', 'Legacy-Archive-001', 2003, 'Legacy Client',     NOW() - INTERVAL '10 days', 'REJECTED', NULL, NULL)
     ON CONFLICT (sample_id) DO NOTHING;
 
--- 6) Results
+-- 6) Analysis Types
+INSERT INTO samples_analysistype (
+    analysis_type_id, code, name, description, is_active, sort_order
+) VALUES
+      ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb001', 'ICP_MS_METALS', 'ICP-MS Metals Panel', 'Trace metals quantification by ICP-MS', TRUE, 10),
+      ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb002', 'GC_MS_VOC', 'GC-MS VOC Screen', 'Volatile organic compounds screening', TRUE, 20),
+      ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb003', 'NUTRIENTS', 'Nutrients Panel', 'Nitrate, nitrite, and phosphate analysis', TRUE, 30),
+      ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb004', 'PH', 'pH Measurement', 'Standard pH bench analysis', TRUE, 40),
+      ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb005', 'LEGACY_QC', 'Legacy QC Recheck', 'Quality control rerun for legacy batches', FALSE, 90)
+    ON CONFLICT (analysis_type_id) DO NOTHING;
+
+-- 7) Sample Analysis Requests
+INSERT INTO samples_sampleanalysis (
+    sample_analysis_id, sample_id, analysis_type_id, requested_at
+) VALUES
+      ('cccccccc-cccc-cccc-cccc-ccccccccc001', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb001', NOW() - INTERVAL '5 days'),
+      ('cccccccc-cccc-cccc-cccc-ccccccccc002', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb003', NOW() - INTERVAL '5 days'),
+      ('cccccccc-cccc-cccc-cccc-ccccccccc003', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa2', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb002', NOW() - INTERVAL '4 days'),
+      ('cccccccc-cccc-cccc-cccc-ccccccccc004', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa3', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb001', NOW() - INTERVAL '3 days'),
+      ('cccccccc-cccc-cccc-cccc-ccccccccc005', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa4', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb004', NOW() - INTERVAL '2 days'),
+      ('cccccccc-cccc-cccc-cccc-ccccccccc006', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa5', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb005', NOW() - INTERVAL '10 days')
+    ON CONFLICT (sample_analysis_id) DO NOTHING;
+
+-- 8) Results
 INSERT INTO results_result (
     id, title, description, sample_id, project_id, completed_at, status,
     approved_at, approved_by_id, rejected_at, rejected_by_id, notes
@@ -64,7 +89,7 @@ INSERT INTO results_result (
   days', 1002, 'QC control out of bounds')
     ON CONFLICT (id) DO NOTHING;
 
--- 7) Experiments (note FK column name is project_id_id in this schema)
+-- 9) Experiments (note FK column name is project_id_id in this schema)
 INSERT INTO experiments_experiment (
     id, name, description, status, created_at, data_file, version, project_id_id
 ) VALUES
