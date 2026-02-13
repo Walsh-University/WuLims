@@ -9,7 +9,7 @@ from accounts.models import User
 from accounts.roles import ROLE_PERMISSIONS
 from customers.models import Customer
 from projects.models import Project
-from samples.models import Sample
+from samples.models import AnalysisType, Sample, SampleAnalysis
 
 
 def ensure_role_permissions(role_name: str) -> Group:
@@ -122,6 +122,7 @@ def viewer_client(client: Client, viewer_user: User) -> Client:
 def sample(db, project: Project) -> Sample:
     """Create a basic sample in RECEIVED status."""
     return Sample.objects.create(
+        sample_name="Test Sample",
         project=project,
         client_name="Test Client",
         status=Sample.Status.RECEIVED,
@@ -132,6 +133,7 @@ def sample(db, project: Project) -> Sample:
 def sample_in_review(db, project: Project) -> Sample:
     """Create a sample in IN_REVIEW status (ready for approval)."""
     return Sample.objects.create(
+        sample_name="Review Sample",
         project=project,
         client_name="Test Client",
         status=Sample.Status.IN_REVIEW,
@@ -144,6 +146,7 @@ def approved_sample(db, user: User, project: Project) -> Sample:
     from django.utils import timezone
 
     return Sample.objects.create(
+        sample_name="Approved Sample",
         project=project,
         client_name="Test Client",
         status=Sample.Status.APPROVED,
@@ -162,3 +165,21 @@ def project(db) -> Project:
 def customer(db) -> Customer:
     """Create a basic customer."""
     return Customer.objects.create(customer_name="Test Customer", external_id="123", customer_type="Test")
+
+
+@pytest.fixture
+def analysis_type(db) -> AnalysisType:
+    """Create a basic active analysis type."""
+    return AnalysisType.objects.create(
+        code="METALS",
+        name="Metals Panel",
+        description="Trace metals analysis",
+        is_active=True,
+        sort_order=1,
+    )
+
+
+@pytest.fixture
+def sample_analysis(db, sample: Sample, analysis_type: AnalysisType) -> SampleAnalysis:
+    """Create a basic sample-to-analysis assignment."""
+    return SampleAnalysis.objects.create(sample=sample, analysis_type=analysis_type)

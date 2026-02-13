@@ -2,6 +2,9 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import render
 
+from instruments.models import Instrument
+from samples.models import Sample
+
 from .status import get_system_status
 
 
@@ -12,7 +15,13 @@ def home(request):
 
 @login_required
 def dashboard(request):
-    return render(request, "lims_core/dashboard.html")
+    instruments_online = Instrument.objects.filter(is_active=True).count()
+    samples_received = Sample.objects.filter(status=Sample.Status.RECEIVED).count()
+    return render(
+        request,
+        "lims_core/dashboard.html",
+        {"instruments_online": instruments_online, "samples_received": samples_received},
+    )
 
 
 def search(request):

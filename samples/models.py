@@ -13,6 +13,7 @@ class Sample(models.Model):
         REJECTED = "REJECTED"
 
     sample_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    sample_name = models.CharField(max_length=255)
     project = models.ForeignKey("projects.Project", null=True, on_delete=models.PROTECT, related_name="samples")
     client_name = models.CharField(max_length=200)
     received_at = models.DateTimeField(auto_now_add=True)
@@ -28,3 +29,34 @@ class Sample(models.Model):
 
     def __str__(self):
         return str(self.sample_id)
+
+
+class AnalysisType(models.Model):
+    analysis_type_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    code = models.CharField(max_length=32, unique=True)
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+    sort_order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ["sort_order", "name"]
+
+    def __str__(self):
+        return self.name
+
+
+class SampleAnalysis(models.Model):
+    sample_analysis_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    sample = models.ForeignKey("samples.Sample", on_delete=models.CASCADE, related_name="analyses")
+    analysis_type = models.ForeignKey("samples.AnalysisType", on_delete=models.PROTECT, related_name="sample_analyses")
+    requested_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["sample", "analysis_type"], name="uniq_sample_analysis_type"),
+        ]
+        ordering = ["-requested_at"]
+
+    def __str__(self):
+        return f"{self.sample_id} - {self.analysis_type.name}"

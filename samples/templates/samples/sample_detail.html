@@ -9,14 +9,19 @@
     <div class="text-muted">{{ sample.project.name|default:"No Project" }} • {{ sample.client_name }} • {{ sample.status }}</div>
   </div>
 
-  {% if sample.status == "IN_REVIEW" and perms.samples.approve_sample %}
-    <button class="btn btn-primary"
-            hx-get="{% url 'samples:approve_modal' sample.pk %}"
-            hx-target="#modal-target"
-            hx-swap="innerHTML">
-      Approve…
-    </button>
-  {% endif %}
+  <div class="d-flex gap-2">
+    {% if perms.samples.change_sample %}
+      <a class="btn btn-outline-secondary" href="{% url 'samples:edit' sample.pk %}">Edit</a>
+    {% endif %}
+    {% if sample.status == "IN_REVIEW" and perms.samples.approve_sample %}
+      <button class="btn btn-primary"
+              hx-get="{% url 'samples:approve_modal' sample.pk %}"
+              hx-target="#modal-target"
+              hx-swap="innerHTML">
+        Approve…
+      </button>
+    {% endif %}
+  </div>
 </div>
 
 <ul class="nav nav-tabs">

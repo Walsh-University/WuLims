@@ -18,4 +18,4 @@ class Experiment(models.Model):
     project_id = models.ForeignKey(Project, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.id
+        return self.name

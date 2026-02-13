@@ -3,6 +3,10 @@ from django.contrib.auth import views as auth_views
 from django.http import JsonResponse
 from django.urls import include, path
 
+admin.site.site_header = "WuLims Administration"
+admin.site.site_title = "WuLims Admin"
+admin.site.index_title = "Operations Console"
+
 
 def healthz(request):
     return JsonResponse({"status": "ok"}, status=200)
@@ -17,4 +21,5 @@ urlpatterns = [
     path("samples/", include("samples.urls")),
     path("", include("lims_core.urls")),
     path("instruments/", include("instruments.urls")),
+    path("results/", include("results.urls")),
 ]
