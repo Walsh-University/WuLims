@@ -56,11 +56,22 @@ class SampleForm(forms.ModelForm):
 
     class Meta:
         model = Sample
-        fields = ["sample_name", "project", "client_name", "status", "approved_at", "approved_by"]
+        fields = [
+            "sample_name",
+            "project",
+            "client_name",
+            "filtration",
+            "preservation",
+            "status",
+            "approved_at",
+            "approved_by",
+        ]
         widgets = {
             "sample_name": forms.TextInput(attrs={"class": "form-control"}),
             "project": forms.Select(attrs={"class": "form-select"}),
             "client_name": forms.TextInput(attrs={"class": "form-control"}),
+            "filtration": forms.Select(attrs={"class": "form-select"}),
+            "preservation": forms.Select(attrs={"class": "form-select"}),
             "status": forms.Select(attrs={"class": "form-select"}),
             "approved_by": forms.Select(attrs={"class": "form-select"}),
         }

@@ -12,10 +12,20 @@ class Sample(models.Model):
         APPROVED = "APPROVED"
         REJECTED = "REJECTED"
 
+    class Filtration(models.TextChoices):
+        DONE = "Done"
+        NOT_NEEDED = "Not Needed"
+        LAB_TO_DO = "Lab to do"
+
+    class Preservation(models.TextChoices):
+        LAB_TO_DO = "Lab to do"
+
     sample_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     sample_name = models.CharField(max_length=255)
     project = models.ForeignKey("projects.Project", null=True, on_delete=models.PROTECT, related_name="samples")
     client_name = models.CharField(max_length=200)
+    filtration = models.CharField(max_length=20, choices=Filtration.choices, default=Filtration.LAB_TO_DO)
+    preservation = models.CharField(max_length=20, choices=Preservation.choices, default=Preservation.LAB_TO_DO)
     received_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.RECEIVED)
 
@@ -25,6 +35,22 @@ class Sample(models.Model):
     class Meta:
         permissions = [
             ("approve_sample", "Can approve sample"),
+        ]
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(
+                    filtration__in=[
+                        "Done",
+                        "Not Needed",
+                        "Lab to do",
+                    ]
+                ),
+                name="sample_filtration_valid",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(preservation="Lab to do"),
+                name="sample_preservation_valid",
+            ),
         ]
 
     def __str__(self):
