@@ -53,8 +53,8 @@ Dev Team:
 |------------------|------------------------------------------------------------| --- |
 | David Good       | [@programminggoody](https://github.com/programminggoody)   | Faculty Advisor      |
 | Logan Trent      | [@logantrent](https://github.com/logantrent)               | Core app development |
-| Patrick McCord   | [@pmccord2003](https://github.com/pmccord2003)             | Core app development |
-| Olesya Ivashchuk | [@olesyaivashchuk24](https://github.com/olesyaivashchuk24) | Core app development |
+| Payton McCord   | [@pmccord2003](https://github.com/pmccord2003)             | Core app development |
+| Olesia Ivashchuk | [@olesyaivashchuk24](https://github.com/olesyaivashchuk24) | Core app development |
 | Joey Timco       | [@jatimco7](https://github.com/jatimco7)                   | Core app development |
 
 ## Quick Start

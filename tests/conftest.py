@@ -7,6 +7,7 @@ from django.test import Client
 
 from accounts.models import User
 from accounts.roles import ROLE_PERMISSIONS
+from customers.models import Customer
 from projects.models import Project
 from samples.models import Sample
 
@@ -155,3 +156,9 @@ def approved_sample(db, user: User, project: Project) -> Sample:
 def project(db) -> Project:
     """Create a basic project."""
     return Project.objects.create(name="Test Project", start_date="2026-01-01")
+
+
+@pytest.fixture
+def customer(db) -> Customer:
+    """Create a basic customer."""
+    return Customer.objects.create(customer_name="Test Customer", external_id="123", customer_type="Test")
