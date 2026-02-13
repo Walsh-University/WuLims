@@ -6,10 +6,84 @@
   --wulims-surface-soft: #fffdf8;
   --wulims-border: #e8dcc4;
   --wulims-text: #212529;
+
+  /* Django admin theme tokens */
+  --primary: var(--wulims-primary);
+  --secondary: #214f63;
+  --accent: var(--wulims-accent);
+  --primary-fg: #fff;
+
+  --body-fg: var(--wulims-text);
+  --body-bg: var(--wulims-surface-soft);
+  --body-quiet-color: #5f5b55;
+  --body-loud-color: #1f1f1f;
+
+  --header-color: #fff;
+  --header-branding-color: #fff;
+  --header-bg: var(--wulims-primary);
+  --header-link-color: #fff;
+
+  --breadcrumbs-fg: #f8f7f4;
+  --breadcrumbs-link-fg: #fff;
+  --breadcrumbs-bg: #214f63;
+
+  --link-fg: #0d5c7a;
+  --link-hover-color: #08455c;
+  --link-selected-fg: var(--wulims-primary);
+
+  --hairline-color: var(--wulims-border);
+  --border-color: var(--wulims-border);
+  --darkened-bg: #fff;
+}
+
+/* Keep admin in light mode palette even when toggle/system prefers dark */
+html[data-theme="dark"],
+:root[data-theme="dark"],
+[data-theme="dark"] {
+  --primary: var(--wulims-primary);
+  --secondary: #214f63;
+  --accent: var(--wulims-accent);
+  --primary-fg: #fff;
+
+  --body-fg: var(--wulims-text);
+  --body-bg: var(--wulims-surface-soft);
+  --body-quiet-color: #5f5b55;
+  --body-loud-color: #1f1f1f;
+
+  --header-color: #fff;
+  --header-branding-color: #fff;
+  --header-bg: var(--wulims-primary);
+  --header-link-color: #fff;
+
+  --breadcrumbs-fg: #f8f7f4;
+  --breadcrumbs-link-fg: #fff;
+  --breadcrumbs-bg: #214f63;
+
+  --link-fg: #0d5c7a;
+  --link-hover-color: #08455c;
+  --link-selected-fg: var(--wulims-primary);
+
+  --hairline-color: var(--wulims-border);
+  --border-color: var(--wulims-border);
+  --darkened-bg: #fff;
 }
 
 body {
   background: var(--wulims-surface-soft);
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+h1 {
+  font-size: 2rem;
+}
+
+h2 {
+  font-size: 1.75rem;
+}
+
+h3 {
+  font-size: 1.35rem;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -29,12 +103,29 @@ body {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
+#breadcrumbs {
+  background: var(--breadcrumbs-bg);
+  color: var(--breadcrumbs-fg);
+}
+
+#breadcrumbs a {
+  color: var(--breadcrumbs-link-fg);
+}
+
 #site-name a,
 #user-tools,
 #user-tools a,
 #header a:link,
 #header a:visited {
   color: #fff;
+}
+
+#site-name {
+  font-size: 1.95rem;
+}
+
+#user-tools {
+  font-size: 0.9rem;
 }
 
 .wulims-admin-back-link {
@@ -59,12 +150,16 @@ body {
   background: var(--wulims-surface);
   color: var(--wulims-text);
   border-bottom: 1px solid var(--wulims-border);
+  font-size: 1.15rem;
+  padding: 10px 12px;
 }
 
 .module caption {
   background: var(--wulims-primary);
   color: #fff;
   border-bottom: 1px solid var(--wulims-primary-dark);
+  font-size: 0.95rem;
+  padding: 10px 12px;
 }
 
 .module,
@@ -75,9 +170,111 @@ body {
   border-color: var(--wulims-border);
 }
 
+#content-related .module {
+  background: #fff;
+  border: 1px solid var(--wulims-border);
+}
+
+#content-related .module h2 {
+  background: var(--wulims-surface);
+  color: var(--wulims-text);
+}
+
+#content-related {
+  background: #fff;
+}
+
+/* Remove legacy dark row striping in dashboard/recent-actions modules */
+#content-main .module table tr,
+#content-related .module table tr,
+#content-main .module table tr.row1,
+#content-main .module table tr.row2,
+#content-related .module table tr.row1,
+#content-related .module table tr.row2 {
+  background: #fff;
+}
+
+#content-related .module ul.actionlist,
+#content-related .module ul.actionlist li,
+#content-related .module ul.actionlist li:nth-child(odd),
+#content-related .module ul.actionlist li:nth-child(even) {
+  background: #fff;
+  color: var(--wulims-text);
+}
+
 #nav-sidebar {
   background: var(--wulims-surface);
   border-right: 1px solid var(--wulims-border);
+  padding: 14px 10px 18px;
+}
+
+#nav-filter {
+  width: 100%;
+  margin: 0 0 12px;
+  padding: 9px 10px;
+  border: 1px solid var(--wulims-border);
+  border-radius: 8px;
+  background: #fff;
+  font-size: 1rem;
+}
+
+#nav-filter:focus {
+  outline: none;
+  border-color: var(--wulims-primary);
+  box-shadow: 0 0 0 3px rgba(109, 1, 32, 0.12);
+}
+
+#nav-sidebar .module {
+  background: transparent;
+  border: 0;
+  margin: 0 0 14px;
+}
+
+#nav-sidebar .module caption {
+  background: transparent;
+  color: var(--wulims-primary);
+  border: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 4px 8px 6px;
+}
+
+#nav-sidebar .module caption .section {
+  color: var(--wulims-primary);
+}
+
+#nav-sidebar .module th,
+#nav-sidebar .module td {
+  border: 0;
+  background: #fff;
+}
+
+#nav-sidebar .module tr.row1,
+#nav-sidebar .module tr.row2 {
+  background: #fff;
+}
+
+#nav-sidebar .module tr,
+#nav-sidebar .module tr:nth-child(odd),
+#nav-sidebar .module tr:nth-child(even) {
+  background: #fff;
+}
+
+#nav-sidebar .module th a {
+  display: block;
+  border-radius: 8px;
+  padding: 7px 10px;
+  color: var(--wulims-text);
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+#nav-sidebar .module th a:hover,
+#nav-sidebar .module th a:focus {
+  background: rgba(109, 1, 32, 0.08);
+  color: var(--wulims-primary);
 }
 
 .module caption a:link,
@@ -118,8 +315,96 @@ a.button:hover {
   background: var(--wulims-primary-dark);
 }
 
+#changelist .actions,
+#changelist-search,
+#changelist table thead th,
+#changelist table tbody tr,
+#changelist-filter h2,
+#changelist-filter h3,
+#changelist-filter li,
+#changelist-filter details,
+#changelist-filter summary {
+  background: #fff;
+  color: var(--wulims-text);
+}
+
+#changelist table thead th {
+  border-bottom: 1px solid var(--wulims-border);
+  font-size: 0.92rem;
+}
+
+#changelist table tbody tr:nth-child(2n + 1) {
+  background: #fcfaf5;
+}
+
+#changelist table tbody tr:hover {
+  background: rgba(109, 1, 32, 0.06);
+}
+
+#changelist-filter {
+  background: #fff;
+  border: 1px solid var(--wulims-border);
+}
+
+#changelist #changelist-filter {
+  background: #fff !important;
+}
+
+/* Toolbar/search/action bar should be light and not charcoal */
+#changelist #toolbar {
+  background: #fff;
+  border: 1px solid var(--wulims-border);
+}
+
+#changelist #toolbar form input,
+#changelist #toolbar form button,
+#changelist .actions select,
+#changelist .actions button {
+  background: #fff;
+  color: var(--wulims-text);
+  border: 1px solid var(--wulims-border);
+  font-size: 0.98rem;
+}
+
+#changelist table tbody td,
+#changelist table tbody th,
+#changelist .actions,
+#changelist-filter,
+#changelist-filter li,
+#changelist-filter a {
+  font-size: 1rem;
+}
+
+/* Filter rail separators should use warm border color, not dark bars */
+#changelist-filter h2,
+#changelist-filter h3,
+#changelist-filter details,
+#changelist-filter summary,
+#changelist-filter ul,
+#changelist-filter li {
+  background: #fff;
+  border-color: var(--wulims-border);
+}
+
+#changelist-filter h3,
+#changelist-filter details > summary,
+#changelist-filter details[open] > summary {
+  background: #fff !important;
+  color: var(--wulims-text);
+  border-top: 1px solid var(--wulims-border);
+}
+
+#changelist-filter h3:first-of-type {
+  border-top: 0;
+}
+
 #nav-sidebar .current-model,
 #nav-sidebar .current-app .section {
   background: rgba(109, 1, 32, 0.12);
   border-left: 3px solid var(--wulims-accent);
+}
+
+#nav-sidebar .current-model a {
+  color: var(--wulims-primary);
+  font-weight: 700;
 }
