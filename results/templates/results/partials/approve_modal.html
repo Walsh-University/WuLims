@@ -5,9 +5,7 @@
             <div class="modal-header">
                 <h5 class="modal-title">Approve Result {{ result.id }}</h5>
                 <button type="button" class="btn-close"
-                        hx-target="#modal-target"
-                        hx-swap="innerHTML"
-                        hx-get="about:blank"></button>
+                        onclick="document.getElementById('modal-target').innerHTML = ''"></button>
             </div>
 
             <div class="modal-body">
@@ -16,10 +14,8 @@
             </div>
 
             <div class="modal-footer">
-                <button class="btn btn-secondary"
-                        hx-target="#modal-target"
-                        hx-swap="innerHTML"
-                        hx-get="about:blank">Cancel</button>
+                <button type="button" class="btn btn-secondary"
+                        onclick="document.getElementById('modal-target').innerHTML = ''">Cancel</button>
 
                 <button class="btn btn-primary"
                         hx-post="about:blank"
