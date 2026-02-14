@@ -4,6 +4,8 @@ from urllib.parse import urlparse
 
 import dj_database_url
 
+from config.observability import build_logging_config, configure_structlog
+
 # ---------------------------------------------------------------------
 # Paths
 # ---------------------------------------------------------------------
@@ -45,18 +47,10 @@ if DJANGO_PUBLIC_URL:
             CSRF_TRUSTED_ORIGINS.append(origin)
 
 
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "handlers": {"console": {"class": "logging.StreamHandler"}},
-    "loggers": {
-        "django.security.DisallowedHost": {
-            "handlers": ["console"],
-            "level": "ERROR",
-            "propagate": False,
-        }
-    },
-}
+LOG_LEVEL = os.getenv("DJANGO_LOG_LEVEL", "INFO").upper()
+JSON_LOGS = env_bool("DJANGO_JSON_LOGS", "1")
+configure_structlog()
+LOGGING = build_logging_config(log_level=LOG_LEVEL, json_logs=JSON_LOGS)
 
 # ---------------------------------------------------------------------
 # Apps / middleware
@@ -68,6 +62,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django_structlog",
     # local apps
     "accounts",
     "experiments",
@@ -86,6 +81,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django_structlog.middlewares.RequestMiddleware",
     "accounts.audit.RoleAuditActorMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",

@@ -3,7 +3,7 @@ set -euo pipefail
 
 export PATH="/opt/venv/bin:${PATH}"
 
-: "${DJANGO_SETTINGS_MODULE:=config.settings}"
+: "${DJANGO_SETTINGS_MODULE:=config.settings.prod}"
 export DJANGO_SETTINGS_MODULE
 
 echo "Starting LIMS..."

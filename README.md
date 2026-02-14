@@ -82,3 +82,24 @@ Then visit:
 - Groups/permissions are ready for role-based workflows (reviewer approvals, etc.).
 - For AD/SSO later: prefer OIDC (Azure AD/Entra or ADFS OIDC) or SAML2 (common in higher-ed).
 - Developer documentation is in `docs/README.md`.
+
+## Observability (Structured Logging + OpenTelemetry)
+
+WuLims now emits structured JSON logs by default and can export traces to SigNoz over OTLP.
+
+- Structured JSON logs:
+  - `DJANGO_JSON_LOGS=1` (default)
+  - `DJANGO_LOG_LEVEL=INFO` (default)
+- OpenTelemetry tracing:
+  - `OTEL_ENABLED=1` (default)
+  - `OTEL_EXPORTER_OTLP_ENDPOINT` or `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` (required to export traces)
+  - `OTEL_EXPORTER_OTLP_INSECURE=1` (default, useful for in-cluster collector traffic)
+  - `OTEL_EXPORTER_OTLP_HEADERS` (optional, `key=value,key2=value2`)
+  - `OTEL_SERVICE_NAME` (default: `wulims`)
+  - `OTEL_SERVICE_NAMESPACE` (default: `wulims`)
+  - `OTEL_SERVICE_VERSION` (default: `0.1.0`)
+  - `OTEL_ENVIRONMENT` (default: `production`)
+
+Kubernetes: set OTLP endpoint to your SigNoz collector service.
+
+Single Docker container: app remains fully usable without OTLP endpoint; traces are simply not exported while structured logs still go to stdout.
