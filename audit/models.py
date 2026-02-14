@@ -1,5 +1,7 @@
 from django.conf import settings
 from django.db import models
+from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ValidationError
 
 
 class AuditEvent(models.Model):
@@ -31,9 +33,10 @@ class AuditEvent(models.Model):
         help_text="Type of action performed.",
     )
 
-    object_type = models.CharField(
-        max_length=100,
-        help_text="Model name of the affected object (e.g. Experiment, Sample).",
+    object_type = models.ForeignKey(
+        ContentType,
+        on_delete=models.CASCADE,
+        help_text="Model type of the affected object.",
     )
 
     object_id = models.UUIDField(
@@ -52,7 +55,21 @@ class AuditEvent(models.Model):
             models.Index(fields=["object_type", "object_id"]),
             models.Index(fields=["timestamp"]),
         ]
+        verbose_name = "Audit Event"
+        verbose_name_plural = "Audit Events"
 
     def __str__(self) -> str:
         actor = self.actor if self.actor else "system"
-        return f"[{self.timestamp}] {actor} {self.action} {self.object_type}({self.object_id})"
+        return (
+            f"[{self.timestamp}] {actor} "
+            f"{self.action} {self.object_type}({self.object_id})"
+        )
+
+    # 🔒 Make audit immutable (compliance-safe)
+    def save(self, *args, **kwargs):
+        if self.pk:
+            raise ValidationError("Audit events cannot be modified.")
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        raise ValidationError("Audit events cannot be deleted.")

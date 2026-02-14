@@ -70,7 +70,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # local apps
     "accounts",
-    "experiments",
+    "experiments.apps.ExperimentsConfig",
     "lims_core",
     "projects",
     "samples",
@@ -88,6 +88,8 @@ MIDDLEWARE = [
     "accounts.audit.RoleAuditActorMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "audit.middleware.AuditUserMiddleware",
+
 ]
 
 ROOT_URLCONF = "config.urls"

@@ -15,7 +15,7 @@ class Experiment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     data_file = models.CharField(max_length=255)
     version = models.CharField(max_length=20)
-    project_id = models.ForeignKey(Project, on_delete=models.CASCADE)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.id
