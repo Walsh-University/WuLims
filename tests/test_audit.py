@@ -48,10 +48,8 @@ class AuditTrailTest(TestCase):
             project=self.project,
         )
 
-
         exp.name = "Updated Name"
         exp.save()
-
 
         self.assertTrue(
             AuditEvent.objects.filter(
@@ -71,10 +69,8 @@ class AuditTrailTest(TestCase):
             project=self.project,
         )
 
-
         exp.status = "RUNNING"
         exp.save()
-
 
         self.assertTrue(
             AuditEvent.objects.filter(

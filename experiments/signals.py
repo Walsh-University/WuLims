@@ -16,6 +16,7 @@ def audit_experiment_save(sender, instance, created, **kwargs):
         diff=None,
     )
 
+
 @receiver(post_delete, sender=Experiment)
 def audit_experiment_delete(sender, instance, **kwargs):
     log_audit_event(

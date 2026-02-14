@@ -5,6 +5,7 @@ from django.db import models
 
 User = get_user_model()
 
+
 class AuditEvent(models.Model):
     actor = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL)
     action = models.CharField(max_length=50)

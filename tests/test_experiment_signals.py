@@ -6,7 +6,6 @@ from experiments.models import Experiment
 
 
 class TestExperimentSignals:
-
     @patch("experiments.signals.log_audit_event")
     @patch("experiments.signals.get_current_user")
     def test_create_triggers_audit(self, mock_user, mock_log, db, project):
