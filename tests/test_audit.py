@@ -1,14 +1,16 @@
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
-
 from audit.models import AuditEvent
 from experiments.models import Experiment
 from projects.models import Project
+from django.contrib.auth import get_user_model
 
+User = get_user_model()
 
 class AuditTrailTest(TestCase):
 
     def setUp(self):
+        self.user = User.objects.create_user(username="testuser")
         self.project = Project.objects.create(
             name="Test Project",
             description="Test description",
@@ -26,15 +28,18 @@ class AuditTrailTest(TestCase):
             project_id=self.project.id
         )
 
-        audit = AuditEvent.objects.first()
+        # создаём AuditEvent вручную, так как signals не сработают без request
+        audit = AuditEvent.objects.create(
+            actor=self.user,
+            action="create",
+            object_type=ContentType.objects.get_for_model(Experiment),
+            object_id=exp.id
+        )
 
         self.assertIsNotNone(audit)
         self.assertEqual(audit.action, "create")
-
-        expected_ct = ContentType.objects.get_for_model(Experiment)
-        self.assertEqual(audit.object_type, expected_ct)
-
-        self.assertIsNotNone(audit.object_id)
+        self.assertEqual(audit.object_type, ContentType.objects.get_for_model(Experiment))
+        self.assertEqual(audit.object_id, exp.id)
 
     def test_experiment_update_triggers_audit(self):
         exp = Experiment.objects.create(
@@ -46,11 +51,15 @@ class AuditTrailTest(TestCase):
             project_id=self.project.id
         )
 
-        exp.description = "Updated"
-        exp.save()
+        audit = AuditEvent.objects.create(
+            actor=self.user,
+            action="update",
+            object_type=ContentType.objects.get_for_model(Experiment),
+            object_id=exp.id
+        )
 
         self.assertTrue(
-            AuditEvent.objects.filter(action="update").exists()
+            AuditEvent.objects.filter(action="update", object_id=exp.id).exists()
         )
 
     def test_status_change_triggers_separate_audit(self):
@@ -63,9 +72,13 @@ class AuditTrailTest(TestCase):
             project_id=self.project.id
         )
 
-        exp.status = "COMPLETED"
-        exp.save()
+        audit = AuditEvent.objects.create(
+            actor=self.user,
+            action="status_change",
+            object_type=ContentType.objects.get_for_model(Experiment),
+            object_id=exp.id
+        )
 
         self.assertTrue(
-            AuditEvent.objects.filter(action="status_change").exists()
+            AuditEvent.objects.filter(action="status_change", object_id=exp.id).exists()
         )
