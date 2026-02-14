@@ -48,4 +48,3 @@ def compute_diff(
             }
 
     return diff or None
-

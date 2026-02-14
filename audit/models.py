@@ -60,10 +60,7 @@ class AuditEvent(models.Model):
 
     def __str__(self) -> str:
         actor = self.actor if self.actor else "system"
-        return (
-            f"[{self.timestamp}] {actor} "
-            f"{self.action} {self.object_type}({self.object_id})"
-        )
+        return f"[{self.timestamp}] {actor} {self.action} {self.object_type}({self.object_id})"
 
     # 🔒 Make audit immutable (compliance-safe)
     def save(self, *args, **kwargs):
