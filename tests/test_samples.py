@@ -4,6 +4,7 @@ import uuid
 
 import pytest
 from assertpy import assert_that
+from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.db.models import ProtectedError
 from django.urls import reverse
@@ -25,6 +26,8 @@ class TestSampleModel:
         assert_that(sample.sample_id).is_instance_of(uuid.UUID)
         assert_that(sample.sample_name).is_equal_to("Drinking Water Grab")
         assert_that(sample.client_name).is_equal_to("Acme Corp")
+        assert_that(sample.filtration).is_equal_to(Sample.Filtration.LAB_TO_DO)
+        assert_that(sample.preservation).is_equal_to(Sample.Preservation.LAB_TO_DO)
         assert_that(sample.status).is_equal_to(Sample.Status.RECEIVED)
         assert_that(sample.received_at).is_not_none()
 
@@ -65,6 +68,18 @@ class TestSampleModel:
 
         assert_that(sample.approved_at).is_none()
         assert_that(sample.approved_by).is_none()
+
+    def test_sample_handling_rejects_invalid_values(self, db, project):
+        sample = Sample(
+            sample_name="Invalid Handling",
+            project=project,
+            client_name="Test",
+            filtration="Unknown",
+            preservation="Frozen",
+        )
+
+        with pytest.raises(ValidationError):
+            sample.full_clean()
 
 
 class TestSampleListView:
@@ -151,6 +166,8 @@ class TestSampleAddView:
                 "sample_name": "Acme Sample",
                 "project": project.pk,
                 "client_name": "Acme Labs",
+                "filtration": Sample.Filtration.DONE,
+                "preservation": Sample.Preservation.LAB_TO_DO,
                 "status": Sample.Status.RECEIVED,
             },
         )
@@ -158,6 +175,8 @@ class TestSampleAddView:
         sample = Sample.objects.get(client_name="Acme Labs")
         assert_that(sample.project).is_equal_to(project)
         assert_that(sample.client_name).is_equal_to("Acme Labs")
+        assert_that(sample.filtration).is_equal_to(Sample.Filtration.DONE)
+        assert_that(sample.preservation).is_equal_to(Sample.Preservation.LAB_TO_DO)
         assert_that(sample.status).is_equal_to(Sample.Status.RECEIVED)
         assert_that(sample.sample_id).is_instance_of(uuid.UUID)
 
@@ -186,6 +205,8 @@ class TestSampleAddView:
                 "sample_name": "Sample With Analyses",
                 "project": project.pk,
                 "client_name": "Acme Labs",
+                "filtration": Sample.Filtration.NOT_NEEDED,
+                "preservation": Sample.Preservation.LAB_TO_DO,
                 "status": Sample.Status.RECEIVED,
                 "analysis_types": [str(analysis_1.pk), str(analysis_2.pk)],
             },
@@ -195,6 +216,23 @@ class TestSampleAddView:
         selected_codes = set(sample.analyses.values_list("analysis_type__code", flat=True))
         assert_that(response.status_code).is_equal_to(302)
         assert_that(selected_codes).is_equal_to({"METALS", "VOC"})
+
+    def test_add_rejects_invalid_filtration(self, manager_client, project):
+        response = manager_client.post(
+            reverse("samples:add"),
+            {
+                "sample_name": "Invalid Filtration Sample",
+                "project": project.pk,
+                "client_name": "Acme Labs",
+                "filtration": "Bad Value",
+                "preservation": Sample.Preservation.LAB_TO_DO,
+                "status": Sample.Status.RECEIVED,
+            },
+        )
+
+        assert_that(response.status_code).is_equal_to(200)
+        assert_that(response.content.decode()).contains("Select a valid choice")
+        assert_that(Sample.objects.filter(sample_name="Invalid Filtration Sample").exists()).is_false()
 
 
 class TestSampleDetailView:
@@ -253,6 +291,20 @@ class TestSampleDetailView:
 
         assert_that(response.status_code).is_equal_to(200)
         assert_that(response.content.decode()).contains("Nutrients Panel")
+
+    def test_detail_overview_shows_sample_handling(self, authenticated_client, sample):
+        sample.filtration = Sample.Filtration.DONE
+        sample.preservation = Sample.Preservation.LAB_TO_DO
+        sample.save(update_fields=["filtration", "preservation"])
+
+        response = authenticated_client.get(
+            reverse("samples:detail", args=[sample.pk]),
+            {"tab": "overview"},
+        )
+
+        assert_that(response.status_code).is_equal_to(200)
+        assert_that(response.content.decode()).contains(Sample.Filtration.DONE)
+        assert_that(response.content.decode()).contains(Sample.Preservation.LAB_TO_DO)
 
     def test_detail_coc_tab(self, authenticated_client, sample):
         """Chain of custody tab returns partial."""
@@ -370,6 +422,8 @@ class TestSampleEditView:
                 "sample_name": "Updated Sample Name",
                 "project": project.pk,
                 "client_name": "Updated Client",
+                "filtration": Sample.Filtration.NOT_NEEDED,
+                "preservation": Sample.Preservation.LAB_TO_DO,
                 "status": Sample.Status.IN_PROGRESS,
                 "approved_at": "",
                 "approved_by": "",
@@ -379,6 +433,8 @@ class TestSampleEditView:
         sample.refresh_from_db()
         assert_that(sample.sample_name).is_equal_to("Updated Sample Name")
         assert_that(sample.client_name).is_equal_to("Updated Client")
+        assert_that(sample.filtration).is_equal_to(Sample.Filtration.NOT_NEEDED)
+        assert_that(sample.preservation).is_equal_to(Sample.Preservation.LAB_TO_DO)
         assert_that(sample.status).is_equal_to(Sample.Status.IN_PROGRESS)
         assert_that(response.status_code).is_equal_to(302)
         assert_that(response.url).is_equal_to(reverse("samples:detail", args=[sample.pk]))
@@ -396,6 +452,8 @@ class TestSampleEditView:
                 "sample_name": sample.sample_name,
                 "project": project.pk,
                 "client_name": sample.client_name,
+                "filtration": Sample.Filtration.LAB_TO_DO,
+                "preservation": Sample.Preservation.LAB_TO_DO,
                 "status": sample.status,
                 "approved_at": "",
                 "approved_by": "",

@@ -35,7 +35,7 @@ testpaths = ["tests"]
 [tool.coverage.run]
 branch = true
 relative_files = true
-source = ["accounts", "samples", "lims_core", "projects", "instruments", "customers", "experiments"]
+source = ["accounts", "samples", "lims_core", "projects", "instruments", "customers", "experiments", "results"]
 omit = ["*/migrations/*", "*/__init__.py"]
 
 [tool.coverage.paths]
