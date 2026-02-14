@@ -1,72 +1,47 @@
-from django.conf import settings
-from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ValidationError
 from django.db import models
+from django.contrib.auth import get_user_model
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey
+
+User = get_user_model()
 
 
 class AuditEvent(models.Model):
-    ACTION_CHOICES = [
-        ("create", "Create"),
-        ("update", "Update"),
-        ("delete", "Delete"),
-        ("status_change", "Status change"),
-        ("system", "System action"),
-    ]
-
     actor = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
+        User,
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
-        related_name="audit_events",
-        help_text="User who performed the action. Null means system action.",
-    )
-
-    timestamp = models.DateTimeField(
-        auto_now_add=True,
-        help_text="When the action occurred.",
     )
 
     action = models.CharField(
         max_length=50,
-        choices=ACTION_CHOICES,
-        help_text="Type of action performed.",
     )
 
     object_type = models.ForeignKey(
         ContentType,
         on_delete=models.CASCADE,
-        help_text="Model type of the affected object.",
     )
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey("object_type", "object_id")
 
-    object_id = models.UUIDField(
-        help_text="Primary key of the affected object.",
-    )
-
-    diff = models.JSONField(
+    before = models.JSONField(
         null=True,
         blank=True,
-        help_text="Field-level changes: {field: {from: x, to: y}}",
+    )
+    after = models.JSONField(
+        null=True,
+        blank=True,
     )
 
-    class Meta:
-        ordering = ["-timestamp"]
-        indexes = [
-            models.Index(fields=["object_type", "object_id"]),
-            models.Index(fields=["timestamp"]),
-        ]
-        verbose_name = "Audit Event"
-        verbose_name_plural = "Audit Events"
+    timestamp = models.DateTimeField(
+        auto_now_add=True,
+    )
 
-    def __str__(self) -> str:
-        actor = self.actor if self.actor else "system"
-        return f"[{self.timestamp}] {actor} {self.action} {self.object_type}({self.object_id})"
+    meta = models.JSONField(
+        null=True,
+        blank=True,
+    )
 
-    # 🔒 Make audit immutable (compliance-safe)
-    def save(self, *args, **kwargs):
-        if self.pk:
-            raise ValidationError("Audit events cannot be modified.")
-        super().save(*args, **kwargs)
-
-    def delete(self, *args, **kwargs):
-        raise ValidationError("Audit events cannot be deleted.")
+    def __str__(self):
+        return f"{self.action} on {self.object_type} ({self.object_id})"

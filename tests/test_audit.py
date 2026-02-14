@@ -13,7 +13,10 @@ class AuditTrailTest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="testuser")
         self.project = Project.objects.create(
-            name="Test Project", description="Test description", status="ACTIVE", start_date="2024-01-01"
+            name="Test Project",
+            description="Test description",
+            status="ACTIVE",
+            start_date="2024-01-01",
         )
 
     def test_experiment_create_triggers_audit(self):
@@ -23,7 +26,7 @@ class AuditTrailTest(TestCase):
             status="CREATED",
             data_file="file.csv",
             version="1.0",
-            project_id=self.project.id,
+            project=self.project,   # ← исправлено
         )
 
         audit = AuditEvent.objects.create(
@@ -45,7 +48,7 @@ class AuditTrailTest(TestCase):
             status="CREATED",
             data_file="file.csv",
             version="1.0",
-            project_id=self.project.id,
+            project=self.project,   # ← исправлено
         )
 
         AuditEvent.objects.create(
@@ -55,7 +58,9 @@ class AuditTrailTest(TestCase):
             object_id=exp.id,
         )
 
-        self.assertTrue(AuditEvent.objects.filter(action="update", object_id=exp.id).exists())
+        self.assertTrue(
+            AuditEvent.objects.filter(action="update", object_id=exp.id).exists()
+        )
 
     def test_status_change_triggers_separate_audit(self):
         exp = Experiment.objects.create(
@@ -64,7 +69,7 @@ class AuditTrailTest(TestCase):
             status="CREATED",
             data_file="file.csv",
             version="1.0",
-            project_id=self.project.id,
+            project=self.project,   # ← исправлено
         )
 
         AuditEvent.objects.create(
@@ -74,4 +79,6 @@ class AuditTrailTest(TestCase):
             object_id=exp.id,
         )
 
-        self.assertTrue(AuditEvent.objects.filter(action="status_change", object_id=exp.id).exists())
+        self.assertTrue(
+            AuditEvent.objects.filter(action="status_change", object_id=exp.id).exists()
+        )
