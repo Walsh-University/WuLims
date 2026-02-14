@@ -39,13 +39,31 @@ jobs:
             type=sha
 
       - name: Build and push
+        id: build
         uses: docker/build-push-action@v6
         with:
           file: docker/Dockerfile
           context: .
           push: true
-          platforms: linux/amd64, linux/arm64
+          platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Notify deploy repo
+        env:
+          DISPATCH_TOKEN: ${{ secrets.DEPLOY_REPO_DISPATCH_TOKEN }}
+        run: |
+          set -euo pipefail
+          TAG="sha-${GITHUB_SHA::7}"
+          DIGEST="${{ steps.build.outputs.digest }}"
+
+          curl -sSf -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${DISPATCH_TOKEN}" \
+            https://api.github.com/repos/Walsh-University/WuLims-deploy/dispatches \
+            -d "$(jq -nc \
+              --arg tag "$TAG" \
+              --arg digest "$DIGEST" \
+              '{event_type:"wulims-image-updated",client_payload:{tag:$tag,digest:$digest}}')"
