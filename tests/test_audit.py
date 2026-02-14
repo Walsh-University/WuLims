@@ -26,7 +26,7 @@ class AuditTrailTest(TestCase):
             status="CREATED",
             data_file="file.csv",
             version="1.0",
-            project=self.project,   # ← исправлено
+            project=self.project,  # ← исправлено
         )
 
         audit = AuditEvent.objects.create(
@@ -48,7 +48,7 @@ class AuditTrailTest(TestCase):
             status="CREATED",
             data_file="file.csv",
             version="1.0",
-            project=self.project,   # ← исправлено
+            project=self.project,  # ← исправлено
         )
 
         AuditEvent.objects.create(
@@ -58,9 +58,7 @@ class AuditTrailTest(TestCase):
             object_id=exp.id,
         )
 
-        self.assertTrue(
-            AuditEvent.objects.filter(action="update", object_id=exp.id).exists()
-        )
+        self.assertTrue(AuditEvent.objects.filter(action="update", object_id=exp.id).exists())
 
     def test_status_change_triggers_separate_audit(self):
         exp = Experiment.objects.create(
@@ -69,7 +67,7 @@ class AuditTrailTest(TestCase):
             status="CREATED",
             data_file="file.csv",
             version="1.0",
-            project=self.project,   # ← исправлено
+            project=self.project,  # ← исправлено
         )
 
         AuditEvent.objects.create(
@@ -79,6 +77,4 @@ class AuditTrailTest(TestCase):
             object_id=exp.id,
         )
 
-        self.assertTrue(
-            AuditEvent.objects.filter(action="status_change", object_id=exp.id).exists()
-        )
+        self.assertTrue(AuditEvent.objects.filter(action="status_change", object_id=exp.id).exists())
