@@ -26,7 +26,6 @@ class AuditTrailTest(TestCase):
             project_id=self.project.id,
         )
 
-        # создаём AuditEvent вручную, так как signals не сработают без request
         audit = AuditEvent.objects.create(
             actor=self.user,
             action="create",
@@ -49,7 +48,7 @@ class AuditTrailTest(TestCase):
             project_id=self.project.id,
         )
 
-        audit = AuditEvent.objects.create(
+        AuditEvent.objects.create(
             actor=self.user,
             action="update",
             object_type=ContentType.objects.get_for_model(Experiment),
@@ -68,7 +67,7 @@ class AuditTrailTest(TestCase):
             project_id=self.project.id,
         )
 
-        audit = AuditEvent.objects.create(
+        AuditEvent.objects.create(
             actor=self.user,
             action="status_change",
             object_type=ContentType.objects.get_for_model(Experiment),
