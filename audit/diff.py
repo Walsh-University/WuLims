@@ -1,6 +1,6 @@
 from typing import Any
+
 from django.db import models
-from django.utils.timezone import is_aware
 
 
 def normalize_value(value: Any) -> Any:

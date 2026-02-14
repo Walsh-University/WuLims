@@ -1,9 +1,9 @@
-from django.test import TestCase
 from django.contrib.contenttypes.models import ContentType
+from django.test import TestCase
 
+from audit.models import AuditEvent
 from experiments.models import Experiment
 from projects.models import Project
-from audit.models import AuditEvent
 
 
 class AuditTrailTest(TestCase):
