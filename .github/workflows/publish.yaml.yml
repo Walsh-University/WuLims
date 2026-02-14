@@ -51,6 +51,15 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Verify dispatch token
+        env:
+          DISPATCH_TOKEN: ${{ secrets.DEPLOY_REPO_DISPATCH_TOKEN }}
+        run: |
+          if [ -z "${DISPATCH_TOKEN}" ]; then
+            echo "Missing secret DEPLOY_REPO_DISPATCH_TOKEN"
+            exit 1
+          fi
+
       - name: Notify deploy repo
         env:
           DISPATCH_TOKEN: ${{ secrets.DEPLOY_REPO_DISPATCH_TOKEN }}
