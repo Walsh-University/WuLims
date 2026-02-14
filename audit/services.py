@@ -6,26 +6,12 @@ from django.db import models
 from audit.models import AuditEvent
 
 
-def log_audit_event(
-    *,
-    user,
-    action: str,
-    instance: models.Model,
-    diff: dict[str, Any] | None = None,
-) -> None:
-    """
-    Create an audit event for a domain object.
-
-    user: User instance or None (None = system action)
-    action: create, update, status_change, etc.
-    instance: Django model instance being audited
-    diff: optional field-level diff
-    """
-
+def log_audit_event(*, user=None, action: str, instance: models.Model, diff: dict[str, Any] | None = None) -> None:
     AuditEvent.objects.create(
         actor=user,
         action=action,
         object_type=ContentType.objects.get_for_model(instance),
         object_id=instance.pk,
-        diff=diff,
+        before=diff.get("before") if diff else None,
+        after=diff.get("after") if diff else None,
     )

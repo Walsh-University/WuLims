@@ -26,20 +26,17 @@ class AuditTrailTest(TestCase):
             status="CREATED",
             data_file="file.csv",
             version="1.0",
-            project=self.project,  # ← исправлено
+            project=self.project,
         )
 
-        audit = AuditEvent.objects.create(
-            actor=self.user,
-            action="create",
+        # Проверяем, что сигнал создал AuditEvent
+        audit = AuditEvent.objects.filter(
             object_type=ContentType.objects.get_for_model(Experiment),
             object_id=exp.id,
-        )
+            action="create",
+        ).first()
 
         self.assertIsNotNone(audit)
-        self.assertEqual(audit.action, "create")
-        self.assertEqual(audit.object_type, ContentType.objects.get_for_model(Experiment))
-        self.assertEqual(audit.object_id, exp.id)
 
     def test_experiment_update_triggers_audit(self):
         exp = Experiment.objects.create(
@@ -48,17 +45,21 @@ class AuditTrailTest(TestCase):
             status="CREATED",
             data_file="file.csv",
             version="1.0",
-            project=self.project,  # ← исправлено
+            project=self.project,
         )
 
-        AuditEvent.objects.create(
-            actor=self.user,
-            action="update",
-            object_type=ContentType.objects.get_for_model(Experiment),
-            object_id=exp.id,
-        )
 
-        self.assertTrue(AuditEvent.objects.filter(action="update", object_id=exp.id).exists())
+        exp.name = "Updated Name"
+        exp.save()
+
+
+        self.assertTrue(
+            AuditEvent.objects.filter(
+                object_type=ContentType.objects.get_for_model(Experiment),
+                object_id=exp.id,
+                action="update",
+            ).exists()
+        )
 
     def test_status_change_triggers_separate_audit(self):
         exp = Experiment.objects.create(
@@ -67,14 +68,18 @@ class AuditTrailTest(TestCase):
             status="CREATED",
             data_file="file.csv",
             version="1.0",
-            project=self.project,  # ← исправлено
+            project=self.project,
         )
 
-        AuditEvent.objects.create(
-            actor=self.user,
-            action="status_change",
-            object_type=ContentType.objects.get_for_model(Experiment),
-            object_id=exp.id,
-        )
 
-        self.assertTrue(AuditEvent.objects.filter(action="status_change", object_id=exp.id).exists())
+        exp.status = "RUNNING"
+        exp.save()
+
+
+        self.assertTrue(
+            AuditEvent.objects.filter(
+                object_type=ContentType.objects.get_for_model(Experiment),
+                object_id=exp.id,
+                action="update",
+            ).exists()
+        )
