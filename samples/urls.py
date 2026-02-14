@@ -7,6 +7,7 @@ app_name = "samples"
 urlpatterns = [
     path("", views.sample_list, name="list"),
     path("add/", views.sample_add, name="add"),
+    path("<uuid:pk>/edit/", views.sample_edit, name="edit"),
     path("_table/", views.sample_table, name="table"),
     path("<uuid:pk>/", views.sample_detail, name="detail"),
     path("<uuid:pk>/_approve_modal/", views.approve_modal, name="approve_modal"),

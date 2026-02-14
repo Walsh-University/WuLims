@@ -1,11 +1,11 @@
 {% extends "lims_core/base.html" %}
-{% block title %}Add Sample - WuLims{% endblock %}
+{% block title %}{% if sample %}Edit Sample {{ sample.sample_id }}{% else %}Add Sample{% endif %} - WuLims{% endblock %}
 {% block nav_samples_active %}active{% endblock %}
-{% block breadcrumb_current %}Add Sample{% endblock %}
+{% block breadcrumb_current %}{% if sample %}Edit Sample{% else %}Add Sample{% endif %}{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
-  <h1 class="h3 mb-0">Add Sample</h1>
+  <h1 class="h3 mb-0">{% if sample %}Edit Sample {{ sample.sample_id }}{% else %}Add Sample{% endif %}</h1>
 </div>
 
 <form method="post" class="card shadow-sm">
@@ -24,8 +24,8 @@
       </div>
     {% endfor %}
     <div class="d-flex gap-2">
-      <button class="btn btn-primary" type="submit">Save Sample</button>
-      <a class="btn btn-outline-secondary" href="{% url 'samples:list' %}">Cancel</a>
+      <button class="btn btn-primary" type="submit">{% if sample %}Update Sample{% else %}Save Sample{% endif %}</button>
+      <a class="btn btn-outline-secondary" href="{% if sample %}{% url 'samples:detail' sample.pk %}{% else %}{% url 'samples:list' %}{% endif %}">Cancel</a>
     </div>
   </div>
 </form>
