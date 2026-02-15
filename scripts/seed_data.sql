@@ -33,20 +33,20 @@ INSERT INTO instruments_instrument (
     id, name, description, manufacturer, model, serial_number, is_active,
     last_calibration_date, last_maintenance_date, created_by_id, updated_by_id
 ) VALUES
-      (3001, 'ICP-MS 01', 'Metals analysis system', 'Agilent', '7900', 'SN-ICP-7900-001', true,  '2026-01-05', '2026-01-20', 1001, 1001),
-      (3002, 'GC-MS 02',  'Volatile organics',      'Shimadzu', 'QP2020', 'SN-GCMS-2020-002', true, '2026-01-12', '2026-01-28', 1001, 1002),
-      (3003, 'pH Meter',  'Bench pH meter',         'Mettler', 'SevenExcellence', 'SN-PH-003', false, '2025-12-10', '2026-01-15', 1002, 1002)
+      (3001, 'ICP-MS 01', 'Metals analysis system', 'Agilent', '7900', 'SN-ICP-7900-001', true,  '2026-01-05', '2026-01-20', NULL, NULL),
+      (3002, 'GC-MS 02',  'Volatile organics',      'Shimadzu', 'QP2020', 'SN-GCMS-2020-002', true, '2026-01-12', '2026-01-28', NULL, NULL),
+      (3003, 'pH Meter',  'Bench pH meter',         'Mettler', 'SevenExcellence', 'SN-PH-003', false, '2025-12-10', '2026-01-15', NULL, NULL)
     ON CONFLICT (id) DO NOTHING;
 
 -- 5) Samples (UUID PK)
 INSERT INTO samples_sample (
-    sample_id, sample_name, project_id, client_name, received_at, status, approved_at, approved_by_id
+    sample_id, sample_name, project_id, client_name, filtration, preservation, received_at, status, approved_at, approved_by_id
 ) VALUES
-      ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1', 'WQ-Grab-001', 2001, 'Springfield Utilities', NOW() - INTERVAL '5 days', 'RECEIVED',    NULL, NULL),
-      ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa2', 'WQ-Grab-002', 2001, 'Springfield Utilities', NOW() - INTERVAL '4 days', 'IN_PROGRESS', NULL, NULL),
-      ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa3', 'Soil-Core-001', 2002, 'GreenField Farms',      NOW() - INTERVAL '3 days', 'IN_REVIEW',   NULL, NULL),
-      ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa4', 'Soil-Core-002', 2002, 'GreenField Farms',      NOW() - INTERVAL '2 days', 'APPROVED',    NOW() - INTERVAL '1 day', 1002),
-      ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa5', 'Legacy-Archive-001', 2003, 'Legacy Client',     NOW() - INTERVAL '10 days', 'REJECTED', NULL, NULL)
+      ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1', 'WQ-Grab-001', 2001, 'Springfield Utilities', 'Done', 'Lab to do', NOW() - INTERVAL '5 days', 'RECEIVED',    NULL, NULL),
+      ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa2', 'WQ-Grab-002', 2001, 'Springfield Utilities', 'Done', 'Lab to do', NOW() - INTERVAL '4 days', 'IN_PROGRESS', NULL, NULL),
+      ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa3', 'Soil-Core-001', 2002, 'GreenField Farms', 'Not Needed', 'Lab to do', NOW() - INTERVAL '3 days', 'IN_REVIEW',   NULL, NULL),
+      ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa4', 'Soil-Core-002', 2002, 'GreenField Farms', 'Lab to do', 'Lab to do', NOW() - INTERVAL '2 days', 'APPROVED',    NOW() - INTERVAL '1 day', NULL),
+      ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa5', 'Legacy-Archive-001', 2003, 'Legacy Client', 'Done', 'Lab to do', NOW() - INTERVAL '10 days', 'REJECTED', NULL, NULL)
     ON CONFLICT (sample_id) DO NOTHING;
 
 -- 6) Analysis Types
@@ -77,16 +77,16 @@ INSERT INTO results_result (
     id, title, description, sample_id, project_id, completed_at, status,
     approved_at, approved_by_id, rejected_at, rejected_by_id, notes
 ) VALUES
-      (4001, 'Lead Panel A', 'Initial acquisition complete', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1', 2001, NOW() - INTERVAL '4 days', 'ACQUIRED',    NULL, NULL, NULL, NULL, 'Auto-
+      (4001, 'Lead Panel A', 'Initial acquisition complete', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1', 2001, NOW() - INTERVAL '4 days', 'DRAFT',    NULL, NULL, NULL, NULL, 'Auto-
   ingested'),
       (4002, 'Lead Panel B', 'Processing calibration set',   'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa2', 2001, NOW() - INTERVAL '2 days', 'IN_PROGRESS', NULL, NULL, NULL, NULL,
        'Calibration drift under review'),
       (4003, 'Nitrate Check','Ready for scientific review',  'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa3', 2002, NOW() - INTERVAL '1 day',  'IN_REVIEW',   NULL, NULL, NULL, NULL, 'Queued
   for reviewer'),
       (4004, 'Metals Final', 'Approved final report values', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa4', 2002, NOW() - INTERVAL '1 day',  'APPROVED',    NOW() - INTERVAL '12 hours',
-       1002, NULL, NULL, 'Approved by reviewer1'),
+       NULL, NULL, NULL, 'Approved by reviewer1'),
       (4005, 'Legacy Recheck','Rejected due to QC failure',  'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa5', 2003, NOW() - INTERVAL '8 days', 'REJECTED',    NULL, NULL, NOW() - INTERVAL '7
-  days', 1002, 'QC control out of bounds')
+  days', NULL, 'QC control out of bounds')
     ON CONFLICT (id) DO NOTHING;
 
 -- 9) Experiments (note FK column name is project_id_id in this schema)
