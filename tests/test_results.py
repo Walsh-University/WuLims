@@ -28,7 +28,7 @@ class TestResultModel:
         statuses = [choice[0] for choice in Result.Status.choices]
 
         assert_that(statuses).contains(
-            "ACQUIRED",
+            "DRAFT",
             "IN_PROGRESS",
             "IN_REVIEW",
             "APPROVED",
@@ -36,7 +36,7 @@ class TestResultModel:
         )
 
     def test_create_result_with_defaults(self, db, sample, project):
-        """Result can be created in ACQUIRED state with no decision fields."""
+        """Result can be created in DRAFT state with no decision fields."""
         result = Result.objects.create(
             title="ICP-MS Readout",
             description="Initial acquisition completed.",
@@ -44,7 +44,7 @@ class TestResultModel:
             project=project,
         )
 
-        assert_that(result.status).is_equal_to(Result.Status.ACQUIRED)
+        assert_that(result.status).is_equal_to(Result.Status.DRAFT)
         assert_that(result.approved_at).is_none()
         assert_that(result.approved_by).is_none()
         assert_that(result.rejected_at).is_none()
@@ -222,12 +222,12 @@ class TestResultTableView:
         assert_that(content).contains(str(sample.client_name))
 
     def test_table_filters_by_status(self, authenticated_client, sample, project):
-        acquired = Result.objects.create(
-            title="Acquired Result",
+        draft = Result.objects.create(
+            title="DRAFT Result",
             description="A",
             sample=sample,
             project=project,
-            status=Result.Status.ACQUIRED,
+            status=Result.Status.DRAFT,
         )
         in_review = Result.objects.create(
             title="Review Result",
@@ -242,7 +242,7 @@ class TestResultTableView:
 
         assert_that(response.status_code).is_equal_to(200)
         assert_that(content).contains(f"results-row-{in_review.id}")
-        assert_that(content).does_not_contain(f"results-row-{acquired.id}")
+        assert_that(content).does_not_contain(f"results-row-{draft.id}")
 
     def test_table_filters_by_search_query(self, authenticated_client, sample):
         project_alpha = sample.project
@@ -298,21 +298,21 @@ class TestResultAddView:
 
         assert_that(response.status_code).is_equal_to(302)
 
-    def test_add_renders_form_when_authenticated(self, authenticated_client):
-        response = authenticated_client.get(reverse("results:add"))
+    def test_add_renders_form_when_authenticated(self, manager_client):
+        response = manager_client.get(reverse("results:add"))
 
         assert_that(response.status_code).is_equal_to(200)
         assert_that(response.content.decode()).contains("Add Result")
 
-    def test_add_creates_result_and_redirects(self, authenticated_client, sample, project):
-        response = authenticated_client.post(
+    def test_add_creates_result_and_redirects(self, manager_client, sample, project):
+        response = manager_client.post(
             reverse("results:add"),
             {
                 "project": project.pk,
                 "sample": sample.pk,
                 "title": "Created via Test",
                 "description": "Created from add view post",
-                "status": Result.Status.ACQUIRED,
+                "status": Result.Status.DRAFT,
             },
         )
 
@@ -323,15 +323,15 @@ class TestResultAddView:
         assert_that(response.status_code).is_equal_to(302)
         assert_that(response.url).is_equal_to(reverse("results:detail", args=[result.pk]))
 
-    def test_add_invalid_payload_re_renders_form(self, authenticated_client, sample, project):
-        response = authenticated_client.post(
+    def test_add_invalid_payload_re_renders_form(self, manager_client, sample, project):
+        response = manager_client.post(
             reverse("results:add"),
             {
                 "project": project.pk,
                 "sample": sample.pk,
                 "title": "",
                 "description": "Missing title",
-                "status": Result.Status.ACQUIRED,
+                "status": Result.Status.DRAFT,
             },
         )
 
@@ -401,7 +401,7 @@ class TestApproveModalView:
 
         assert_that(response.status_code).is_equal_to(302)
 
-    def test_approve_modal_renders(self, authenticated_client, sample, project):
+    def test_approve_modal_renders(self, reviewer_client, sample, project):
         result = Result.objects.create(
             title="Approve Modal",
             description="Modal test",
@@ -409,7 +409,7 @@ class TestApproveModalView:
             project=project,
             status=Result.Status.IN_REVIEW,
         )
-        response = authenticated_client.get(reverse("results:approve_modal", args=[result.pk]))
+        response = reviewer_client.get(reverse("results:approve_modal", args=[result.pk]))
 
         assert_that(response.status_code).is_equal_to(200)
-        assert_that(response.content.decode()).contains(f"Approve Result {result.id}")
+        assert_that(response.content.decode()).contains(f"Review Result {result.id}")

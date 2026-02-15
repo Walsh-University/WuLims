@@ -45,10 +45,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     bash \
  && rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /opt/venv /opt/venv
-COPY --from=builder /app /app
+# Create an unprivileged runtime user.
+RUN groupadd --system --gid 10001 app \
+ && useradd --system --uid 10001 --gid app --create-home --home-dir /home/app app
+
+COPY --chown=app:app --from=builder /opt/venv /opt/venv
+COPY --chown=app:app --from=builder /app /app
+
+RUN chown app:app /app \
+ && mkdir -p /app/staticfiles \
+ && chown app:app /app/staticfiles
 
 RUN chmod +x docker/entrypoint.sh
 
 EXPOSE 8000
+USER app
 CMD ["bash", "-c", "docker/entrypoint.sh"]
