@@ -39,11 +39,19 @@ class Result(models.Model):
         on_delete=models.SET_NULL,
         related_name="rejected_results",
     )
+    reviewer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="review_results",
+    )
 
     notes = models.TextField(blank=True)
 
     class Meta:
         permissions = [
+            ("submit_result", "Can submit result for review"),
             ("approve_result", "Can approve result"),
             ("reject_result", "Can reject result"),
         ]
@@ -82,6 +90,12 @@ class Result(models.Model):
                 errors["approved_at"] = "Approved fields must be empty unless status is APPROVED."
             if rejected_fields_present:
                 errors["rejected_at"] = "Rejected fields must be empty unless status is REJECTED."
+
+        if self.status == self.Status.IN_REVIEW and self.reviewer is None:
+            errors["reviewer"] = "reviewer is required when status is IN_REVIEW."
+
+        if self.status in {self.Status.DRAFT, self.Status.IN_PROGRESS} and self.reviewer is not None:
+            errors["reviewer"] = "reviewer must be empty unless status is IN_REVIEW or finalized."
 
         if errors:
             raise ValidationError(errors)
