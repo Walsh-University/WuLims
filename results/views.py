@@ -1,4 +1,4 @@
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.db.models import CharField, Q
 from django.db.models.functions import Cast
 from django.shortcuts import get_object_or_404, redirect, render
@@ -8,12 +8,14 @@ from .models import Result
 
 
 @login_required
+@permission_required("results.view_result", raise_exception=True)
 def results_list(request):
     form = ResultsFilterForm(request.GET or None)
     return render(request, "results/results_list.html", {"form": form})
 
 
 @login_required
+@permission_required("results.add_result", raise_exception=True)
 def result_add(request):
     if request.method == "POST":
         form = ResultForm(request.POST)
@@ -27,11 +29,13 @@ def result_add(request):
 
 
 @login_required
+@permission_required("results.edit_result", raise_exception=True)
 def results_edit(request):
     pass
 
 
 @login_required
+@permission_required("results.view_result", raise_exception=True)
 def result_detail(request, pk):
     result = get_object_or_404(Result.objects.select_related("project", "sample"), pk=pk)
     tab = request.GET.get("tab")
@@ -43,6 +47,7 @@ def result_detail(request, pk):
 
 
 @login_required
+@permission_required("results.view_result", raise_exception=True)
 def results_table(request):
     form = ResultsFilterForm(request.GET or None)
     qs = Result.objects.select_related("project", "sample").all()
@@ -60,6 +65,7 @@ def results_table(request):
 
 
 @login_required
+@permission_required("results.approve_result", raise_exception=True)
 def approve_modal(request, pk):
     result = get_object_or_404(Result, pk=pk)
     return render(request, "results/partials/approve_modal.html", {"result": result})
