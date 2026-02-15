@@ -3,7 +3,7 @@
     <td>{{ r.project.name|default:"—" }}</td>
     <td>{{ r.project.customer_id.customer_name|default:r.sample.client_name|default:"-" }}</td>
     <td>
-        {% if r.status == "ACQUIRED" %}
+        {% if r.status == "DRAFT" %}
             <span class="badge bg-success">{{ r.status }}</span>
         {% elif r.status == "IN_REVIEW" %}
             <span class="badge bg-warning text-dark">{{ r.status }}</span>

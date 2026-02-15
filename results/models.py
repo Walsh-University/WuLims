@@ -8,7 +8,7 @@ from samples.models import Sample
 
 class Result(models.Model):
     class Status(models.TextChoices):
-        ACQUIRED = "ACQUIRED"
+        DRAFT = "DRAFT"
         IN_PROGRESS = "IN_PROGRESS"
         IN_REVIEW = "IN_REVIEW"
         APPROVED = "APPROVED"
@@ -20,7 +20,7 @@ class Result(models.Model):
     sample = models.ForeignKey(Sample, on_delete=models.PROTECT, related_name="samples")
     project = models.ForeignKey(Project, on_delete=models.PROTECT, related_name="projects")
     completed_at = models.DateTimeField(null=True, blank=True)
-    status = models.CharField(max_length=20, choices=Status.choices, default=Status.ACQUIRED)
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.DRAFT)
 
     approved_at = models.DateTimeField(null=True, blank=True)
     approved_by = models.ForeignKey(
