@@ -8,3 +8,10 @@ profile:
   name: qodana.recommended
 include:
   - name: CheckDependencyLicenses
+exclude:
+  - name: All
+    paths:
+      - docs/**
+      - .github/**
+      - build/**
+      - dist/**
