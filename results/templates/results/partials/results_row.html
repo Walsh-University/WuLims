@@ -13,13 +13,17 @@
     </td>
     <td>{{ r.completed_at|date:"Y-m-d H:i" }}</td>
     <td class="text-end">
-        {% if r.status == "IN_REVIEW" and perms.results.approve_result %}
-            <button class="btn btn-sm btn-primary"
-                    hx-get="{% url 'results:approve_modal' r.pk %}"
-                    hx-target="#modal-target"
-                    hx-swap="innerHTML">
-                Approve…
-            </button>
+        {% if r.status == "IN_REVIEW" %}
+            {% if perms.results.approve_result or perms.results.reject_result %}
+                <button class="btn btn-sm btn-primary"
+                        hx-get="{% url 'results:approve_modal' r.pk %}"
+                        hx-target="#modal-target"
+                        hx-swap="innerHTML">
+                    Review…
+                </button>
+            {% else %}
+                <span class="text-muted small">—</span>
+            {% endif %}
         {% else %}
             <span class="text-muted small">—</span>
         {% endif %}
