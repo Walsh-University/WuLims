@@ -22,3 +22,4 @@ repos:
     hooks:
       - id: detect-secrets
         exclude: ^tests/|docker-compose.yml
+        args: ['--exclude-lines', 'integrity\s*=']
