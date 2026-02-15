@@ -44,9 +44,8 @@ class Result(models.Model):
 
     class Meta:
         permissions = [
-            ("approve_experiment_result", "Can approve result"),
-            ("reject_experiment_result", "Can reject result"),
-            ("add_experiment_result", "Can add result"),
+            ("approve_result", "Can approve result"),
+            ("reject_result", "Can reject result"),
         ]
 
     def __str__(self):

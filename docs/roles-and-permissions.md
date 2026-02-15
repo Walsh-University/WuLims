@@ -2,6 +2,37 @@
 
 WuLims uses Django's built-in `Group` + `Permission` model for role-based access control (RBAC).
 
+## Read This First: What Django Creates Automatically
+
+For every Django model, Django automatically creates these base permissions during `python manage.py migrate`:
+
+- `add_<model>`
+- `change_<model>`
+- `delete_<model>`
+- `view_<model>`
+
+Example: for `samples.Sample`, Django creates:
+
+- `samples.add_sample`
+- `samples.change_sample`
+- `samples.delete_sample`
+- `samples.view_sample`
+
+You only need to explicitly define permissions for actions outside that default CRUD/view set, such as workflow actions like:
+
+- `samples.approve_sample`
+- `results.approve_result`
+- `results.reject_result`
+- `accounts.manage_roles`
+
+Those custom permissions are defined in each model's `Meta.permissions` and then created in the database by migrations.
+
+Practical rule for contributors:
+
+1. If the action is standard create/edit/delete/read, use Django's built-in permission.
+2. If the action is domain-specific (approve/reject/assign/escalate/etc.), add a custom permission in `Meta.permissions`.
+3. After permission changes, run migrations so `auth_permission` stays in sync.
+
 ## Baseline Roles
 
 These roles are created by migration and are intended to be the default starting point:

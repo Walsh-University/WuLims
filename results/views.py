@@ -29,7 +29,7 @@ def result_add(request):
 
 
 @login_required
-@permission_required("results.edit_result", raise_exception=True)
+@permission_required("results.change_result", raise_exception=True)
 def results_edit(request):
     pass
 
