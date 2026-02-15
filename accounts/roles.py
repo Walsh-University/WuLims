@@ -10,6 +10,7 @@ ROLE_PERMISSIONS: dict[str, set[str]] = {
         "samples.change_sample",
         "results.view_result",
         "results.change_result",
+        "results.submit_result",
     },
     "QA Reviewer": {
         "samples.view_sample",
@@ -27,6 +28,7 @@ ROLE_PERMISSIONS: dict[str, set[str]] = {
         "results.view_result",
         "results.add_result",
         "results.change_result",
+        "results.submit_result",
         "results.delete_result",
         "results.approve_result",
         "results.reject_result",
@@ -45,6 +47,7 @@ ROLE_PERMISSIONS: dict[str, set[str]] = {
         "results.view_result",
         "results.add_result",
         "results.change_result",
+        "results.submit_result",
         "results.delete_result",
         "results.approve_result",
         "results.reject_result",

@@ -221,7 +221,7 @@ class TestResultTableView:
         assert_that(content).contains(project.name)
         assert_that(content).contains(str(sample.client_name))
 
-    def test_table_filters_by_status(self, authenticated_client, sample, project):
+    def test_table_filters_by_status(self, authenticated_client, sample, project, reviewer_user):
         draft = Result.objects.create(
             title="DRAFT Result",
             description="A",
@@ -235,6 +235,7 @@ class TestResultTableView:
             sample=sample,
             project=project,
             status=Result.Status.IN_REVIEW,
+            reviewer=reviewer_user,
         )
 
         response = authenticated_client.get(reverse("results:table"), {"status": Result.Status.IN_REVIEW})
@@ -389,27 +390,147 @@ class TestResultDetailView:
 class TestApproveModalView:
     """Tests for approve modal endpoint."""
 
-    def test_approve_modal_requires_login(self, client, sample, project):
+    def test_approve_modal_requires_login(self, client, sample, project, reviewer_user):
         result = Result.objects.create(
             title="Approve Modal",
             description="Modal test",
             sample=sample,
             project=project,
             status=Result.Status.IN_REVIEW,
+            reviewer=reviewer_user,
         )
         response = client.get(reverse("results:approve_modal", args=[result.pk]))
 
         assert_that(response.status_code).is_equal_to(302)
 
-    def test_approve_modal_renders(self, reviewer_client, sample, project):
+    def test_approve_modal_renders(self, reviewer_client, sample, project, reviewer_user):
         result = Result.objects.create(
             title="Approve Modal",
             description="Modal test",
             sample=sample,
             project=project,
             status=Result.Status.IN_REVIEW,
+            reviewer=reviewer_user,
         )
         response = reviewer_client.get(reverse("results:approve_modal", args=[result.pk]))
 
         assert_that(response.status_code).is_equal_to(200)
         assert_that(response.content.decode()).contains(f"Review Result {result.id}")
+
+
+class TestSubmitResultView:
+    """Tests for submit-for-review flow."""
+
+    def test_submit_requires_login(self, client, sample, project):
+        result = Result.objects.create(
+            title="Draft Result",
+            description="Ready for review",
+            sample=sample,
+            project=project,
+            status=Result.Status.DRAFT,
+        )
+
+        response = client.post(reverse("results:submit", args=[result.pk]))
+
+        assert_that(response.status_code).is_equal_to(302)
+        assert_that(response.url).contains("login")
+
+    def test_submit_requires_post(self, manager_client, sample, project):
+        result = Result.objects.create(
+            title="Draft Result",
+            description="Ready for review",
+            sample=sample,
+            project=project,
+            status=Result.Status.DRAFT,
+        )
+
+        response = manager_client.get(reverse("results:submit", args=[result.pk]))
+
+        assert_that(response.status_code).is_equal_to(400)
+        assert_that(response.content.decode()).contains("POST required")
+
+    def test_submit_requires_draft_status(self, manager_client, sample, project, reviewer_user):
+        result = Result.objects.create(
+            title="Already in Review",
+            description="Cannot re-submit",
+            sample=sample,
+            project=project,
+            status=Result.Status.IN_REVIEW,
+            reviewer=reviewer_user,
+        )
+
+        response = manager_client.post(reverse("results:submit", args=[result.pk]))
+
+        assert_that(response.status_code).is_equal_to(400)
+        assert_that(response.content.decode()).contains("Result must be DRAFT")
+
+    def test_submit_assigns_selected_reviewer(self, manager_client, sample, project, reviewer_user):
+        result = Result.objects.create(
+            title="Draft Result",
+            description="Ready for review",
+            sample=sample,
+            project=project,
+            status=Result.Status.DRAFT,
+        )
+
+        response = manager_client.post(
+            reverse("results:submit", args=[result.pk]),
+            {"reviewer_id": str(reviewer_user.pk)},
+        )
+        result.refresh_from_db()
+
+        assert_that(response.status_code).is_equal_to(200)
+        assert_that(result.status).is_equal_to(Result.Status.IN_REVIEW)
+        assert_that(result.reviewer).is_equal_to(reviewer_user)
+
+    def test_submit_auto_assigns_reviewer_when_not_provided(self, manager_client, sample, project, reviewer_user):
+        result = Result.objects.create(
+            title="Draft Result",
+            description="Ready for review",
+            sample=sample,
+            project=project,
+            status=Result.Status.DRAFT,
+        )
+
+        response = manager_client.post(reverse("results:submit", args=[result.pk]), {})
+        result.refresh_from_db()
+
+        assert_that(response.status_code).is_equal_to(200)
+        assert_that(result.status).is_equal_to(Result.Status.IN_REVIEW)
+        assert_that(result.reviewer).is_equal_to(reviewer_user)
+
+    def test_submit_requires_eligible_reviewer(self, manager_client, sample, project):
+        result = Result.objects.create(
+            title="Draft Result",
+            description="Ready for review",
+            sample=sample,
+            project=project,
+            status=Result.Status.DRAFT,
+        )
+
+        response = manager_client.post(reverse("results:submit", args=[result.pk]), {})
+        result.refresh_from_db()
+
+        assert_that(response.status_code).is_equal_to(400)
+        assert_that(response.content.decode()).contains("No eligible reviewer")
+        assert_that(result.status).is_equal_to(Result.Status.DRAFT)
+
+    def test_submit_validates_required_fields(self, manager_client, sample, project, reviewer_user):
+        result = Result.objects.create(
+            title="Draft Result",
+            description="Ready for review",
+            sample=sample,
+            project=project,
+            status=Result.Status.DRAFT,
+        )
+        Result.objects.filter(pk=result.pk).update(title=" ")
+
+        response = manager_client.post(
+            reverse("results:submit", args=[result.pk]),
+            {"reviewer_id": str(reviewer_user.pk)},
+        )
+        result.refresh_from_db()
+
+        assert_that(response.status_code).is_equal_to(400)
+        assert_that(response.content.decode()).contains("Missing required fields")
+        assert_that(result.status).is_equal_to(Result.Status.DRAFT)

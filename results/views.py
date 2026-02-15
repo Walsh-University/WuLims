@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required, permission_required
 from django.core.exceptions import PermissionDenied
 from django.db.models import CharField, Q
@@ -9,6 +10,23 @@ from django.utils import timezone
 
 from .forms import ResultForm, ResultsFilterForm
 from .models import Result
+
+
+def _eligible_reviewers(exclude_user=None):
+    User = get_user_model()
+    reviewers = User.objects.filter(is_active=True).filter(
+        Q(
+            user_permissions__content_type__app_label="results",
+            user_permissions__codename__in=["approve_result", "reject_result"],
+        )
+        | Q(
+            groups__permissions__content_type__app_label="results",
+            groups__permissions__codename__in=["approve_result", "reject_result"],
+        )
+    )
+    if exclude_user is not None:
+        reviewers = reviewers.exclude(pk=exclude_user.pk)
+    return reviewers.distinct().order_by("username")
 
 
 @login_required
@@ -83,6 +101,21 @@ def approve_modal(request, pk):
     )
 
 
+@login_required
+@permission_required("results.submit_result", raise_exception=True)
+def submit_modal(request, pk):
+    result = get_object_or_404(Result, pk=pk)
+    if result.status != Result.Status.DRAFT:
+        return HttpResponseBadRequest("Result must be DRAFT to submit for review.")
+
+    reviewers = _eligible_reviewers(exclude_user=request.user)
+    return render(
+        request,
+        "results/partials/submit_modal.html",
+        {"result": result, "reviewers": reviewers},
+    )
+
+
 def _result_row_response(request, result: Result, message: str, level: str = "success"):
     row_html = render_to_string("results/partials/results_row.html", {"r": result}, request=request)
     toast_html = render_to_string(
@@ -92,6 +125,49 @@ def _result_row_response(request, result: Result, message: str, level: str = "su
     )
     oob = toast_html + '<div id="modal-target" hx-swap-oob="innerHTML"></div>'
     return HttpResponse((row_html + oob).encode("utf-8"))
+
+
+@login_required
+@permission_required("results.submit_result", raise_exception=True)
+def submit_result(request, pk):
+    if request.method != "POST":
+        return HttpResponseBadRequest("POST required")
+
+    result = get_object_or_404(Result, pk=pk)
+    if result.status != Result.Status.DRAFT:
+        return HttpResponseBadRequest("Result must be DRAFT to submit for review.")
+
+    required_errors = []
+    if not (result.title or "").strip():
+        required_errors.append("title")
+    if not (result.description or "").strip():
+        required_errors.append("description")
+    if result.sample_id is None:
+        required_errors.append("sample")
+    if result.project_id is None:
+        required_errors.append("project")
+    if required_errors:
+        return HttpResponseBadRequest(f"Missing required fields before submission: {', '.join(required_errors)}.")
+
+    reviewer_id = (request.POST.get("reviewer_id") or "").strip()
+    reviewers = _eligible_reviewers(exclude_user=request.user)
+    reviewer = reviewers.filter(pk=reviewer_id).first() if reviewer_id else reviewers.first()
+    if reviewer is None:
+        return HttpResponseBadRequest("No eligible reviewer available for assignment.")
+
+    result.status = Result.Status.IN_REVIEW
+    result.reviewer = reviewer
+    result.approved_at = None
+    result.approved_by = None
+    result.rejected_at = None
+    result.rejected_by = None
+    result.save()
+
+    return _result_row_response(
+        request,
+        result,
+        f"Result {result.id} submitted for review and assigned to {reviewer.get_username()}.",
+    )
 
 
 @login_required

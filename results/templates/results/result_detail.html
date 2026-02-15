@@ -9,7 +9,16 @@
             <div class="text-muted">{{ result.project.name|default:"No Project" }} • {{ result.project.client_name }} • {{ result.status }}</div>
         </div>
 
-        {% if result.status == "IN_REVIEW" %}
+        {% if result.status == "DRAFT" %}
+            {% if perms.results.submit_result %}
+                <button class="btn btn-outline-primary"
+                        hx-get="{% url 'results:submit_modal' result.pk %}"
+                        hx-target="#modal-target"
+                        hx-swap="innerHTML">
+                    Submit for Review…
+                </button>
+            {% endif %}
+        {% elif result.status == "IN_REVIEW" %}
             {% if perms.results.approve_result or perms.results.reject_result %}
                 <button class="btn btn-primary"
                         hx-get="{% url 'results:approve_modal' result.pk %}"
