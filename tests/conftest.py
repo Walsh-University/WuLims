@@ -15,10 +15,16 @@ from samples.models import AnalysisType, Sample, SampleAnalysis
 def ensure_role_permissions(role_name: str) -> Group:
     group, _ = Group.objects.get_or_create(name=role_name)
 
+    app_models = {
+        "accounts": "user",
+        "samples": "sample",
+        "results": "result",
+    }
+
     permissions = []
     for permission_ref in ROLE_PERMISSIONS[role_name]:
         app_label, codename = permission_ref.split(".")
-        model = "sample" if app_label == "samples" else "user"
+        model = app_models[app_label]
         content_type = ContentType.objects.get(app_label=app_label, model=model)
         permissions.append(Permission.objects.get(content_type=content_type, codename=codename))
 

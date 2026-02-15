@@ -63,12 +63,31 @@ def sync_roles(apps, schema_editor):
         "samples": ContentType.objects.get_or_create(app_label="samples", model="sample")[0],
         "results": ContentType.objects.get_or_create(app_label="results", model="result")[0],
     }
+    permission_names = {
+        "manage_roles": "Can manage user role assignments",
+        "view_sample": "Can view sample",
+        "add_sample": "Can add sample",
+        "change_sample": "Can change sample",
+        "delete_sample": "Can delete sample",
+        "approve_sample": "Can approve sample",
+        "view_result": "Can view result",
+        "add_result": "Can add result",
+        "change_result": "Can change result",
+        "delete_result": "Can delete result",
+        "approve_result": "Can approve result",
+        "reject_result": "Can reject result",
+    }
 
     for role_name, permission_refs in ROLE_PERMISSIONS.items():
         group, _ = Group.objects.get_or_create(name=role_name)
         permission_ids = []
         for app_label, codename in permission_refs:
-            permission_ids.append(Permission.objects.get(content_type=content_types[app_label], codename=codename).id)
+            perm, _ = Permission.objects.get_or_create(
+                content_type=content_types[app_label],
+                codename=codename,
+                defaults={"name": permission_names[codename]},
+            )
+            permission_ids.append(perm.id)
         group.permissions.set(permission_ids)
 
 
