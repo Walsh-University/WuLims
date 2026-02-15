@@ -1,0 +1,37 @@
+<div class="modal-backdrop show"></div>
+<div class="modal d-block" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Submit Result {{ result.id }} for Review</h5>
+                <button type="button" class="btn-close"
+                        onclick="document.getElementById('modal-target').innerHTML = ''"></button>
+            </div>
+
+            <form id="submit-review-form-{{ result.pk }}"
+                  hx-post="{% url 'results:submit' result.pk %}"
+                  hx-target="#results-row-{{ result.pk }}"
+                  hx-swap="outerHTML">
+                <div class="modal-body">
+                    <p class="mb-2">This moves status from <strong>DRAFT</strong> to <strong>IN_REVIEW</strong>.</p>
+                    <label for="reviewer_id_{{ result.pk }}" class="form-label">Reviewer (optional)</label>
+                    <select class="form-select" id="reviewer_id_{{ result.pk }}" name="reviewer_id">
+                        <option value="">Auto-assign reviewer</option>
+                        {% for reviewer in reviewers %}
+                            <option value="{{ reviewer.pk }}">
+                                {{ reviewer.get_full_name|default:reviewer.username }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <div class="form-text">If left blank, the first eligible QA reviewer is assigned automatically.</div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary"
+                            onclick="document.getElementById('modal-target').innerHTML = ''">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Submit for Review</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
