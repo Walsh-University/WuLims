@@ -19,6 +19,21 @@ Welcome to the WuLims project! This is a Laboratory Information Management Syste
 | [Roles & Permissions](roles-and-permissions.md) | Default roles, group permissions, and enforcement rules |
 | [Docker](docker.md)                       | Container setup and running WuLims in Docker              |
 
+## Build Docs (MkDocs)
+
+From the repository root:
+
+```bash
+uv sync --group dev
+uv run mkdocs serve
+```
+
+Build static docs:
+
+```bash
+uv run mkdocs build
+```
+
 ## Tech Stack
 
 - **Python 3.13+** - Programming language

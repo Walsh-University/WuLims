@@ -1094,7 +1094,6 @@ dependencies = [
     { name = "django" },
     { name = "django-structlog" },
     { name = "gunicorn" },
-    { name = "mkdocs" },
     { name = "opentelemetry-exporter-otlp" },
     { name = "opentelemetry-instrumentation-django" },
     { name = "opentelemetry-sdk" },
@@ -1111,6 +1110,7 @@ dependencies = [
 dev = [
     { name = "assertpy" },
     { name = "django-debug-toolbar" },
+    { name = "mkdocs" },
     { name = "pre-commit" },
     { name = "pytest" },
     { name = "pytest-cov" },
@@ -1127,7 +1127,6 @@ requires-dist = [
     { name = "django", specifier = "==6.0.2" },
     { name = "django-structlog", specifier = ">=10.0.0" },
     { name = "gunicorn", specifier = "==25.1.0" },
-    { name = "mkdocs", specifier = ">=1.6.1" },
     { name = "opentelemetry-exporter-otlp", specifier = ">=1.39.1" },
     { name = "opentelemetry-instrumentation-django", specifier = ">=0.60b1" },
     { name = "opentelemetry-sdk", specifier = ">=1.39.1" },
@@ -1144,6 +1143,7 @@ requires-dist = [
 dev = [
     { name = "assertpy", specifier = ">=1.1" },
     { name = "django-debug-toolbar", specifier = ">=6.2.0" },
+    { name = "mkdocs", specifier = ">=1.6.1" },
     { name = "pre-commit", specifier = ">=4.5.1" },
     { name = "pytest", specifier = ">=9.0.2" },
     { name = "pytest-cov", specifier = ">=5.0.0" },
