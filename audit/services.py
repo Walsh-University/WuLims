@@ -12,6 +12,5 @@ def log_audit_event(*, user=None, action: str, instance: models.Model, diff: dic
         action=action,
         object_type=ContentType.objects.get_for_model(instance),
         object_id=instance.pk,
-        before=diff.get("before") if diff else None,
-        after=diff.get("after") if diff else None,
+        changes=diff,
     )

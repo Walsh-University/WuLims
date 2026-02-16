@@ -12,8 +12,9 @@ class AuditEvent(models.Model):
     object_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey("object_type", "object_id")
-    before = models.JSONField(null=True, blank=True)
-    after = models.JSONField(null=True, blank=True)
+
+    changes = models.JSONField(null=True, blank=True)
+
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

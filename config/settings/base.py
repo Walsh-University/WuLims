@@ -72,7 +72,8 @@ INSTALLED_APPS = [
     "instruments",
     "audit",
     "customers",
-    "results",
+    "results.apps.ResultsConfig",
+
 ]
 
 
