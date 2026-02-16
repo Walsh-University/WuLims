@@ -1,0 +1,25 @@
+site_name: WuLims Developer Docs
+site_description: Developer documentation for WuLims
+repo_name: Walsh-University/WuLims
+repo_url: https://github.com/Walsh-University/WuLims
+
+docs_dir: docs
+site_dir: site
+
+theme:
+  name: readthedocs
+
+nav:
+  - Home: README.md
+  - Getting Started: getting-started.md
+  - Project Structure: project-structure.md
+  - Architecture: architecture.md
+  - Django Relationships: Django-relationships.md
+  - Creating Views: creating-views.md
+  - Styling: styling.md
+  - UI Conventions: ui-conventions.md
+  - Testing: testing.md
+  - Migrations: migrations.md
+  - Chain of Custody: chain_of_custody.md
+  - Roles and Permissions: roles-and-permissions.md
+  - Docker: docker.md
