@@ -1,10 +1,10 @@
-from django.db.models.signals import pre_save, post_save, post_delete
+from django.db.models.signals import post_delete, post_save, pre_save
 from django.dispatch import receiver
 
-from audit.services import log_audit_event
 from audit.diff import compute_diff
-from .models import Experiment
+from audit.services import log_audit_event
 
+from .models import Experiment
 
 EXPERIMENT_FIELDS = [
     "name",
