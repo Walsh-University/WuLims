@@ -477,4 +477,3 @@ pyrightconfig.json
 /staticfiles/
 __pycache__/
 *.pyc
-

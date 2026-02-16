@@ -7,10 +7,17 @@ dependencies = [
     "asgiref==3.11.1",
     "dj-database-url>=3.1.0",
     "django==6.0.2",
-    "gunicorn==25.0.1",
+    "django-structlog>=10.0.0",
+    "gunicorn==25.1.0",
+    "opentelemetry-exporter-otlp>=1.39.1",
+    "opentelemetry-instrumentation-django>=0.60b1",
+    "opentelemetry-sdk>=1.39.1",
     "packaging==26.0",
     "psycopg2-binary>=2.9.11",
+    "pytest-django==4.12.0",
     "python-dotenv>=1.2.1",
+    "ruff==0.15.1",
+    "ty==0.0.17",
     "whitenoise>=6.11.0",
 ]
 
@@ -35,7 +42,7 @@ testpaths = ["tests"]
 [tool.coverage.run]
 branch = true
 relative_files = true
-source = ["accounts", "samples", "lims_core", "projects", "instruments", "customers", "experiments"]
+source = ["accounts", "samples", "lims_core", "projects", "instruments", "customers", "experiments", "results"]
 omit = ["*/migrations/*", "*/__init__.py"]
 
 [tool.coverage.paths]
@@ -104,11 +111,12 @@ exclude = ["migrations"]
 [dependency-groups]
 dev = [
     "assertpy>=1.1",
+    "django-debug-toolbar>=6.2.0",
     "pre-commit>=4.5.1",
     "pytest>=9.0.2",
     "pytest-cov>=5.0.0",
     "pytest-django>=4.11.1",
     "pytest-mock>=3.15.1",
-    "ruff>=0.15.0",
-    "ty>=0.0.15",
+    "ruff>=0.15.1",
+    "ty>=0.0.17",
 ]

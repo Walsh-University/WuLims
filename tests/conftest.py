@@ -7,17 +7,24 @@ from django.test import Client
 
 from accounts.models import User
 from accounts.roles import ROLE_PERMISSIONS
+from customers.models import Customer
 from projects.models import Project
-from samples.models import Sample
+from samples.models import AnalysisType, Sample, SampleAnalysis
 
 
 def ensure_role_permissions(role_name: str) -> Group:
     group, _ = Group.objects.get_or_create(name=role_name)
 
+    app_models = {
+        "accounts": "user",
+        "samples": "sample",
+        "results": "result",
+    }
+
     permissions = []
     for permission_ref in ROLE_PERMISSIONS[role_name]:
         app_label, codename = permission_ref.split(".")
-        model = "sample" if app_label == "samples" else "user"
+        model = app_models[app_label]
         content_type = ContentType.objects.get(app_label=app_label, model=model)
         permissions.append(Permission.objects.get(content_type=content_type, codename=codename))
 
@@ -118,29 +125,35 @@ def viewer_client(client: Client, viewer_user: User) -> Client:
 
 
 @pytest.fixture
-def sample(db) -> Sample:
+def sample(db, project: Project) -> Sample:
     """Create a basic sample in RECEIVED status."""
     return Sample.objects.create(
+        sample_name="Test Sample",
+        project=project,
         client_name="Test Client",
         status=Sample.Status.RECEIVED,
     )
 
 
 @pytest.fixture
-def sample_in_review(db) -> Sample:
+def sample_in_review(db, project: Project) -> Sample:
     """Create a sample in IN_REVIEW status (ready for approval)."""
     return Sample.objects.create(
+        sample_name="Review Sample",
+        project=project,
         client_name="Test Client",
         status=Sample.Status.IN_REVIEW,
     )
 
 
 @pytest.fixture
-def approved_sample(db, user: User) -> Sample:
+def approved_sample(db, user: User, project: Project) -> Sample:
     """Create an already-approved sample."""
     from django.utils import timezone
 
     return Sample.objects.create(
+        sample_name="Approved Sample",
+        project=project,
         client_name="Test Client",
         status=Sample.Status.APPROVED,
         approved_at=timezone.now(),
@@ -152,3 +165,27 @@ def approved_sample(db, user: User) -> Sample:
 def project(db) -> Project:
     """Create a basic project."""
     return Project.objects.create(name="Test Project", start_date="2026-01-01")
+
+
+@pytest.fixture
+def customer(db) -> Customer:
+    """Create a basic customer."""
+    return Customer.objects.create(customer_name="Test Customer", external_id="123", customer_type="Test")
+
+
+@pytest.fixture
+def analysis_type(db) -> AnalysisType:
+    """Create a basic active analysis type."""
+    return AnalysisType.objects.create(
+        code="METALS",
+        name="Metals Panel",
+        description="Trace metals analysis",
+        is_active=True,
+        sort_order=1,
+    )
+
+
+@pytest.fixture
+def sample_analysis(db, sample: Sample, analysis_type: AnalysisType) -> SampleAnalysis:
+    """Create a basic sample-to-analysis assignment."""
+    return SampleAnalysis.objects.create(sample=sample, analysis_type=analysis_type)

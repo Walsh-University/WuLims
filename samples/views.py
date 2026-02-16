@@ -23,7 +23,7 @@ def sample_list(request):
 @permission_required("samples.view_sample", raise_exception=True)
 def sample_table(request):
     form = SampleFilterForm(request.GET or None)
-    qs = Sample.objects.all().order_by("-received_at")
+    qs = Sample.objects.select_related("project").all().order_by("-received_at")
 
     if form.is_valid():
         status = form.cleaned_data.get("status")
@@ -40,7 +40,10 @@ def sample_table(request):
 @login_required
 @permission_required("samples.view_sample", raise_exception=True)
 def sample_detail(request, pk: uuid.UUID):
-    sample = get_object_or_404(Sample, pk=pk)
+    sample = get_object_or_404(
+        Sample.objects.select_related("project").prefetch_related("analyses__analysis_type"),
+        pk=pk,
+    )
     tab = request.GET.get("tab")
 
     if tab == "overview":
@@ -99,3 +102,19 @@ def sample_add(request):
         form = SampleForm()
 
     return render(request, "samples/sample_form.html", {"form": form})
+
+
+@login_required
+@permission_required("samples.change_sample", raise_exception=True)
+def sample_edit(request, pk: uuid.UUID):
+    sample = get_object_or_404(Sample, pk=pk)
+
+    if request.method == "POST":
+        form = SampleForm(request.POST, instance=sample)
+        if form.is_valid():
+            sample = form.save()
+            return redirect("samples:detail", pk=sample.pk)
+    else:
+        form = SampleForm(instance=sample)
+
+    return render(request, "samples/sample_form.html", {"form": form, "sample": sample})

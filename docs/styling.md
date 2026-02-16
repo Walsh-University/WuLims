@@ -4,8 +4,8 @@ WuLims uses Bootstrap as a base and layers a custom SCSS theme on top. The SCSS 
 
 Think of styling in WuLims like this:
 
-> SCSS is the source code. 
-> 
+> SCSS is the source code.
+>
 > CSS is the compiled output.
 
 You edit the source (SCSS).
@@ -30,7 +30,7 @@ It's the modern, enterprise way to write CSS and style web apps.
 
 - https://sass-lang.com
 - https://www.upwork.com/resources/what-is-scss
-- 
+-
 SCSS is a superset of CSS. Everything valid in CSS is valid SCSS — plus a few handy features.
 
 You are not expected to write SCSS unless you want to explore it.
@@ -47,7 +47,7 @@ Nesting (clearer structure)
 ```scss
 .sidebar {
     border-right: 1px solid rgba(0, 0, 0, 0.08);
-    
+
     .nav-link.active {
     font-weight: 600;
     }
@@ -143,7 +143,7 @@ make css
 ```
 
 > Most students will not run this themselves.
-> 
+>
 > The compiled CSS is already included in the repository.
 
 ## Installing SASS
