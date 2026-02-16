@@ -112,6 +112,7 @@ exclude = ["migrations"]
 dev = [
     "assertpy>=1.1",
     "django-debug-toolbar>=6.2.0",
+    "mkdocs>=1.6.1",
     "pre-commit>=4.5.1",
     "pytest>=9.0.2",
     "pytest-cov>=5.0.0",

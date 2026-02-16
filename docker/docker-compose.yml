@@ -4,9 +4,9 @@ services:
     container_name: wulims_db
     restart: unless-stopped
     environment:
-      POSTGRES_DB: wulims
-      POSTGRES_USER: wulims
-      POSTGRES_PASSWORD: wulims_dev_password
+      POSTGRES_DB: env(DB_NAME)
+      POSTGRES_USER: env(DB_USER)
+      POSTGRES_PASSWORD: env(WULIMS_DB_PASSWORD)
     ports:
       - "5432:5432"
     volumes:
