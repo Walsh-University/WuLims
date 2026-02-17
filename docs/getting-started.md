@@ -17,7 +17,7 @@ This guide covers environment setup and Django fundamentals for new developers.
 
 You can run WuLims in two ways:
 
-- **Local dev**: Use `uv`, run `python manage.py runserver`, and use SQLite or Postgres (recommended for realism).
+- **Local dev**: Use `uv`, run `python manage.py runserver`, and connect to PostgreSQL.
 - **Docker**: Run the app in a container with Gunicorn, automatic migrations, and static file collection. This is closer to production and avoids local dependency drift.
 
 Most students should start with **local dev** for easier debugging, then try Docker once the basics feel comfortable.
@@ -56,23 +56,15 @@ source .venv/bin/activate  # macOS/Linux
 uv sync
 ```
 
-### 3. Database Setup
+### 3. Database Setup (PostgreSQL)
 
-WuLims supports two database options:
-
-#### Option B: SQLite (Default - No Setup Required)
-
-SQLite is used for backup. No additional configuration needed - just proceed to step 4.
-
-#### Option A: PostgreSQL (Recommended for Production-like Development)
-
-To keep the environment production-like, we're using PostgreSQL via Docker:
+WuLims uses PostgreSQL for local runtime. The simplest path is to run Postgres via Docker:
 
 ```bash
-# Start the PostgreSQL container
-docker compose up -d
+# Start PostgreSQL
+docker compose -f docker/docker-compose.yml up -d db
 
-# Set environment variables (add to your shell profile for persistence)
+# Optional: set env vars explicitly (defaults already match these values)
 export DB_NAME=wulims
 export DB_USER=wulims
 export DB_PASSWORD=wulims_dev_password
@@ -87,13 +79,12 @@ cp .env.example .env
 source .env  # or use a tool like direnv
 ```
 
-DO NOT COMMIT `.env` TO VERSION CONTROL.  .env is a local configuration file with secrets (passwords) and
-development keys.  It should never be shared or committed.
+Do not commit `.env` to version control. It contains local configuration values and secrets.
 
 To stop PostgreSQL later:
 ```bash
-docker compose down        # Stop container (keeps data)
-docker compose down -v     # Stop and delete all data
+docker compose -f docker/docker-compose.yml down        # Stop container (keeps data)
+docker compose -f docker/docker-compose.yml down -v     # Stop and delete all data
 ```
 
 ### 4. Initialize the Database

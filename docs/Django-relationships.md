@@ -102,7 +102,7 @@ to a specific person, allowing each person to have multiple email addresses.
 
 The `related_name` attribute allows reverse access to related objects, such as accessing all people associated with a customer using `customer_instance.people.all()` and all email addresses associated with a person using `person_instance.email_addresses.all()`.
 
-Without 'related_name', Django would use default names like 'person_set' and 'personemail_set', which can be less intuitive.
+Without `related_name`, Django would use default names like `person_set` and `personemail_set`, which can be less intuitive.
 
 **Without** `related_name`:
 ```python
@@ -118,7 +118,7 @@ person.email_addresses.all()
 
 ## Understanding `on_delete`
 
-`on_delete=models.CASCADE` Tells the database to delete all related `Person` or `PersonEmail` records if the associated `Customer` or `Person` is deleted.
+`on_delete=models.CASCADE` tells Django to delete all related `Person` or `PersonEmail` records if the associated `Customer` or `Person` is deleted.
 
 This helps maintain data integrity by ensuring that there are no orphaned records in the database.
 
@@ -130,14 +130,14 @@ Most common options for `on_delete` include:
 - `SET_NULL` → keep child, null FK (requires null=True)
 - `RESTRICT` → newer, stricter PROTECT
 
-Example on_delete usage:
+Example `on_delete` usage:
 
-| Relationship | on_delete Behavior |
---------------|-------------------
-| Customer → Project  |	PROTECT
-| Experiment → Sample | 	PROTECT
-| Person → Email | 	CASCADE
-| Person → Phone | 	CASCADE
+| Relationship | `on_delete` behavior |
+|---|---|
+| Customer → Project | `PROTECT` |
+| Experiment → Sample | `PROTECT` |
+| Person → Email | `CASCADE` |
+| Person → Phone | `CASCADE` |
 
 
 ## Updating Existing Models
