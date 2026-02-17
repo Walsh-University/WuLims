@@ -22,24 +22,4 @@
   document.querySelectorAll("#filter-form input, #filter-form select").forEach(el => {
     el.classList.add("form-control");
   });
-
-  // Before request is sent
-  document.body.addEventListener('htmx:beforeRequest', function(evt) {
-      console.log('Request:', evt.detail);
-  });
-
-  // After response is received
-  document.body.addEventListener('htmx:afterRequest', function(evt) {
-      console.log('Response:', evt.detail);
-  });
-
-  // When a request fails
-  document.body.addEventListener('htmx:responseError', function(evt) {
-      console.log('Error:', evt.detail);
-  });
-
-  // When the swap happens
-  document.body.addEventListener('htmx:afterSwap', function(evt) {
-      console.log('Swapped:', evt.detail);
-  });
 </script>
