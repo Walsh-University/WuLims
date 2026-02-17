@@ -1,134 +1,48 @@
-feature: Chain of Custody (COC) form
-app: chainofcustody
+# Chain of Custody
 
-models:
+This page documents the current chain-of-custody-related data in WuLims and the implementation status.
 
-ChainOfCustody:
-fields:
-received_date: DateField(null=true, blank=true)                 # "Date Rec’d in Lab"
-gse_job_number: CharField(max_length=64, blank=true)
-page_number: PositiveSmallIntegerField(null=true, blank=true)
-page_total: PositiveSmallIntegerField(null=true, blank=true)
+## Current Implementation Status
 
-      # Client Information
-      client_name: CharField(max_length=255)
-      client_address: TextField(blank=true)
-      client_phone: CharField(max_length=64, blank=true)
-      client_email: EmailField(blank=true)
+There is no standalone `chainofcustody` Django app in this repository today.
 
-      # Project Information
-      project_name: CharField(max_length=255, blank=true)
-      project_location: CharField(max_length=255, blank=true)
-      project_number: CharField(max_length=64, blank=true)
-      project_manager: CharField(max_length=255, blank=true)
+Chain-of-custody information currently lives on the `samples.Sample` model and related sample analysis tables:
 
-      # Report information / deliverables
-      deliverables_fax: BooleanField(default=false)
-      deliverables_email: BooleanField(default=true)
-      deliverables_additional: TextField(blank=true)
+- `Sample.filtration`
+- `Sample.preservation`
+- `Sample.received_at`
+- `Sample.status`
+- `Sample.approved_at`
+- `Sample.approved_by`
+- `SampleAnalysis` records tied to each sample
 
-      # Billing
-      billing_same_as_client: BooleanField(default=true)
-      billing_name: CharField(max_length=255, blank=true)
-      billing_address: TextField(blank=true)
-      billing_phone: CharField(max_length=64, blank=true)
-      billing_email: EmailField(blank=true)
-      purchase_order_number: CharField(max_length=64, blank=true)
+Source of truth:
+- `samples/models.py`
 
-      # Turnaround
-      tat: CharField(choices=[STANDARD, RUSH], default=STANDARD)
-      due_date: DateField(null=true, blank=true)
-      due_time: TimeField(null=true, blank=true)
+## What Is Tracked Per Sample
 
-      # Other requirements/comments/detection limits
-      requirements_comments: TextField(blank=true)
+The current workflow tracks custody-related state at the sample level:
 
-      # Container / preservative (COC-level defaults)
-      container_type: CharField(max_length=128, blank=true)
-      preservative: CharField(max_length=128, blank=true)
+1. Intake timestamp (`received_at`)
+2. Handling metadata (`filtration`, `preservation`)
+3. Workflow status transitions (`RECEIVED` → `IN_PROGRESS` → `IN_REVIEW` → `APPROVED`/`REJECTED`)
+4. Approval metadata (`approved_by`, `approved_at`)
+5. Requested analyses via `SampleAnalysis`
 
-      created_at: DateTimeField(auto_now_add=true)
-      updated_at: DateTimeField(auto_now=true)
+## What Is Not Yet Implemented
 
-Sample:
-fields:
-chain_of_custody: ForeignKey(ChainOfCustody, related_name="samples", on_delete=CASCADE)
+The following are not yet modeled as first-class entities in this repo:
 
-      lab_id: CharField(max_length=64, blank=true)                    # "CSE Lab ID (Lab Use Only)"
-      sample_id: CharField(max_length=128)                            # "Sample ID"
-      collection_date: DateField(null=true, blank=true)
-      collection_time: TimeField(null=true, blank=true)
-      sample_matrix: CharField(max_length=128, blank=true)
-      sampler_initials: CharField(max_length=16, blank=true)
+- COC header records (job number, page tracking, billing contact)
+- Explicit custody event handoff table (relinquished/received signatures and timestamps)
+- Dedicated printable COC document model/PDF pipeline
 
-      # Optional per-sample container/preservative overrides
-      container_type: CharField(max_length=128, blank=true)
-      preservative: CharField(max_length=128, blank=true)
+## Suggested Next Iteration (Optional)
 
-      notes: TextField(blank=true)
+If needed, COC can be expanded by introducing a dedicated app and models such as:
 
-AnalysisMethod:
-fields:
-code: CharField(max_length=64, unique=true)                     # e.g., "VOC", "Metals", "EPA 8260"
-name: CharField(max_length=255)
-description: TextField(blank=true)
-is_active: BooleanField(default=true)
+- `ChainOfCustody` (header-level metadata)
+- `CustodyEvent` (handoff log)
+- `ChainOfCustodySample` or FK from `Sample` to `ChainOfCustody`
 
-RequestedAnalysis:
-fields:
-chain_of_custody: ForeignKey(ChainOfCustody, related_name="requested_analyses", on_delete=CASCADE)
-method: ForeignKey(AnalysisMethod, on_delete=PROTECT)
-
-      # This represents the checkbox matrix: which samples are checked for this method
-      samples: ManyToManyField(Sample, related_name="requested_methods", blank=true)
-
-      notes: TextField(blank=true)
-
-    constraints:
-      unique_together: [chain_of_custody, method]
-
-SampleHandling:
-fields:
-chain_of_custody: OneToOneField(ChainOfCustody, related_name="handling", on_delete=CASCADE)
-chill: BooleanField(default=false)
-cool: BooleanField(default=false)
-room_temp: BooleanField(default=false)
-none_needed: BooleanField(default=false)
-dry_ice: BooleanField(default=false)
-other: BooleanField(default=false)
-other_text: CharField(max_length=255, blank=true)
-comments: TextField(blank=true)
-
-CustodyEvent:
-fields:
-chain_of_custody: ForeignKey(ChainOfCustody, related_name="custody_events", on_delete=CASCADE)
-relinquished_by: CharField(max_length=255)
-relinquished_at: DateTimeField(null=true, blank=true)
-received_by: CharField(max_length=255)
-received_at: DateTimeField(null=true, blank=true)
-
-views:
-- COC list page (table, search by client/project/job #)
-- COC create/edit page:
-  sections:
-  - header + client + project + billing + turnaround + comments
-  - inline formset for Samples (add/remove rows)
-  - analysis requested section:
-  - show AnalysisMethod rows (active only)
-  - for each method, render sample checkboxes (matrix style)
-  - custody event inline formset
-- COC detail page (read-only, printable)
-- Optional: PDF export later
-
-admin:
-- register all models
-- ChainOfCustody admin includes inlines: SampleInline, CustodyEventInline, RequestedAnalysisInline (or custom UI)
-- AnalysisMethod manageable by staff
-
-migrations:
-- initial migrations for all models above
-
-tests:
-- model creation tests
-- requested analysis uniqueness constraint test
-- add samples + mark requested analyses test
+Until then, operational custody data should be considered sample-scoped and maintained in `samples/`.

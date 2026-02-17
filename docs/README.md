@@ -12,7 +12,7 @@ Welcome to the WuLims project! This is a Laboratory Information Management Syste
 | [Django Relationships](Django-relationships.md) | Model relationship patterns and examples            |
 | [Creating Views](creating-views.md)       | How to create new views and HTMX endpoints                |
 | [Styling](styling.md)                     | SCSS, Bootstrap theming, and CSS build workflow           |
-| [UI Conventions](ui-conventions.md)       | UI Conventinos for WuLims                       |
+| [UI Conventions](ui-conventions.md)       | UI conventions for WuLims                       |
 | [Testing](testing.md)                     | Running tests, coverage, and test-writing practices       |
 | [Migrations](migrations.md)               | Database migrations and model changes                     |
 | [Chain of Custody](chain_of_custody.md)   | Sample custody flow and auditability rules                |
@@ -41,7 +41,7 @@ uv run mkdocs build
 - **HTMX** - Dynamic HTML without JavaScript frameworks
 - **Alpine.js** - Lightweight JavaScript for interactivity
 - **Bootstrap 5.3** - CSS framework for styling
-- **PostgreSQL** - Production database (SQLite for development)
+- **PostgreSQL** - Primary application database
 - **uv** - Fast Python package manager (replaces pip)
 
 ## Quick Start

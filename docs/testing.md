@@ -277,13 +277,14 @@ uv run ty check .
 ## CI/CD
 
 Tests run automatically on GitHub Actions when you:
-- Push to any branch (except `main`)
+- Push to non-`main` branches
 - Open a pull request to `main`
 
-The CI pipeline runs three parallel jobs:
-1. **Lint** - Ruff check and format verification
-2. **Type Check** - ty type checking
-3. **Test** - pytest with coverage
+The CI workflow includes:
+1. Ruff lint and format checks
+2. ty type checking
+3. Pytest with coverage
+4. MkDocs strict build (`mkdocs build --strict`)
 
 Coverage reports are uploaded as artifacts and available for download from the Actions tab.
 
