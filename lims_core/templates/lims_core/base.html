@@ -75,7 +75,7 @@
             <div class="nav flex-column nav-pills">
               <a class="nav-link {% block nav_dashboard_active %}{% endblock %}" href="{% url 'lims_core:dashboard' %}">Dashboard</a>
               <a class="nav-link" href="#">Customers</a>
-              <a class="nav-link" href="#">Projects</a>
+              <a class="nav-link {% block nav_projects_active %}{% endblock %}" href="{% url 'projects:list' %}">Projects</a>
               <a class="nav-link {% block nav_experiments_active %}{% endblock %}" href="{% url 'experiments:list' %}">Experiments</a>
               <a class="nav-link {% block nav_instruments_active %}{% endblock %}" href="{% url 'instruments:list' %}">Instruments</a>
               <a class="nav-link {% block nav_samples_active %}{% endblock %}" href="{% url 'samples:list' %}">Samples</a>
