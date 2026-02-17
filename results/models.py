@@ -8,7 +8,7 @@ from samples.models import Sample
 
 class Result(models.Model):
     class Status(models.TextChoices):
-        ACQUIRED = "ACQUIRED"
+        DRAFT = "DRAFT"
         IN_PROGRESS = "IN_PROGRESS"
         IN_REVIEW = "IN_REVIEW"
         APPROVED = "APPROVED"
@@ -20,7 +20,7 @@ class Result(models.Model):
     sample = models.ForeignKey(Sample, on_delete=models.PROTECT, related_name="samples")
     project = models.ForeignKey(Project, on_delete=models.PROTECT, related_name="projects")
     completed_at = models.DateTimeField(null=True, blank=True)
-    status = models.CharField(max_length=20, choices=Status.choices, default=Status.ACQUIRED)
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.DRAFT)
 
     approved_at = models.DateTimeField(null=True, blank=True)
     approved_by = models.ForeignKey(
@@ -39,14 +39,21 @@ class Result(models.Model):
         on_delete=models.SET_NULL,
         related_name="rejected_results",
     )
+    reviewer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="review_results",
+    )
 
     notes = models.TextField(blank=True)
 
     class Meta:
         permissions = [
-            ("approve_experiment_result", "Can approve result"),
-            ("reject_experiment_result", "Can reject result"),
-            ("add_experiment_result", "Can add result"),
+            ("submit_result", "Can submit result for review"),
+            ("approve_result", "Can approve result"),
+            ("reject_result", "Can reject result"),
         ]
 
     def __str__(self):
@@ -83,6 +90,12 @@ class Result(models.Model):
                 errors["approved_at"] = "Approved fields must be empty unless status is APPROVED."
             if rejected_fields_present:
                 errors["rejected_at"] = "Rejected fields must be empty unless status is REJECTED."
+
+        if self.status == self.Status.IN_REVIEW and self.reviewer is None:
+            errors["reviewer"] = "reviewer is required when status is IN_REVIEW."
+
+        if self.status in {self.Status.DRAFT, self.Status.IN_PROGRESS} and self.reviewer is not None:
+            errors["reviewer"] = "reviewer must be empty unless status is IN_REVIEW or finalized."
 
         if errors:
             raise ValidationError(errors)

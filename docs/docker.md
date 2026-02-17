@@ -44,12 +44,12 @@ This keeps startup consistent and avoids manual setup inside the container.
 
 ### Django Settings for Docker
 
-In `config/settings.py`, Docker-specific defaults include:
-- `STATIC_ROOT` set so `collectstatic` can run inside the container
-- `ALLOWED_HOSTS = ["*"]` for container networking
-- Database switches to PostgreSQL when `DB_NAME` is set
+Docker uses the normal project settings modules (`config.settings.prod` by default in container entrypoint).
+Key runtime behavior:
 
-These changes make the app work both locally and in containers.
+- `python manage.py migrate` runs at container startup
+- `python manage.py collectstatic --noinput` runs at startup
+- Gunicorn serves `config.wsgi:application`
 
 ---
 
@@ -69,10 +69,10 @@ Then visit: http://127.0.0.1:8000/
 
 ## Using PostgreSQL with Docker Compose
 
-The repo includes `docker-compose.yml` for a local Postgres database:
+The repo includes `docker/docker-compose.yml` for a local Postgres database:
 
 ```bash
-docker compose up -d
+docker compose -f docker/docker-compose.yml up -d db
 ```
 
 Set environment variables so Django uses Postgres (example):
@@ -88,7 +88,7 @@ export DB_PORT=5432
 To stop the database:
 
 ```bash
-docker compose down
+docker compose -f docker/docker-compose.yml down
 ```
 
 ## Common Troubleshooting

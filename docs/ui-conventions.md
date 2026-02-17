@@ -1,45 +1,33 @@
-# WuLims UI Conventions (Read Before Building Pages)
+# WuLims UI Conventions
 
-This document defines **how UI elements should look and behave** in WuLims.
+This document defines how UI elements should look and behave in WuLims.
 
-The goal is **consistency**, not creativity.
-A consistent UI is easier to learn, easier to maintain, and feels professional.
-
-When in doubt: **copy an existing pattern**.
-
----
+Goal: consistency over creativity.
 
 ## General Principles
 
-- Use **Bootstrap components and utilities first**
-- Prefer **clarity over cleverness**
-- Avoid visual noise (too many colors, borders, icons)
-- If two pages solve the same problem, they should look the same
-
----
+- Use Bootstrap components and utilities first.
+- Prefer clarity over cleverness.
+- Avoid visual noise (too many colors, borders, or icons).
+- If two pages solve the same problem, they should look the same.
 
 ## Buttons
 
-Buttons communicate **intent**. Use them consistently.
-
-### Button Types
+Buttons should communicate intent clearly.
 
 | Purpose | Class | Example |
-|------|------|------|
+|---|---|---|
 | Primary action | `btn btn-primary` | Save, Create, Submit |
 | Secondary action | `btn btn-outline-secondary` | Cancel, Back |
 | Destructive action | `btn btn-danger` | Delete |
-| Neutral / admin | `btn btn-outline-secondary` | Admin tools |
+| Neutral/admin | `btn btn-outline-secondary` | Admin tools |
 
-### Rules
+Rules:
+- Use one primary action per page.
+- Make destructive actions visually distinct and confirm them (modal or prompt).
+- Avoid custom button colors in templates.
 
-- Every page should have **one primary action**
-- Destructive actions should be:
-    - visually distinct
-    - confirmed (modal or prompt)
-- Avoid custom colors for buttons
-
-### Example
+Example:
 
 ```html
 <div class="d-flex gap-2">
@@ -50,20 +38,17 @@ Buttons communicate **intent**. Use them consistently.
 
 ## Tables
 
-Tables are the heart of WuLims. Keep them readable and predictable.
+Use predictable table patterns:
 
-Required Classes
 ```html
 <table class="table table-hover align-middle">
 ```
-Use:
-- table-hover → helps scanning rows
-- align-middle → vertical alignment for mixed content
 
-Table Headers
-- Use <thead>
-- Keep headers short and descriptive
-- Avoid icons in headers unless necessary
+- `table-hover` improves scanability.
+- `align-middle` keeps mixed-content rows aligned.
+- Keep action buttons right-aligned in the last column.
+
+Header example:
 
 ```html
 <thead class="table-light">
@@ -76,49 +61,28 @@ Table Headers
 </thead>
 ```
 
-Actions Column
-- Actions go on the right
-- Use buttons or icon buttons
-- Align actions right
-
-```html
-<td class="text-end">
-  <a class="btn btn-sm btn-outline-secondary">View</a>
-</td>
-
-```
-
 ## Forms
 
-Forms should be boring and predictable.
+Forms should be simple and predictable.
 
-**Layout Rules**
-- One column by default
-- Group related fields
-- Labels always above inputs
+- One column by default.
+- Group related fields.
+- Keep labels above inputs.
+- Use Bootstrap validation styles and actionable error text.
 
-**Required Structure**
+Example:
+
 ```html
 <div class="mb-3">
   <label class="form-label">Sample Name</label>
   <input type="text" class="form-control">
+  <div class="invalid-feedback">Sample name is required.</div>
 </div>
 ```
-**Validation**
-Validation
-- Use Bootstrap validation styles
-- Error messages should be specific and actionable
-
-```html
-<div class="invalid-feedback">
-  Sample name is required.
-</div>
-```
-
 
 ## Page Layout
 
-Page Header Pattern (Recommended)
+Recommended page header pattern:
 
 ```html
 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -127,62 +91,43 @@ Page Header Pattern (Recommended)
 </div>
 ```
 
-- Page title on the left
-- Primary action on the right
-- Use h3 for page titles (consistent scale)
+- Title on the left.
+- Primary action on the right.
+- Use consistent heading scale (`h3` for page titles).
 
-## Badges & Status Indicators
+## Badges and Status
 
-Use badges to communicate state, not decoration.
+Use badges for state, not decoration.
 
-**Approved Uses**
-- Status (Complete, Pending, Error)
-- Connectivity (Connected, Offline)
-- Counts or alerts
-
-Example
 ```html
 <span class="badge text-bg-success">Complete</span>
 <span class="badge text-bg-warning text-dark">Pending</span>
-<span class="badge badge-accent">Connected</span>
 ```
-Avoid inventing new colors or meanings.
 
-## Icons (If Used)
+Do not invent one-off status colors in templates.
 
-- Use Bootstrap Icons (https://icons.getbootstrap.com/)
-- Icons should support text, not replace it
-- Never rely on color alone to communicate meaning (hurts colorblind users)
-- Prefer text + icon, not icon-only buttons
+## Icons
+
+- Use Bootstrap Icons.
+- Prefer icon + text over icon-only actions.
+- Do not rely on color alone to communicate meaning.
 
 ## Modals
 
-**Use modals for:**
-- confirmation (delete, destructive actions)
-- focused data entry
-- short, self-contained tasks
+Use modals for:
+- Confirmations for destructive actions.
+- Short, focused tasks.
 
-**Avoid:**
-- large workflows
-- long forms
-- critical navigation
+Avoid modals for:
+- Long forms.
+- Multi-step workflows.
+- Core navigation.
 
-## What NOT to Do
+## Avoid
 
-- Inline styles
-- Custom colors in templates
-- One-off CSS fixes
-- Overusing icons
-- Multiple primary buttons on one page
+- Inline styles.
+- `<style>` blocks in templates.
+- One-off CSS fixes in templates.
+- Multiple primary buttons on one page.
 
-If you feel tempted to do one of these, stop and ask.
-
-## Final Reminder
-
-WuLims is lab software, not a marketing site.
-
-- Clear > pretty
-- Consistent > clever
-- Boring UI = good UI
-
-If a user doesn’t notice the interface, you did it right.
+When in doubt, copy an existing pattern from the same feature area.

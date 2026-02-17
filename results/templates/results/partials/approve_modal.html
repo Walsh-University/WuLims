@@ -3,26 +3,42 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Approve Result {{ result.id }}</h5>
+                <h5 class="modal-title">Review Result {{ result.id }}</h5>
                 <button type="button" class="btn-close"
                         onclick="document.getElementById('modal-target').innerHTML = ''"></button>
             </div>
 
             <div class="modal-body">
-                <p class="mb-0">This will mark the result as <strong>APPROVED</strong>.</p>
-                <p class="text-muted small mb-0">Guardrail: only IN_REVIEW results can be approved.</p>
+                <p class="mb-0">Guardrail: only <strong>IN_REVIEW</strong> results can be approved or rejected.</p>
+                {% if can_reject %}
+                    <div class="alert alert-warning mt-3 mb-0">
+                        <strong>Warning:</strong> Rejecting this result will set its status to <strong>REJECTED</strong>.
+                    </div>
+                {% endif %}
             </div>
 
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary"
                         onclick="document.getElementById('modal-target').innerHTML = ''">Cancel</button>
 
-                <button class="btn btn-primary"
-                        hx-post="about:blank"
-                        hx-target="#results-row-{{ result.pk }}"
-                        hx-swap="outerHTML">
-                    Approve
-                </button>
+                {% if can_reject %}
+                    <button class="btn btn-outline-danger"
+                            hx-post="{% url 'results:reject' result.pk %}"
+                            hx-confirm="Reject result {{ result.id }}? This will set the status to REJECTED."
+                            hx-target="#results-row-{{ result.pk }}"
+                            hx-swap="outerHTML">
+                        Reject
+                    </button>
+                {% endif %}
+
+                {% if can_approve %}
+                    <button class="btn btn-primary"
+                            hx-post="{% url 'results:approve' result.pk %}"
+                            hx-target="#results-row-{{ result.pk }}"
+                            hx-swap="outerHTML">
+                        Approve
+                    </button>
+                {% endif %}
             </div>
         </div>
     </div>
