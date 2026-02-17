@@ -10,7 +10,7 @@ class AuditEvent(models.Model):
     actor = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL)
     action = models.CharField(max_length=50)
     object_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField()
+    object_id = models.CharField(max_length=64, db_index=True)
     content_object = GenericForeignKey("object_type", "object_id")
 
     changes = models.JSONField(null=True, blank=True)

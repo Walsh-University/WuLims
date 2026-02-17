@@ -30,9 +30,14 @@ def compute_diff(
     Compute field-level diff between two model instances.
 
     Returns:
-    {
-        "field_name": {"from": old_value, "to": new_value}
-    }
+        {
+            "field_name": {
+                "from": old_value,
+                "to": new_value
+            }
+        }
+
+    Returns None if no changes detected.
     """
 
     diff: dict[str, Any] = {}

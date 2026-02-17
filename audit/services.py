@@ -11,6 +11,6 @@ def log_audit_event(*, user=None, action: str, instance: models.Model, diff: dic
         actor=user,
         action=action,
         object_type=ContentType.objects.get_for_model(instance),
-        object_id=instance.pk,
+        object_id=str(instance.pk),
         changes=diff,
     )

@@ -1,27 +1,42 @@
+from django.db import transaction
 from django.db.models.signals import post_delete, post_save, pre_save
 from django.dispatch import receiver
 
 from audit.diff import compute_diff
+from audit.middleware import get_current_user
 from audit.services import log_audit_event
 
 from .models import Experiment
 
-EXPERIMENT_FIELDS = [
-    "name",
-    "description",
-    "status",
-    "data_file",
-    "version",
-]
+EXPERIMENT_FIELDS = ["name", "description", "status", "version", "data_file"]
 
 
-# 🔹 UPDATE
 @receiver(pre_save, sender=Experiment)
-def audit_experiment_update(sender, instance, **kwargs):
+def cache_experiment_old_state(sender, instance, **kwargs):
     if not instance.pk:
-        return  # это create
+        instance._audit_old_instance = None
+        return
 
-    old_instance = Experiment.objects.get(pk=instance.pk)
+    instance._audit_old_instance = sender.objects.filter(pk=instance.pk).first()
+
+
+@receiver(post_save, sender=Experiment)
+def audit_experiment_save(sender, instance, created, **kwargs):
+
+    if created:
+        transaction.on_commit(
+            lambda: log_audit_event(
+                user=get_current_user(),
+                action="create",
+                instance=instance,
+                diff=None,
+            )
+        )
+        return
+
+    old_instance = getattr(instance, "_audit_old_instance", None)
+    if not old_instance:
+        return
 
     diff = compute_diff(
         old=old_instance,
@@ -30,34 +45,23 @@ def audit_experiment_update(sender, instance, **kwargs):
     )
 
     if diff:
-        log_audit_event(
-            user=None,
-            action="update",
-            instance=instance,
-            diff=diff,
+        transaction.on_commit(
+            lambda: log_audit_event(
+                user=get_current_user(),
+                action="update",
+                instance=instance,
+                diff=diff,
+            )
         )
 
 
-# 🔹 CREATE
-@receiver(post_save, sender=Experiment)
-def audit_experiment_create(sender, instance, created, **kwargs):
-    if not created:
-        return
-
-    log_audit_event(
-        user=None,
-        action="create",
-        instance=instance,
-        diff=None,
-    )
-
-
-# 🔹 DELETE
 @receiver(post_delete, sender=Experiment)
 def audit_experiment_delete(sender, instance, **kwargs):
-    log_audit_event(
-        user=None,
-        action="delete",
-        instance=instance,
-        diff=None,
+    transaction.on_commit(
+        lambda: log_audit_event(
+            user=get_current_user(),
+            action="delete",
+            instance=instance,
+            diff=None,
+        )
     )

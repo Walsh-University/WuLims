@@ -18,5 +18,8 @@ class AuditUserMiddleware:
 
     def __call__(self, request):
         _thread_locals.user = request.user
-        response = self.get_response(request)
-        return response
+        try:
+            return self.get_response(request)
+        finally:
+            if hasattr(_thread_locals, "user"):
+                delattr(_thread_locals, "user")
