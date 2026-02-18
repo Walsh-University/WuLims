@@ -32,7 +32,12 @@ def sample_table(request):
             qs = qs.filter(status=status)
         if q:
             qs = qs.annotate(sample_id_str=Cast("sample_id", output_field=CharField()))
-            qs = qs.filter(Q(sample_id_str__icontains=q) | Q(client_name__icontains=q))
+            qs = qs.filter(
+                Q(sample_id_str__icontains=q)
+                | Q(sample_name__icontains=q)
+                | Q(client_name__icontains=q)
+                | Q(project__name__icontains=q)
+            )
 
     return render(request, "samples/partials/sample_table.html", {"samples": qs, "form": form})
 
