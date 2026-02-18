@@ -157,9 +157,7 @@ def submit_result(request, pk):
     if result.project_id is None:
         required_errors.append("project")
     if required_errors:
-        return HttpResponseBadRequest(
-            f"Missing required fields before submission: {', '.join(required_errors)}."
-        )
+        return HttpResponseBadRequest(f"Missing required fields before submission: {', '.join(required_errors)}.")
 
     reviewer_id = (request.POST.get("reviewer_id") or "").strip()
     reviewers = _eligible_reviewers(exclude_user=request.user)
@@ -219,9 +217,7 @@ def reject_result(request, pk):
     result.approved_by = None
     result.save()
 
-    return _result_row_response(
-        request, result, f"Result {result.id} rejected.", level="warning"
-    )
+    return _result_row_response(request, result, f"Result {result.id} rejected.", level="warning")
 
 
 @login_required
@@ -258,4 +254,3 @@ def result_detail_tab(request, pk: int):
         "results/partials/overview_tab.html",
         {"result": result},
     )
-
