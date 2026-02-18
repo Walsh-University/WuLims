@@ -22,4 +22,5 @@ urlpatterns = [
     path("", include("lims_core.urls")),
     path("instruments/", include("instruments.urls")),
     path("results/", include("results.urls")),
+    path("experiments/", include("experiments.urls")),
 ]

@@ -1,0 +1,17 @@
+<div class="card shadow-sm">
+  <div class="card-body">
+    <h5>Audit Timeline</h5>
+    <ul class="list-group list-group-flush">
+      {% for entry in audit_timeline %}
+        <li class="list-group-item">
+          <strong>{{ entry.timestamp }}</strong> — {{ entry.action }} by {{ entry.actor }}
+          {% if entry.changes %}
+            <div class="text-muted small">{{ entry.changes }}</div>
+          {% endif %}
+        </li>
+      {% empty %}
+        <li class="list-group-item text-muted">No audit entries found.</li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
