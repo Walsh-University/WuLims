@@ -35,7 +35,6 @@ def experiment_table(request):
     )
 
 
-# ✅ ГЛАВНАЯ DETAIL СТРАНИЦА
 @login_required
 def experiment_detail(request, pk: int):
     experiment = get_object_or_404(Experiment, pk=pk)
@@ -46,7 +45,6 @@ def experiment_detail(request, pk: int):
     )
 
 
-# ✅ HTMX ТАБЫ
 @login_required
 def experiment_detail_tab(request, pk: int):
     experiment = get_object_or_404(Experiment, pk=pk)
