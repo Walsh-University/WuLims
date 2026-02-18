@@ -379,13 +379,13 @@ class TestResultDetailView:
             sample=sample,
             project=project,
         )
-        response = authenticated_client.get(reverse("results:detail", args=[result.pk]), {"tab": "overview"})
+
+        response = authenticated_client.get(reverse("results:result_detail_tab", args=[result.pk]), {"tab": "overview"})
         content = response.content.decode()
 
         assert_that(response.status_code).is_equal_to(200)
         assert_that(content).contains("Overview Result")
         assert_that(content).contains("Overview Description")
-
 
 class TestApproveModalView:
     """Tests for approve modal endpoint."""
