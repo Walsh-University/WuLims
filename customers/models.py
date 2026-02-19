@@ -35,7 +35,6 @@ class Person(models.Model):
     suffix = models.CharField(max_length=50, blank=True)
     job_title = models.CharField(max_length=150, blank=True)
     is_active = models.BooleanField(default=True)
-    role_id = models.IntegerField(null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 
