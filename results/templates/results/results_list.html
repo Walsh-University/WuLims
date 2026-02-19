@@ -14,7 +14,7 @@
 
     <div
             hx-get="{% url 'results:table' %}"
-            hx-trigger="load, keyup changed delay:300ms from:#filter-form, change from:#filter-form"
+            hx-trigger="load, keyup changed delay:300ms from:find input, change from:find select"
             hx-target="#table-target"
             hx-include="#filter-form"
     >
