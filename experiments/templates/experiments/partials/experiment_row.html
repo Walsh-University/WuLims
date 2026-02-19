@@ -1,0 +1,28 @@
+<tr id="experiment-row-{{ exp.id }}">
+  <td>
+    <a href="{% url 'experiments:detail' exp.id %}">
+      {{ exp.name }}
+    </a>
+  </td>
+
+  <td>{{ exp.description }}</td>
+  <td>
+    {% if exp.is_active %}
+      <span class="badge bg-success">Active</span>
+    {% else %}
+      <span class="badge bg-secondary">Inactive</span>
+    {% endif %}
+  </td>
+
+  <td>
+    {% if exp.last_run %}
+      {{ exp.last_run|date:"Y-m-d H:i" }}
+    {% else %}
+      <span class="text-muted small">—</span>
+    {% endif %}
+  </td>
+
+  <td class="text-end">
+    <a class="btn btn-sm btn-outline-primary" href="{% url 'experiments:detail' exp.id %}">View</a>
+  </td>
+</tr>

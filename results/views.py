@@ -1,3 +1,5 @@
+import logging
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required, permission_required
 from django.core.exceptions import PermissionDenied
@@ -10,6 +12,8 @@ from django.utils import timezone
 
 from .forms import ResultForm, ResultsFilterForm
 from .models import Result
+
+logger = logging.getLogger(__name__)
 
 
 def _eligible_reviewers(exclude_user=None):
@@ -46,25 +50,31 @@ def result_add(request):
             return redirect("results:detail", pk=result.pk)
     else:
         form = ResultForm()
-
     return render(request, "results/result_add.html", {"form": form})
 
 
 @login_required
 @permission_required("results.change_result", raise_exception=True)
-def results_edit(request):
-    pass
+def results_edit(request, pk):
+    """
+    Редактирование Result по pk
+    """
+    result = get_object_or_404(Result, pk=pk)
+    if request.method == "POST":
+        form = ResultForm(request.POST, instance=result)
+        if form.is_valid():
+            form.save()
+            return redirect("results:detail", pk=result.pk)
+    else:
+        form = ResultForm(instance=result)
+
+    return render(request, "results/result_edit.html", {"form": form, "result": result})
 
 
 @login_required
 @permission_required("results.view_result", raise_exception=True)
 def result_detail(request, pk):
     result = get_object_or_404(Result.objects.select_related("project", "sample"), pk=pk)
-    tab = request.GET.get("tab")
-
-    if tab == "overview":
-        return render(request, "results/partials/result_overview.html", {"result": result})
-
     return render(request, "results/result_detail.html", {"result": result})
 
 
@@ -208,3 +218,39 @@ def reject_result(request, pk):
     result.save()
 
     return _result_row_response(request, result, f"Result {result.id} rejected.", level="warning")
+
+
+@login_required
+@permission_required("results.view_result", raise_exception=True)
+def result_detail_tab(request, pk: int):
+    """
+    HTMX view для вкладок Result Detail:
+    - Overview
+    - Audit Timeline
+    """
+    result = get_object_or_404(Result.objects.select_related("project", "sample"), pk=pk)
+    tab = request.GET.get("tab", "overview")
+
+    if tab == "audit":
+        try:
+            # Пример аудита для теста (заменить на реальные данные)
+            audit_timeline = [
+                {"timestamp": timezone.now(), "action": "Created", "actor": "Alice", "changes": None},
+                {"timestamp": timezone.now(), "action": "Edited", "actor": "Bob", "changes": "Value updated"},
+                {"timestamp": timezone.now(), "action": "Approved", "actor": "Charlie", "changes": None},
+            ]
+        except Exception as e:
+            logger.error(f"Failed to get audit timeline for Result {result.pk}: {e}")
+            audit_timeline = []
+
+        return render(
+            request,
+            "results/partials/audit_tab.html",
+            {"audit_timeline": audit_timeline, "result": result},
+        )
+
+    return render(
+        request,
+        "results/partials/overview_tab.html",
+        {"result": result},
+    )

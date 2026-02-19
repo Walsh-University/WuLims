@@ -1,0 +1,15 @@
+<div class="card shadow-sm">
+  <div class="card-body">
+    <dl class="row mb-0">
+      <dt class="col-sm-3">Status</dt>
+      <dd class="col-sm-9">{{ experiment.is_active|yesno:"Active,Inactive" }}</dd>
+
+      <dt class="col-sm-3">Description</dt>
+      <dd class="col-sm-9">{{ experiment.description }}</dd>
+
+      <dt class="col-sm-3">Created</dt>
+      <dd class="col-sm-9">{{ experiment.created_at|date:"Y-m-d H:i" }}</dd>
+    </dl>
+  </div>
+</div>
+

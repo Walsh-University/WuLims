@@ -1,0 +1,21 @@
+<div class="card shadow-sm">
+  <div class="card-body p-0">
+    {% if audit_timeline %}
+      <ul class="timeline list-unstyled m-3">
+        {% for event in audit_timeline %}
+          <li class="mb-2">
+            <strong>{{ event.timestamp|date:"M d, Y H:i" }}</strong> —
+            {{ event.action }} by {{ event.actor }}
+            {% if event.changes %}
+              <pre class="small">{{ event.changes|json_script:"changes" }}</pre>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="text-muted m-3 mb-0">
+        No audit history available.
+      </p>
+    {% endif %}
+  </div>
+</div>
