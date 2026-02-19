@@ -163,6 +163,21 @@ def submit_result(request, pk):
     if result.status != Result.Status.DRAFT:
         return HttpResponseBadRequest("Result must be DRAFT to submit for review.")
 
+    required_errors = []
+    if not (result.title or "").strip():
+        required_errors.append("title")
+    if not (result.description or "").strip():
+        required_errors.append("description")
+    if result.sample_id is None:
+        required_errors.append("sample")
+    if result.project_id is None:
+        required_errors.append("project")
+
+    if required_errors:
+        return HttpResponseBadRequest(
+            f"Missing required fields before submission: {', '.join(required_errors)}."
+        )
+
     old_result = Result.objects.get(pk=result.pk)
 
     reviewer_id = (request.POST.get("reviewer_id") or "").strip()
@@ -177,6 +192,7 @@ def submit_result(request, pk):
     result.approved_by = None
     result.rejected_at = None
     result.rejected_by = None
+
     result.save()
 
     diff = compute_diff(
