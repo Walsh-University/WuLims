@@ -1,0 +1,37 @@
+<div class="card shadow-sm border-0">
+  <div class="card-header bg-light">
+    <h5 class="mb-0">Audit Timeline</h5>
+  </div>
+
+  {% if audit_timeline %}
+    <div class="list-group list-group-flush">
+      {% for audit in audit_timeline %}
+        <div class="list-group-item">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <div class="fw-semibold">{{ audit.action|default:"No action" }}</div>
+              <div class="text-muted small">by {{ audit.actor|default:"Unknown" }}</div>
+            </div>
+            <small class="text-muted">
+              {% if audit.timestamp %}
+                {{ audit.timestamp|date:"Y-m-d H:i" }}
+              {% else %}
+                --
+              {% endif %}
+            </small>
+          </div>
+
+          {% if audit.changes %}
+            <div class="mt-2 text-muted small">{{ audit.changes }}</div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="card-body text-muted text-center py-4">
+      No audit records found.
+    </div>
+  {% endif %}
+</div>
+
+
