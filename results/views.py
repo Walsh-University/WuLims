@@ -2,6 +2,7 @@ import logging
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
 from django.db.models import CharField, Q
 from django.db.models.functions import Cast
@@ -9,6 +10,10 @@ from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.utils import timezone
+
+from audit.diff import compute_diff
+from audit.models import AuditEvent
+from audit.services import log_audit_event
 
 from .forms import ResultForm, ResultsFilterForm
 from .models import Result
@@ -56,14 +61,25 @@ def result_add(request):
 @login_required
 @permission_required("results.change_result", raise_exception=True)
 def results_edit(request, pk):
-    """
-    Редактирование Result по pk
-    """
     result = get_object_or_404(Result, pk=pk)
+
     if request.method == "POST":
+        old_result = Result.objects.get(pk=result.pk)
         form = ResultForm(request.POST, instance=result)
         if form.is_valid():
-            form.save()
+            updated_result = form.save()
+            diff = compute_diff(
+                old=old_result,
+                new=updated_result,
+                fields=["title", "description", "status", "sample", "project"],
+            )
+            if diff:
+                log_audit_event(
+                    user=request.user,
+                    action="updated",
+                    instance=updated_result,
+                    diff=diff,
+                )
             return redirect("results:detail", pk=result.pk)
     else:
         form = ResultForm(instance=result)
@@ -147,17 +163,7 @@ def submit_result(request, pk):
     if result.status != Result.Status.DRAFT:
         return HttpResponseBadRequest("Result must be DRAFT to submit for review.")
 
-    required_errors = []
-    if not (result.title or "").strip():
-        required_errors.append("title")
-    if not (result.description or "").strip():
-        required_errors.append("description")
-    if result.sample_id is None:
-        required_errors.append("sample")
-    if result.project_id is None:
-        required_errors.append("project")
-    if required_errors:
-        return HttpResponseBadRequest(f"Missing required fields before submission: {', '.join(required_errors)}.")
+    old_result = Result.objects.get(pk=result.pk)
 
     reviewer_id = (request.POST.get("reviewer_id") or "").strip()
     reviewers = _eligible_reviewers(exclude_user=request.user)
@@ -172,6 +178,19 @@ def submit_result(request, pk):
     result.rejected_at = None
     result.rejected_by = None
     result.save()
+
+    diff = compute_diff(
+        old=old_result,
+        new=result,
+        fields=["status", "reviewer"],
+    )
+
+    log_audit_event(
+        user=request.user,
+        action="status_changed",
+        instance=result,
+        diff=diff,
+    )
 
     return _result_row_response(
         request,
@@ -190,12 +209,27 @@ def approve_result(request, pk):
     if result.status != Result.Status.IN_REVIEW:
         return HttpResponseBadRequest("Result must be IN_REVIEW to approve.")
 
+    old_result = Result.objects.get(pk=result.pk)
+
     result.status = Result.Status.APPROVED
     result.approved_at = timezone.now()
     result.approved_by = request.user
     result.rejected_at = None
     result.rejected_by = None
     result.save()
+
+    diff = compute_diff(
+        old=old_result,
+        new=result,
+        fields=["status", "approved_at", "approved_by"],
+    )
+
+    log_audit_event(
+        user=request.user,
+        action="status_changed",
+        instance=result,
+        diff=diff,
+    )
 
     return _result_row_response(request, result, f"Result {result.id} approved.")
 
@@ -210,6 +244,8 @@ def reject_result(request, pk):
     if result.status != Result.Status.IN_REVIEW:
         return HttpResponseBadRequest("Result must be IN_REVIEW to reject.")
 
+    old_result = Result.objects.get(pk=result.pk)
+
     result.status = Result.Status.REJECTED
     result.rejected_at = timezone.now()
     result.rejected_by = request.user
@@ -217,31 +253,35 @@ def reject_result(request, pk):
     result.approved_by = None
     result.save()
 
+    diff = compute_diff(
+        old=old_result,
+        new=result,
+        fields=["status", "rejected_at", "rejected_by"],
+    )
+
+    log_audit_event(
+        user=request.user,
+        action="status_changed",
+        instance=result,
+        diff=diff,
+    )
+
     return _result_row_response(request, result, f"Result {result.id} rejected.", level="warning")
 
 
 @login_required
 @permission_required("results.view_result", raise_exception=True)
 def result_detail_tab(request, pk: int):
-    """
-    HTMX view для вкладок Result Detail:
-    - Overview
-    - Audit Timeline
-    """
     result = get_object_or_404(Result.objects.select_related("project", "sample"), pk=pk)
     tab = request.GET.get("tab", "overview")
 
     if tab == "audit":
-        try:
-            # Пример аудита для теста (заменить на реальные данные)
-            audit_timeline = [
-                {"timestamp": timezone.now(), "action": "Created", "actor": "Alice", "changes": None},
-                {"timestamp": timezone.now(), "action": "Edited", "actor": "Bob", "changes": "Value updated"},
-                {"timestamp": timezone.now(), "action": "Approved", "actor": "Charlie", "changes": None},
-            ]
-        except Exception as e:
-            logger.error(f"Failed to get audit timeline for Result {result.pk}: {e}")
-            audit_timeline = []
+        content_type = ContentType.objects.get_for_model(Result)
+
+        audit_timeline = AuditEvent.objects.filter(
+            object_type=content_type,
+            object_id=str(result.pk),
+        ).order_by("-timestamp")
 
         return render(
             request,
@@ -254,3 +294,4 @@ def result_detail_tab(request, pk: int):
         "results/partials/overview_tab.html",
         {"result": result},
     )
+
