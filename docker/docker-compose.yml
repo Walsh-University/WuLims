@@ -1,16 +1,16 @@
 services:
   db:
-    image: postgres:16
+    image: postgres:18
     container_name: wulims_db
     restart: unless-stopped
     environment:
-      POSTGRES_DB: env(DB_NAME)
-      POSTGRES_USER: env(DB_USER)
-      POSTGRES_PASSWORD: env(WULIMS_DB_PASSWORD)
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/18/data
 
 volumes:
   postgres_data:
