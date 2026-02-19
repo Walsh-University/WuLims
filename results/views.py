@@ -294,4 +294,3 @@ def result_detail_tab(request, pk: int):
         "results/partials/overview_tab.html",
         {"result": result},
     )
-
