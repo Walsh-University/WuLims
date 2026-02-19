@@ -62,7 +62,7 @@ WuLims uses PostgreSQL for local runtime. The simplest path is to run Postgres v
 
 ```bash
 # Start PostgreSQL
-docker compose -f docker/docker-compose.yml up -d db
+docker compose -f docker/docker-compose.yml --env-file .env up -d db
 
 # Optional: set env vars explicitly (defaults already match these values)
 export DB_NAME=wulims
