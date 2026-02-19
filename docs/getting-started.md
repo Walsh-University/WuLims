@@ -2,6 +2,19 @@
 
 This guide covers environment setup and Django fundamentals for new developers.
 
+## One-Command Install (macOS/Linux, or Windows via Git Bash/WSL)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Walsh-University/WuLims/main/setup.sh | bash
+```
+
+This installer will:
+- Clone the repo (or use current repo if you already ran it from there)
+- Install `uv` if missing
+- Verify Docker is installed/running
+- Run `uv sync`
+- Run `scripts/setup_dev_env.py` (pre-commit hooks, `.env`, Postgres, migrations, superuser prompt)
+
 ## Quick Bootstrap (Recommended)
 
 Use the cross-platform setup script to handle initial setup in one run:
@@ -23,7 +36,7 @@ This script will:
 - Run all Django migrations
 - Prompt for superuser credentials and password, then create/update the superuser
 
-After running the setup script, your development environmt will be up and running. You'll have
+After running the setup script, your development environment will be up and running. You'll have
 a running docker container with the PostgreSQL database and all migrations will be
 applied.
 
