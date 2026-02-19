@@ -2,6 +2,33 @@
 
 This guide covers environment setup and Django fundamentals for new developers.
 
+## Quick Bootstrap (Recommended)
+
+Use the cross-platform setup script to handle initial setup in one run:
+
+```bash
+python scripts/setup_dev_env.py
+```
+
+Windows (Command Prompt / PowerShell):
+
+```powershell
+py scripts/setup_dev_env.py
+```
+
+This script will:
+- Install pre-commit hooks
+- Copy `.env.example` to `.env` (if `.env` does not already exist)
+- Start PostgreSQL from `docker/docker-compose.yml`
+- Run all Django migrations
+- Prompt for superuser credentials and password, then create/update the superuser
+
+After running the setup script, your development environmt will be up and running. You'll have
+a running docker container with the PostgreSQL database and all migrations will be
+applied.
+
+You can login to WuLims with the password you set during setup.
+
 ## Prerequisites
 
 - Python 3.13 or higher
