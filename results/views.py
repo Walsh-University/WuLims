@@ -174,9 +174,7 @@ def submit_result(request, pk):
         required_errors.append("project")
 
     if required_errors:
-        return HttpResponseBadRequest(
-            f"Missing required fields before submission: {', '.join(required_errors)}."
-        )
+        return HttpResponseBadRequest(f"Missing required fields before submission: {', '.join(required_errors)}.")
 
     old_result = Result.objects.get(pk=result.pk)
 
