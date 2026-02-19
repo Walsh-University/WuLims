@@ -387,6 +387,7 @@ class TestResultDetailView:
         assert_that(content).contains("Overview Result")
         assert_that(content).contains("Overview Description")
 
+
 class TestApproveModalView:
     """Tests for approve modal endpoint."""
 
