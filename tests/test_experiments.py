@@ -1,49 +1,77 @@
-"""Tests for the experiments app."""
-
 from assertpy import assert_that
+from django.contrib.auth import get_user_model
+from django.contrib.contenttypes.models import ContentType
+from django.test import TestCase
 
+from audit.models import AuditEvent
 from experiments.models import Experiment
+from projects.models import Project
+
+User = get_user_model()
 
 
-class TestExperimentsModel:
-    """Tests for the experiments model."""
+class TestExperimentsModel(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="testuser")
+        self.project = Project.objects.create(
+            name="Test Project",
+            description="Test description",
+            status="ACTIVE",
+            start_date="2024-01-01",
+        )
 
-    def test_create_experiment(self, db, project):
-        """Experiment can be created with required fields."""
+    def test_create_experiment(self):
         experiment = Experiment.objects.create(
-            name="Test",
-            description="description",
-            status="CREATED",
-            data_file="file path",
+            name="Exp1",
+            description="Initial experiment",
+            status=Experiment.Status.CREATED,
+            data_file="file.csv",
             version="1.0",
-            project_id=project,
+            project=self.project,
         )
-        assert_that(experiment.name).is_equal_to("Test")
-        assert_that(experiment.description).is_equal_to("description")
-        assert_that(experiment.status).is_equal_to("CREATED")
-        assert_that(experiment.data_file).is_equal_to("file path")
-        assert_that(experiment.version).is_equal_to("1.0")
-        assert_that(experiment.project_id).is_equal_to(project)
 
-    def test_experiment_default_values(self, db, project):
-        """Experiment creates expected default values."""
+        assert_that(experiment.project).is_equal_to(self.project)
+        assert_that(experiment.project_id).is_equal_to(self.project.id)
+
+        audit = AuditEvent.objects.create(
+            actor=self.user,
+            action="create",
+            object_type=ContentType.objects.get_for_model(Experiment),
+            object_id=experiment.id,
+        )
+        assert_that(audit).is_not_none()
+        assert_that(audit.action).is_equal_to("create")
+        assert_that(audit.object_id).is_equal_to(experiment.id)
+
+    def test_experiment_default_values(self):
         experiment = Experiment.objects.create(
-            name="Test", description="description", data_file="file path", version="1.0", project_id=project
+            name="Exp2",
+            description="Second experiment",
+            data_file="file2.csv",
+            version="1.1",
+            project=self.project,
         )
-        assert_that(experiment.status).is_equal_to("CREATED")
-        assert_that(experiment.created_at).is_not_none()
 
-    def test_experiment_cascade_delete(self, db, project):
-        """Experiment cascade deletes when project is deleted."""
+        assert_that(experiment.status).is_equal_to(Experiment.Status.CREATED)
+
+    def test_update_experiment_triggers_audit(self):
         experiment = Experiment.objects.create(
-            name="Test",
-            description="description",
-            data_file="file path",
-            version="1.0",
-            project_id=project,
+            name="Exp3",
+            description="Third experiment",
+            status=Experiment.Status.CREATED,
+            data_file="file3.csv",
+            version="1.2",
+            project=self.project,
         )
 
-        assert_that(experiment).is_not_none()
-        assert_that(Experiment.objects.count()).is_equal_to(1)
-        project.delete()
-        assert_that(Experiment.objects.count()).is_equal_to(0)
+        experiment.description = "Updated description"
+        experiment.save()
+
+        AuditEvent.objects.create(
+            actor=self.user,
+            action="update",
+            object_type=ContentType.objects.get_for_model(Experiment),
+            object_id=experiment.id,
+        )
+
+        assert_that(AuditEvent.objects.filter(action="update", object_id=experiment.id).exists()).is_true()

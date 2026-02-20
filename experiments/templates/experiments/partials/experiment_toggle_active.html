@@ -1,0 +1,55 @@
+<div class="modal-backdrop show"></div>
+<div class="modal d-block" tabindex="-1" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          {% if exp.is_active %}
+            Deactivate Experiment {{ exp.name }}
+          {% else %}
+            Activate Experiment {{ exp.name }}
+          {% endif %}
+        </h5>
+
+        <button type="button" class="btn-close"
+                hx-target="#modal-target"
+                hx-swap="innerHTML"
+                hx-get="about:blank"></button>
+      </div>
+
+      <div class="modal-body">
+        {% if exp.is_active %}
+          <p class="mb-0">
+            This will mark the experiment as <strong>INACTIVE</strong>.
+          </p>
+          <p class="text-muted small mb-0">
+            Inactive experiments cannot be run or referenced.
+          </p>
+        {% else %}
+          <p class="mb-0">
+            This will mark the experiment as <strong>ACTIVE</strong>.
+          </p>
+          <p class="text-muted small mb-0">
+            Active experiments can be run and referenced.
+          </p>
+        {% endif %}
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary"
+                hx-target="#modal-target"
+                hx-swap="innerHTML"
+                hx-get="about:blank">
+          Cancel
+        </button>
+
+        <button class="btn btn-primary"
+                hx-post="{% url 'experiments:toggle_active' exp.id %}"
+                hx-target="#experiment-row-{{ exp.id }}"
+                hx-swap="outerHTML">
+          Confirm
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

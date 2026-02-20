@@ -65,14 +65,16 @@ INSTALLED_APPS = [
     "django_structlog",
     # local apps
     "accounts",
-    "experiments",
+    "experiments.apps.ExperimentsConfig",
     "lims_core",
     "projects",
     "samples",
     "instruments",
+    "audit",
     "customers",
-    "results",
+    "results.apps.ResultsConfig",
 ]
+
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -85,6 +87,7 @@ MIDDLEWARE = [
     "accounts.audit.RoleAuditActorMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "audit.middleware.AuditUserMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"

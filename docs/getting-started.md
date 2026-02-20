@@ -2,6 +2,46 @@
 
 This guide covers environment setup and Django fundamentals for new developers.
 
+## One-Command Install (macOS/Linux, or Windows via Git Bash/WSL)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Walsh-University/WuLims/main/setup.sh | bash
+```
+
+This installer will:
+- Clone the repo (or use current repo if you already ran it from there)
+- Install `uv` if missing
+- Verify Docker is installed/running
+- Run `uv sync`
+- Run `scripts/setup_dev_env.py` (pre-commit hooks, `.env`, Postgres, migrations, superuser prompt)
+
+## Quick Bootstrap (Recommended)
+
+Use the cross-platform setup script to handle initial setup in one run:
+
+```bash
+python scripts/setup_dev_env.py
+```
+
+Windows (Command Prompt / PowerShell):
+
+```powershell
+py scripts/setup_dev_env.py
+```
+
+This script will:
+- Install pre-commit hooks
+- Copy `.env.example` to `.env` (if `.env` does not already exist)
+- Start PostgreSQL from `docker/docker-compose.yml`
+- Run all Django migrations
+- Prompt for superuser credentials and password, then create/update the superuser
+
+After running the setup script, your development environment will be up and running. You'll have
+a running docker container with the PostgreSQL database and all migrations will be
+applied.
+
+You can login to WuLims with the password you set during setup.
+
 ## Prerequisites
 
 - Python 3.13 or higher
@@ -17,7 +57,7 @@ This guide covers environment setup and Django fundamentals for new developers.
 
 You can run WuLims in two ways:
 
-- **Local dev**: Use `uv`, run `python manage.py runserver`, and use SQLite or Postgres (recommended for realism).
+- **Local dev**: Use `uv`, run `python manage.py runserver`, and connect to PostgreSQL.
 - **Docker**: Run the app in a container with Gunicorn, automatic migrations, and static file collection. This is closer to production and avoids local dependency drift.
 
 Most students should start with **local dev** for easier debugging, then try Docker once the basics feel comfortable.
@@ -56,23 +96,15 @@ source .venv/bin/activate  # macOS/Linux
 uv sync
 ```
 
-### 3. Database Setup
+### 3. Database Setup (PostgreSQL)
 
-WuLims supports two database options:
-
-#### Option B: SQLite (Default - No Setup Required)
-
-SQLite is used for backup. No additional configuration needed - just proceed to step 4.
-
-#### Option A: PostgreSQL (Recommended for Production-like Development)
-
-To keep the environment production-like, we're using PostgreSQL via Docker:
+WuLims uses PostgreSQL for local runtime. The simplest path is to run Postgres via Docker:
 
 ```bash
-# Start the PostgreSQL container
-docker compose up -d
+# Start PostgreSQL
+docker compose -f docker/docker-compose.yml --env-file .env up -d db
 
-# Set environment variables (add to your shell profile for persistence)
+# Optional: set env vars explicitly (defaults already match these values)
 export DB_NAME=wulims
 export DB_USER=wulims
 export DB_PASSWORD=wulims_dev_password
@@ -87,13 +119,12 @@ cp .env.example .env
 source .env  # or use a tool like direnv
 ```
 
-DO NOT COMMIT `.env` TO VERSION CONTROL.  .env is a local configuration file with secrets (passwords) and
-development keys.  It should never be shared or committed.
+Do not commit `.env` to version control. It contains local configuration values and secrets.
 
 To stop PostgreSQL later:
 ```bash
-docker compose down        # Stop container (keeps data)
-docker compose down -v     # Stop and delete all data
+docker compose -f docker/docker-compose.yml down        # Stop container (keeps data)
+docker compose -f docker/docker-compose.yml down -v     # Stop and delete all data
 ```
 
 ### 4. Initialize the Database
