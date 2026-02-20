@@ -72,7 +72,7 @@ Then visit: http://127.0.0.1:8000/
 The repo includes `docker/docker-compose.yml` for a local Postgres database:
 
 ```bash
-docker compose -f docker/docker-compose.yml up -d db
+docker compose -f docker/docker-compose.yml --env-file .env up -d db
 ```
 
 Set environment variables so Django uses Postgres (example):

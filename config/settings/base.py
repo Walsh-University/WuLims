@@ -104,6 +104,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "lims_core.context_processors.auth_context",
             ],
         },
     },
@@ -139,6 +140,32 @@ else:
 # ---------------------------------------------------------------------
 AUTH_USER_MODEL = "accounts.User"
 
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+]
+
+OIDC_ENABLED = env_bool("OIDC_ENABLED", "0")
+OIDC_PROVIDER_NAME = os.getenv("OIDC_PROVIDER_NAME", "Single Sign-On")
+OIDC_LOGIN_ONLY = env_bool("OIDC_LOGIN_ONLY", "0")
+OIDC_RP_CLIENT_ID = os.getenv("OIDC_RP_CLIENT_ID", "")
+OIDC_RP_CLIENT_SECRET = os.getenv("OIDC_RP_CLIENT_SECRET", "")
+OIDC_RP_SIGN_ALGO = os.getenv("OIDC_RP_SIGN_ALGO", "RS256")
+OIDC_RP_SCOPES = os.getenv("OIDC_RP_SCOPES", "openid email profile")
+
+OIDC_OP_DISCOVERY_ENDPOINT = os.getenv("OIDC_OP_DISCOVERY_ENDPOINT", "")
+OIDC_OP_AUTHORIZATION_ENDPOINT = os.getenv("OIDC_OP_AUTHORIZATION_ENDPOINT", "")
+OIDC_OP_TOKEN_ENDPOINT = os.getenv("OIDC_OP_TOKEN_ENDPOINT", "")
+OIDC_OP_USER_ENDPOINT = os.getenv("OIDC_OP_USER_ENDPOINT", "")
+OIDC_OP_JWKS_ENDPOINT = os.getenv("OIDC_OP_JWKS_ENDPOINT", "")
+OIDC_OP_LOGOUT_ENDPOINT = os.getenv("OIDC_OP_LOGOUT_ENDPOINT", "")
+
+OIDC_STORE_ACCESS_TOKEN = env_bool("OIDC_STORE_ACCESS_TOKEN", "0")
+OIDC_USE_NONCE = env_bool("OIDC_USE_NONCE", "1")
+OIDC_NONCE_SIZE = int(os.getenv("OIDC_NONCE_SIZE", "32"))
+OIDC_VERIFY_SSL = env_bool("OIDC_VERIFY_SSL", "1")
+OIDC_CREATE_USER = env_bool("OIDC_CREATE_USER", "1")
+OIDC_UPDATE_USER = env_bool("OIDC_UPDATE_USER", "1")
+
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
@@ -149,6 +176,9 @@ AUTH_PASSWORD_VALIDATORS = [
 LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "samples:list"
 LOGOUT_REDIRECT_URL = "login"
+
+if OIDC_ENABLED:
+    AUTHENTICATION_BACKENDS.insert(0, "accounts.oidc.WuLimsOIDCAuthenticationBackend")
 
 # ---------------------------------------------------------------------
 # Internationalization

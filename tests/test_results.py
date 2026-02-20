@@ -535,3 +535,168 @@ class TestSubmitResultView:
         assert_that(response.status_code).is_equal_to(400)
         assert_that(response.content.decode()).contains("Missing required fields")
         assert_that(result.status).is_equal_to(Result.Status.DRAFT)
+
+    def test_submit_validates_missing_description(self, manager_client, sample, project, reviewer_user):
+        result = Result.objects.create(
+            title="Draft Result",
+            description="Ready for review",
+            sample=sample,
+            project=project,
+            status=Result.Status.DRAFT,
+        )
+        Result.objects.filter(pk=result.pk).update(description=" ")
+
+        response = manager_client.post(
+            reverse("results:submit", args=[result.pk]),
+            {"reviewer_id": str(reviewer_user.pk)},
+        )
+
+        assert_that(response.status_code).is_equal_to(400)
+        assert_that(response.content.decode()).contains("description")
+
+
+class TestSubmitModalView:
+    def test_submit_modal_requires_login(self, client, sample, project):
+        result = Result.objects.create(
+            title="Draft Result",
+            description="Ready for review",
+            sample=sample,
+            project=project,
+            status=Result.Status.DRAFT,
+        )
+        response = client.get(reverse("results:submit_modal", args=[result.pk]))
+        assert_that(response.status_code).is_equal_to(302)
+
+    def test_submit_modal_renders_for_draft(self, manager_client, sample, project):
+        result = Result.objects.create(
+            title="Draft Result",
+            description="Ready for review",
+            sample=sample,
+            project=project,
+            status=Result.Status.DRAFT,
+        )
+        response = manager_client.get(reverse("results:submit_modal", args=[result.pk]))
+        assert_that(response.status_code).is_equal_to(200)
+
+    def test_submit_modal_rejects_non_draft(self, manager_client, sample, project, reviewer_user):
+        result = Result.objects.create(
+            title="In Review",
+            description="Already submitted",
+            sample=sample,
+            project=project,
+            status=Result.Status.IN_REVIEW,
+            reviewer=reviewer_user,
+        )
+        response = manager_client.get(reverse("results:submit_modal", args=[result.pk]))
+        assert_that(response.status_code).is_equal_to(400)
+
+
+class TestApproveModalForbidden:
+    def test_approve_modal_forbidden_without_perms(self, authenticated_client, sample, project, reviewer_user):
+        result = Result.objects.create(
+            title="In Review",
+            description="Awaiting decision",
+            sample=sample,
+            project=project,
+            status=Result.Status.IN_REVIEW,
+            reviewer=reviewer_user,
+        )
+        # authenticated_client is a Lab Tech with only view_result — no approve/reject
+        response = authenticated_client.get(reverse("results:approve_modal", args=[result.pk]))
+        assert_that(response.status_code).is_equal_to(403)
+
+
+class TestApproveResultView:
+    def test_approve_result_requires_post(self, reviewer_client, sample, project, reviewer_user):
+        result = Result.objects.create(
+            title="In Review",
+            description="Awaiting approval",
+            sample=sample,
+            project=project,
+            status=Result.Status.IN_REVIEW,
+            reviewer=reviewer_user,
+        )
+        response = reviewer_client.get(reverse("results:approve", args=[result.pk]))
+        assert_that(response.status_code).is_equal_to(400)
+
+    def test_approve_result_rejects_non_in_review(self, reviewer_client, sample, project):
+        result = Result.objects.create(
+            title="Draft",
+            description="Not ready",
+            sample=sample,
+            project=project,
+            status=Result.Status.DRAFT,
+        )
+        response = reviewer_client.post(reverse("results:approve", args=[result.pk]))
+        assert_that(response.status_code).is_equal_to(400)
+        assert_that(response.content.decode()).contains("IN_REVIEW")
+
+    def test_approve_result_transitions_to_approved(self, reviewer_client, sample, project, reviewer_user):
+        result = Result.objects.create(
+            title="In Review",
+            description="Awaiting approval",
+            sample=sample,
+            project=project,
+            status=Result.Status.IN_REVIEW,
+            reviewer=reviewer_user,
+        )
+        response = reviewer_client.post(reverse("results:approve", args=[result.pk]))
+        result.refresh_from_db()
+
+        assert_that(response.status_code).is_equal_to(200)
+        assert_that(result.status).is_equal_to(Result.Status.APPROVED)
+        assert_that(result.approved_at).is_not_none()
+
+
+class TestRejectResultView:
+    def test_reject_result_requires_post(self, reviewer_client, sample, project, reviewer_user):
+        result = Result.objects.create(
+            title="In Review",
+            description="Awaiting decision",
+            sample=sample,
+            project=project,
+            status=Result.Status.IN_REVIEW,
+            reviewer=reviewer_user,
+        )
+        response = reviewer_client.get(reverse("results:reject", args=[result.pk]))
+        assert_that(response.status_code).is_equal_to(400)
+
+    def test_reject_result_rejects_non_in_review(self, reviewer_client, sample, project):
+        result = Result.objects.create(
+            title="Draft",
+            description="Not ready",
+            sample=sample,
+            project=project,
+            status=Result.Status.DRAFT,
+        )
+        response = reviewer_client.post(reverse("results:reject", args=[result.pk]))
+        assert_that(response.status_code).is_equal_to(400)
+        assert_that(response.content.decode()).contains("IN_REVIEW")
+
+    def test_reject_result_transitions_to_rejected(self, reviewer_client, sample, project, reviewer_user):
+        result = Result.objects.create(
+            title="In Review",
+            description="Awaiting decision",
+            sample=sample,
+            project=project,
+            status=Result.Status.IN_REVIEW,
+            reviewer=reviewer_user,
+        )
+        response = reviewer_client.post(reverse("results:reject", args=[result.pk]))
+        result.refresh_from_db()
+
+        assert_that(response.status_code).is_equal_to(200)
+        assert_that(result.status).is_equal_to(Result.Status.REJECTED)
+        assert_that(result.rejected_at).is_not_none()
+
+
+class TestResultDetailTabAudit:
+    def test_audit_tab_returns_200(self, authenticated_client, sample, project):
+        result = Result.objects.create(
+            title="Audit Tab Test",
+            description="Testing audit tab",
+            sample=sample,
+            project=project,
+        )
+        response = authenticated_client.get(reverse("results:result_detail_tab", args=[result.pk]), {"tab": "audit"})
+        assert_that(response.status_code).is_equal_to(200)

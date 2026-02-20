@@ -17,10 +17,11 @@ def check_database():
 def get_system_status(include_internal: bool = False):
     checks = [check_database()]
 
-    # Overall status rules
-    if not checks[0]["ok"]:
+    # Overall status rules: database down → Down, any other dep down → Degraded
+    check_by_name = {c["name"]: c["ok"] for c in checks}
+    if not check_by_name.get("database", False):
         status = "Down"
-    elif any(not c["ok"] for c in checks):
+    elif not all(check_by_name.values()):
         status = "Degraded"
     else:
         status = "Operational"

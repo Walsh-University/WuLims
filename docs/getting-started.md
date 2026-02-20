@@ -2,6 +2,46 @@
 
 This guide covers environment setup and Django fundamentals for new developers.
 
+## One-Command Install (macOS/Linux, or Windows via Git Bash/WSL)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Walsh-University/WuLims/main/setup.sh | bash
+```
+
+This installer will:
+- Clone the repo (or use current repo if you already ran it from there)
+- Install `uv` if missing
+- Verify Docker is installed/running
+- Run `uv sync`
+- Run `scripts/setup_dev_env.py` (pre-commit hooks, `.env`, Postgres, migrations, superuser prompt)
+
+## Quick Bootstrap (Recommended)
+
+Use the cross-platform setup script to handle initial setup in one run:
+
+```bash
+python scripts/setup_dev_env.py
+```
+
+Windows (Command Prompt / PowerShell):
+
+```powershell
+py scripts/setup_dev_env.py
+```
+
+This script will:
+- Install pre-commit hooks
+- Copy `.env.example` to `.env` (if `.env` does not already exist)
+- Start PostgreSQL from `docker/docker-compose.yml`
+- Run all Django migrations
+- Prompt for superuser credentials and password, then create/update the superuser
+
+After running the setup script, your development environment will be up and running. You'll have
+a running docker container with the PostgreSQL database and all migrations will be
+applied.
+
+You can login to WuLims with the password you set during setup.
+
 ## Prerequisites
 
 - Python 3.13 or higher
@@ -62,7 +102,7 @@ WuLims uses PostgreSQL for local runtime. The simplest path is to run Postgres v
 
 ```bash
 # Start PostgreSQL
-docker compose -f docker/docker-compose.yml up -d db
+docker compose -f docker/docker-compose.yml --env-file .env up -d db
 
 # Optional: set env vars explicitly (defaults already match these values)
 export DB_NAME=wulims
