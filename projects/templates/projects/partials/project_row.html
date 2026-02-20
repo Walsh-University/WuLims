@@ -1,5 +1,18 @@
 <tr id="project-row-{{ p.id }}">
     <td>{{ p.name }}</td>
-    <td>{{ p.status }}</td>
-    <td>{{ p.customer.customer_name }}</td>
+    <td>
+        {% if p.status == "ACTIVE" %}
+            <span class="badge bg-success">Active</span>
+        {% endif %}
+        {% if p.status == "CLOSED" %}
+            <span class="badge bg-secondary">Closed</span>
+        {% endif %}
+    </td>
+    <td>
+        {% if p.customer %}
+            {{ p.customer.name }}
+        {% else %}
+            <span class="text-muted small">—</span>
+        {% endif %}
+    </td>
 </tr>
