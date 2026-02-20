@@ -40,6 +40,11 @@ def instrument_table(request):
 @login_required
 def instrument_detail(request, pk: int):
     instrument = get_object_or_404(Instrument, pk=pk)
+    tab = request.GET.get("tab")
+    if tab == "overview":
+        return render(request, "instruments/partials/instrument_overview.html", {"instrument": instrument})
+    if tab == "maintenance":
+        return render(request, "instruments/partials/instrument_maintenance.html", {"instrument": instrument})
     return render(request, "instruments/instrument_detail.html", {"instrument": instrument})
 
 
