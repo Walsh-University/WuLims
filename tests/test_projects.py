@@ -1,6 +1,7 @@
 """Tests for the projects app."""
 
 from assertpy import assert_that
+from django.urls import reverse
 
 from projects.models import Project
 
@@ -44,3 +45,70 @@ class TestProjectsModel:
         assert_that(project.status).is_equal_to("ACTIVE")
         assert_that(project.created_at).is_not_none()
         assert_that(project.id).is_not_none()
+
+
+class TestProjectListView:
+    """Tests for the project list page."""
+
+    def test_list_requires_login(self, client):
+        response = client.get(reverse("projects:list"))
+
+        assert_that(response.status_code).is_equal_to(302)
+        assert_that(response.url).contains("login")
+
+    def test_list_forbidden_without_permission(self, authenticated_client):
+        response = authenticated_client.get(reverse("projects:list"))
+
+        assert_that(response.status_code).is_equal_to(403)
+
+    def test_list_accessible_when_authorized(self, client, admin_user):
+        client.force_login(admin_user)
+        response = client.get(reverse("projects:list"))
+
+        assert_that(response.status_code).is_equal_to(200)
+        assert_that(response.content.decode()).contains("Projects")
+
+
+class TestProjectTableView:
+    """Tests for the project table partial endpoint."""
+
+    def test_table_requires_login(self, client):
+        response = client.get(reverse("projects:table"))
+
+        assert_that(response.status_code).is_equal_to(302)
+
+    def test_table_forbidden_without_permission(self, authenticated_client):
+        response = authenticated_client.get(reverse("projects:table"))
+
+        assert_that(response.status_code).is_equal_to(403)
+
+    def test_table_returns_projects(self, client, admin_user, project):
+        client.force_login(admin_user)
+        response = client.get(reverse("projects:table"))
+
+        assert_that(response.status_code).is_equal_to(200)
+        assert_that(response.content.decode()).contains(project.name)
+
+    def test_table_filters_by_status(self, client, admin_user, db):
+        client.force_login(admin_user)
+        active_project = Project.objects.create(name="Active Project", start_date="2026-01-01", status="ACTIVE")
+        Project.objects.create(name="Closed Project", start_date="2026-01-02", status="CLOSED")
+
+        response = client.get(reverse("projects:table"), {"status": "ACTIVE"})
+
+        content = response.content.decode()
+        assert_that(response.status_code).is_equal_to(200)
+        assert_that(content).contains(active_project.name)
+        assert_that(content).does_not_contain("Closed Project")
+
+    def test_table_filters_by_search(self, client, admin_user, db):
+        client.force_login(admin_user)
+        Project.objects.create(name="Alpha Initiative", start_date="2026-01-01", description="Primary")
+        Project.objects.create(name="Beta Initiative", start_date="2026-01-02", description="Secondary")
+
+        response = client.get(reverse("projects:table"), {"q": "Alpha"})
+
+        content = response.content.decode()
+        assert_that(response.status_code).is_equal_to(200)
+        assert_that(content).contains("Alpha Initiative")
+        assert_that(content).does_not_contain("Beta Initiative")
