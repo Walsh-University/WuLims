@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required, permission_required
+from django.db.models import Q
 from django.shortcuts import render
 
 from projects.forms import ProjectFilterForm
@@ -23,7 +24,7 @@ def project_table(request):
         status = form.cleaned_data.get("status")
 
         if q:
-            qs = qs.filter(name__icontains=q) | qs.filter(description__icontains=q)
+            qs = qs.filter(Q(name__icontains=q) | Q(description__icontains=q))
         if status in Project.Status.values:
             qs = qs.filter(status=status)
 
