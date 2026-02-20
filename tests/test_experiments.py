@@ -1,7 +1,9 @@
+import pytest
 from assertpy import assert_that
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
+from django.urls import reverse
 
 from audit.models import AuditEvent
 from experiments.models import Experiment
@@ -75,3 +77,64 @@ class TestExperimentsModel(TestCase):
         )
 
         assert_that(AuditEvent.objects.filter(action="update", object_id=experiment.id).exists()).is_true()
+
+
+@pytest.fixture
+def experiment(db, project):
+    return Experiment.objects.create(
+        name="Test Experiment",
+        description="A test experiment",
+        data_file="data.csv",
+        version="1.0",
+        project=project,
+    )
+
+
+@pytest.mark.django_db
+class TestExperimentViews:
+    def test_list_requires_login(self, client):
+        response = client.get(reverse("experiments:list"))
+        assert response.status_code == 302
+
+    def test_list_accessible_when_authenticated(self, authenticated_client):
+        response = authenticated_client.get(reverse("experiments:list"))
+        assert response.status_code == 200
+
+    def test_table_returns_experiments(self, authenticated_client, experiment):
+        response = authenticated_client.get(reverse("experiments:table"))
+        assert response.status_code == 200
+        assert experiment.name.encode() in response.content
+
+    def test_table_filters_by_search_query(self, authenticated_client, experiment):
+        response = authenticated_client.get(reverse("experiments:table"), {"q": "Test Experiment"})
+        assert response.status_code == 200
+        assert experiment.name.encode() in response.content
+
+    def test_table_excludes_non_matching_query(self, authenticated_client, experiment):
+        response = authenticated_client.get(reverse("experiments:table"), {"q": "zzz-no-match"})
+        assert response.status_code == 200
+        assert experiment.name.encode() not in response.content
+
+    def test_detail_requires_login(self, client, experiment):
+        response = client.get(reverse("experiments:detail", args=[experiment.pk]))
+        assert response.status_code == 302
+
+    def test_detail_returns_experiment(self, authenticated_client, experiment):
+        response = authenticated_client.get(reverse("experiments:detail", args=[experiment.pk]))
+        assert response.status_code == 200
+        assert experiment.name.encode() in response.content
+
+    def test_detail_tab_overview(self, authenticated_client, experiment):
+        response = authenticated_client.get(
+            reverse("experiments:detail_tab", args=[experiment.pk]), {"tab": "overview"}
+        )
+        assert response.status_code == 200
+        assert experiment.description.encode() in response.content
+
+    def test_detail_tab_audit(self, authenticated_client, experiment):
+        response = authenticated_client.get(reverse("experiments:detail_tab", args=[experiment.pk]), {"tab": "audit"})
+        assert response.status_code == 200
+
+    def test_toggle_active_requires_post(self, authenticated_client, experiment):
+        response = authenticated_client.get(reverse("experiments:toggle_active", args=[experiment.pk]))
+        assert response.status_code == 400

@@ -7,7 +7,15 @@
     <div class="card shadow-sm">
       <div class="card-body">
         <h1 class="h4 mb-3">Sign in</h1>
+        {% url 'oidc_authentication_init' as oidc_init_url %}
 
+        {% if oidc_enabled and oidc_init_url %}
+          <a class="btn btn-outline-primary w-100 mb-3" href="{{ oidc_init_url }}">
+            Sign in with {{ oidc_provider_name }}
+          </a>
+        {% endif %}
+
+        {% if not oidc_login_only %}
         <form method="post">
           {% csrf_token %}
           {% for field in form %}
@@ -21,6 +29,7 @@
           {% endfor %}
           <button class="btn btn-primary w-100" type="submit">Login</button>
         </form>
+        {% endif %}
       </div>
     </div>
   </div>
