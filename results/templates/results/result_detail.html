@@ -42,7 +42,10 @@
 </ul>
 
 <!-- Контейнер для контента вкладок -->
-<div id="tab-target" class="mt-3"></div>
+<div id="tab-target" class="mt-3"
+     hx-get="{% url 'results:result_detail_tab' result.pk %}?tab=overview"
+     hx-trigger="load"
+     hx-swap="innerHTML"></div>
 <div id="modal-target"></div>
 
 <script>
@@ -51,12 +54,5 @@ function setActiveResultTab(clickedTab) {
     tabs.forEach(tab => tab.classList.remove('active'));
     clickedTab.classList.add('active');
 }
-
-// Авто-клик по первой вкладке при загрузке
-document.addEventListener("DOMContentLoaded", function() {
-    document.querySelector('#resultTabs .nav-link.active').click();
-});
 </script>
 {% endblock %}
-
-
