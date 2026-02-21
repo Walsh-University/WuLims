@@ -131,6 +131,25 @@
 <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" integrity="sha384-LXWjKwDZz29o7TduNe+r/UxaolHh5FsSvy2W7bDHSZ8jJeGgDeuNnsDNHoxpSgDi" crossorigin="anonymous"></script>
 <script>
   (function () {
+    function getCookie(name) {
+      const cookieValue = `; ${document.cookie}`;
+      const parts = cookieValue.split(`; ${name}=`);
+      if (parts.length === 2) {
+        return parts.pop().split(";").shift();
+      }
+      return "";
+    }
+
+    document.body.addEventListener("htmx:configRequest", function (event) {
+      const csrfToken = getCookie("csrftoken");
+      if (csrfToken) {
+        event.detail.headers["X-CSRFToken"] = csrfToken;
+      }
+    });
+  })();
+</script>
+<script>
+  (function () {
     async function loadSystemStatus() {
       const dot = document.getElementById("systemStatusDot");
       const text = document.getElementById("systemStatusText");
@@ -192,6 +211,7 @@
 
     document.body.addEventListener("htmx:responseError", function () {
       showToast("Something went wrong. Please try again.", "danger");
+    });
 
     function setAppStatus(label, variant) {
       const badge = document.getElementById("appStatus");
@@ -202,13 +222,16 @@
     }
 
     document.body.addEventListener("htmx:afterOnLoad", () =>
-            setAppStatus("Connected", "success")
+      setAppStatus("Connected", "success")
     );
 
     document.body.addEventListener("htmx:responseError", () =>
-            setAppStatus("Disconnected", "danger")
+      setAppStatus("Disconnected", "danger")
     );
 
+    document.body.addEventListener("closeModal", () => {
+      const modalTarget = document.getElementById("modal-target");
+      if (modalTarget) modalTarget.innerHTML = "";
     });
   })();
 </script>

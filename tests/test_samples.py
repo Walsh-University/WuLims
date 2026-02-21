@@ -361,8 +361,13 @@ class TestApproveSampleView:
         response = reviewer_client.post(reverse("samples:approve", args=[sample_in_review.pk]))
 
         content = response.content.decode()
-        assert_that(content).contains("approved")
-        assert_that(content).contains("toast")
+        assert_that(content).contains(f'id="sample-row-{sample_in_review.pk}"')
+        assert_that(content).contains("APPROVED")
+
+        hx_trigger = response.headers.get("HX-Trigger")
+        assert_that(hx_trigger).is_not_none()
+        assert_that(hx_trigger).contains("toast")
+        assert_that(hx_trigger).contains("approved")
 
     def test_approve_forbidden_without_permission(self, authenticated_client, sample_in_review):
         """Users without approve permission receive forbidden."""

@@ -88,6 +88,7 @@ def toggle_active(request, pk: int):
         return HttpResponse(status=403)
 
     experiment = get_object_or_404(Experiment, pk=pk)
+
     experiment.is_active = not experiment.is_active
     experiment.save()
 
