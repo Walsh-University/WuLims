@@ -1,3 +1,4 @@
+import json
 import uuid
 
 from django.contrib.auth.decorators import login_required, permission_required
@@ -83,16 +84,14 @@ def approve_sample(request, pk: uuid.UUID):
     sample.save()
 
     row_html = render_to_string("samples/partials/sample_row.html", {"s": sample}, request=request)
-    toast_html = render_to_string(
-        "lims_core/partials/toast.html",
-        {"message": f"Sample {sample.sample_id} approved.", "level": "success"},
-        request=request,
+    response = HttpResponse(row_html.encode("utf-8"))
+    response["HX-Trigger"] = json.dumps(
+        {
+            "toast": {"message": f"Sample {sample.sample_id} approved.", "variant": "success"},
+            "closeModal": True,
+        }
     )
-
-    # Out-of-band swaps: add toast + clear modal content
-    oob = toast_html + '<div id="modal-target" hx-swap-oob="innerHTML"></div>'
-
-    return HttpResponse((row_html + oob).encode("utf-8"))
+    return response
 
 
 @login_required

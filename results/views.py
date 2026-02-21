@@ -1,3 +1,4 @@
+import json
 import logging
 
 from django.contrib.auth import get_user_model
@@ -128,13 +129,9 @@ def submit_modal(request, pk):
 
 def _result_row_response(request, result: Result, message: str, level: str = "success"):
     row_html = render_to_string("results/partials/results_row.html", {"r": result}, request=request)
-    toast_html = render_to_string(
-        "lims_core/partials/toast.html",
-        {"message": message, "level": level},
-        request=request,
-    )
-    oob = toast_html + '<div id="modal-target" hx-swap-oob="innerHTML"></div>'
-    return HttpResponse((row_html + oob).encode("utf-8"))
+    response = HttpResponse(row_html.encode("utf-8"))
+    response["HX-Trigger"] = json.dumps({"toast": {"message": message, "variant": level}, "closeModal": True})
+    return response
 
 
 @login_required
