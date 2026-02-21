@@ -1,7 +1,10 @@
 from django.contrib.auth.decorators import login_required
+from django.contrib.contenttypes.models import ContentType
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, render
 from django.template.loader import render_to_string
+
+from audit.models import AuditEvent
 
 from .forms import ExperimentFilterForm
 from .models import Experiment
@@ -35,7 +38,6 @@ def experiment_table(request):
     )
 
 
-# ✅ ГЛАВНАЯ DETAIL СТРАНИЦА
 @login_required
 def experiment_detail(request, pk: int):
     experiment = get_object_or_404(Experiment, pk=pk)
@@ -46,34 +48,22 @@ def experiment_detail(request, pk: int):
     )
 
 
-# ✅ HTMX ТАБЫ
 @login_required
 def experiment_detail_tab(request, pk: int):
     experiment = get_object_or_404(Experiment, pk=pk)
     tab = request.GET.get("tab", "overview")
 
-    audit_timeline = [
-        {
-            "timestamp": "2026-02-18 10:00",
-            "action": "Created",
-            "actor": "Alice",
-            "changes": None,
-        },
-        {
-            "timestamp": "2026-02-18 12:00",
-            "action": "Edited",
-            "actor": "Bob",
-            "changes": "Description updated",
-        },
-        {
-            "timestamp": "2026-02-18 14:00",
-            "action": "Approved",
-            "actor": "Charlie",
-            "changes": None,
-        },
-    ]
-
     if tab == "audit":
+        content_type = ContentType.objects.get_for_model(Experiment)
+        audit_timeline = AuditEvent.objects.filter(
+            object_type=content_type,
+            object_id=str(experiment.pk),
+        ).order_by("-timestamp")
+
+        # Для обычного пользователя показываем только изменения статуса
+        if not request.user.has_perm("experiments.change_experiment"):
+            audit_timeline = audit_timeline.filter(changes__has_key="status")
+
         return render(
             request,
             "experiments/partials/experiment_audit.html",
@@ -94,6 +84,10 @@ def experiment_detail_tab(request, pk: int):
 def toggle_active(request, pk: int):
     if request.method != "POST":
         return HttpResponseBadRequest("POST required")
+
+    # Только пользователи с правом change_experiment могут переключать is_active
+    if not request.user.has_perm("experiments.change_experiment"):
+        return HttpResponse(status=403)
 
     experiment = get_object_or_404(Experiment, pk=pk)
     experiment.is_active = not experiment.is_active
