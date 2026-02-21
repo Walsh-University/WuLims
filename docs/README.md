@@ -19,6 +19,7 @@ Welcome to the WuLims project! This is a Laboratory Information Management Syste
 | [Roles & Permissions](roles-and-permissions.md) | Default roles, group permissions, and enforcement rules |
 | [OIDC Setup](oidc.md)                     | Configure Microsoft Entra or Authentik OIDC login        |
 | [Docker](docker.md)                       | Container setup and running WuLims in Docker              |
+| [Debugging HTMX](debugging-htmx.md)       | Console logging, common request errors, and swap issues   |
 
 ## Build Docs (MkDocs)
 
