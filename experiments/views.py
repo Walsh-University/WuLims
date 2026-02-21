@@ -4,9 +4,7 @@ from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, render
 from django.template.loader import render_to_string
 
-from audit.diff import compute_diff
 from audit.models import AuditEvent
-from audit.services import log_audit_event
 
 from .forms import ExperimentFilterForm
 from .models import Experiment
@@ -85,23 +83,9 @@ def toggle_active(request, pk: int):
         return HttpResponseBadRequest("POST required")
 
     experiment = get_object_or_404(Experiment, pk=pk)
-    old_experiment = Experiment.objects.get(pk=experiment.pk)
 
     experiment.is_active = not experiment.is_active
     experiment.save()
-
-    diff = compute_diff(
-        old=old_experiment,
-        new=experiment,
-        fields=["is_active"],
-    )
-
-    log_audit_event(
-        user=request.user,
-        action="status_changed",
-        instance=experiment,
-        diff=diff,
-    )
 
     row_html = render_to_string(
         "experiments/partials/experiment_row.html",

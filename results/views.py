@@ -176,8 +176,6 @@ def submit_result(request, pk):
     if required_errors:
         return HttpResponseBadRequest(f"Missing required fields before submission: {', '.join(required_errors)}.")
 
-    old_result = Result.objects.get(pk=result.pk)
-
     reviewer_id = (request.POST.get("reviewer_id") or "").strip()
     reviewers = _eligible_reviewers(exclude_user=request.user)
     reviewer = reviewers.filter(pk=reviewer_id).first() if reviewer_id else reviewers.first()
@@ -192,19 +190,6 @@ def submit_result(request, pk):
     result.rejected_by = None
 
     result.save()
-
-    diff = compute_diff(
-        old=old_result,
-        new=result,
-        fields=["status", "reviewer"],
-    )
-
-    log_audit_event(
-        user=request.user,
-        action="status_changed",
-        instance=result,
-        diff=diff,
-    )
 
     return _result_row_response(
         request,
@@ -223,8 +208,6 @@ def approve_result(request, pk):
     if result.status != Result.Status.IN_REVIEW:
         return HttpResponseBadRequest("Result must be IN_REVIEW to approve.")
 
-    old_result = Result.objects.get(pk=result.pk)
-
     result.status = Result.Status.APPROVED
     result.approved_at = timezone.now()
     result.approved_by = request.user
@@ -232,20 +215,11 @@ def approve_result(request, pk):
     result.rejected_by = None
     result.save()
 
-    diff = compute_diff(
-        old=old_result,
-        new=result,
-        fields=["status", "approved_at", "approved_by"],
+    return _result_row_response(
+        request,
+        result,
+        f"Result {result.id} approved.",
     )
-
-    log_audit_event(
-        user=request.user,
-        action="status_changed",
-        instance=result,
-        diff=diff,
-    )
-
-    return _result_row_response(request, result, f"Result {result.id} approved.")
 
 
 @login_required
@@ -258,8 +232,6 @@ def reject_result(request, pk):
     if result.status != Result.Status.IN_REVIEW:
         return HttpResponseBadRequest("Result must be IN_REVIEW to reject.")
 
-    old_result = Result.objects.get(pk=result.pk)
-
     result.status = Result.Status.REJECTED
     result.rejected_at = timezone.now()
     result.rejected_by = request.user
@@ -267,20 +239,12 @@ def reject_result(request, pk):
     result.approved_by = None
     result.save()
 
-    diff = compute_diff(
-        old=old_result,
-        new=result,
-        fields=["status", "rejected_at", "rejected_by"],
+    return _result_row_response(
+        request,
+        result,
+        f"Result {result.id} rejected.",
+        level="warning",
     )
-
-    log_audit_event(
-        user=request.user,
-        action="status_changed",
-        instance=result,
-        diff=diff,
-    )
-
-    return _result_row_response(request, result, f"Result {result.id} rejected.", level="warning")
 
 
 @login_required
