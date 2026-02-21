@@ -60,7 +60,6 @@ def experiment_detail_tab(request, pk: int):
             object_id=str(experiment.pk),
         ).order_by("-timestamp")
 
-        # Для обычного пользователя показываем только изменения статуса
         if not request.user.has_perm("experiments.change_experiment"):
             audit_timeline = audit_timeline.filter(changes__has_key="status")
 
@@ -85,7 +84,6 @@ def toggle_active(request, pk: int):
     if request.method != "POST":
         return HttpResponseBadRequest("POST required")
 
-    # Только пользователи с правом change_experiment могут переключать is_active
     if not request.user.has_perm("experiments.change_experiment"):
         return HttpResponse(status=403)
 
