@@ -11,7 +11,8 @@
             <form id="submit-review-form-{{ result.pk }}"
                   hx-post="{% url 'results:submit' result.pk %}"
                   hx-target="#results-row-{{ result.pk }}"
-                  hx-swap="outerHTML">
+                  hx-swap="outerHTML"
+                  hx-on::after-request="if (event.detail.xhr && event.detail.xhr.status >= 200 && event.detail.xhr.status < 300) document.getElementById('modal-target').innerHTML = ''">
                 <div class="modal-body">
                     <p class="mb-2">This moves status from <strong>DRAFT</strong> to <strong>IN_REVIEW</strong>.</p>
                     <label for="reviewer_id_{{ result.pk }}" class="form-label">Reviewer (optional)</label>
@@ -19,7 +20,7 @@
                         <option value="">Auto-assign reviewer</option>
                         {% for reviewer in reviewers %}
                             <option value="{{ reviewer.pk }}">
-                                {{ reviewer.get_full_name|default:reviewer.username }}
+                                {{ reviewer.username }}
                             </option>
                         {% endfor %}
                     </select>
