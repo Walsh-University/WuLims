@@ -1,0 +1,17 @@
+<tr id="customer-row-{{ customer.pk }}">
+  <td><a href="{% url 'customers:detail' customer.pk %}">{{ customer.customer_id }}</a></td>
+  <td>{{ customer.client_name }}</td>
+  <td>
+    {% if customer.status == "APPROVED" %}
+      <span class="badge bg-success">{{ customer.status }}</span>
+    {% elif customer.status == "IN_REVIEW" %}
+      <span class="badge bg-warning text-dark">{{ customer.status }}</span>
+    {% else %}
+      <span class="badge bg-secondary">{{ customer.status }}</span>
+    {% endif %}
+  </td>
+  <td>{{ customer.received_at|date:"Y-m-d H:i" }}</td>
+  <td class="text-end">
+    <span class="text-muted small">—</span>
+  </td>
+</tr>

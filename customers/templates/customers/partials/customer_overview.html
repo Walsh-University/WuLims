@@ -1,0 +1,17 @@
+<div class="card shadow-sm">
+  <div class="card-body">
+    <dl class="row mb-0">
+      <dt class="col-sm-3">Status</dt><dd class="col-sm-9">{{ customer.status }}</dd>
+      <dt class="col-sm-3">Received</dt><dd class="col-sm-9">{{ customer.received_at|date:"Y-m-d H:i" }}</dd>
+      <dt class="col-sm-3">Approved</dt>
+      <dd class="col-sm-9">
+        {% if customer.approved_at %}
+          {{ customer.approved_at|date:"Y-m-d H:i" }}
+          {% if customer.approved_by %} by {{ customer.approved_by.get_full_name|default:customer.approved_by.username }}{% endif %}
+        {% else %}
+          <span class="text-muted">—</span>
+        {% endif %}
+      </dd>
+    </dl>
+  </div>
+</div>
