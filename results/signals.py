@@ -32,7 +32,6 @@ def cache_result_old_state(sender, instance, **kwargs):
 
 @receiver(post_save, sender=Result)
 def audit_result_save(sender, instance, created, **kwargs):
-
     if created:
         transaction.on_commit(
             lambda: log_audit_event(
