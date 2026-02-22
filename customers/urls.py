@@ -9,5 +9,4 @@ urlpatterns = [
     path("add/", views.customer_add, name="add"),
     path("_table/", views.customer_table, name="table"),
     path("<uuid:pk>/", views.customer_detail, name="detail"),
-
 ]

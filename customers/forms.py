@@ -18,7 +18,10 @@ class CustomerFilterForm(forms.Form):
 class CustomerForm(forms.ModelForm):
     class Meta:
         model = Customer
-        fields = ["customer_name", "is_active",]
+        fields = [
+            "customer_name",
+            "is_active",
+        ]
         widgets = {
             "customer_name": forms.TextInput(attrs={"class": "form-control"}),
         }
