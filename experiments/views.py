@@ -55,11 +55,13 @@ def experiment_detail_tab(request, pk: int):
 
     if tab == "audit":
         content_type = ContentType.objects.get_for_model(Experiment)
-
         audit_timeline = AuditEvent.objects.filter(
             object_type=content_type,
             object_id=str(experiment.pk),
         ).order_by("-timestamp")
+
+        if not request.user.has_perm("experiments.change_experiment"):
+            audit_timeline = audit_timeline.filter(changes__has_key="status")
 
         return render(
             request,
@@ -81,6 +83,9 @@ def experiment_detail_tab(request, pk: int):
 def toggle_active(request, pk: int):
     if request.method != "POST":
         return HttpResponseBadRequest("POST required")
+
+    if not request.user.has_perm("experiments.change_experiment"):
+        return HttpResponse(status=403)
 
     experiment = get_object_or_404(Experiment, pk=pk)
 

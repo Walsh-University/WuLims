@@ -258,6 +258,9 @@ def result_detail_tab(request, pk: int):
             object_id=str(result.pk),
         ).order_by("-timestamp")
 
+        if not request.user.has_perm("results.change_result"):
+            audit_timeline = audit_timeline.filter(changes__has_key="status")
+
         return render(
             request,
             "results/partials/audit_tab.html",
