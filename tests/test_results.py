@@ -33,6 +33,7 @@ class TestResultModel:
             "IN_REVIEW",
             "APPROVED",
             "REJECTED",
+            "RELEASED",
         )
 
     def test_create_result_with_defaults(self, db, sample, project):
@@ -688,6 +689,98 @@ class TestRejectResultView:
         assert_that(response.status_code).is_equal_to(200)
         assert_that(result.status).is_equal_to(Result.Status.REJECTED)
         assert_that(result.rejected_at).is_not_none()
+
+
+class TestReleaseResultView:
+    def test_release_requires_release_permission(self, reviewer_client, sample, project, reviewer_user):
+        result = Result.objects.create(
+            title="Approved Result",
+            description="Ready to release",
+            sample=sample,
+            project=project,
+            status=Result.Status.APPROVED,
+            approved_at=timezone.now(),
+            approved_by=reviewer_user,
+            reviewer=reviewer_user,
+        )
+
+        response = reviewer_client.post(reverse("results:release", args=[result.pk]))
+
+        assert_that(response.status_code).is_equal_to(403)
+
+    def test_release_requires_post(self, manager_client, sample, project, manager_user):
+        result = Result.objects.create(
+            title="Approved Result",
+            description="Ready to release",
+            sample=sample,
+            project=project,
+            status=Result.Status.APPROVED,
+            approved_at=timezone.now(),
+            approved_by=manager_user,
+        )
+
+        response = manager_client.get(reverse("results:release", args=[result.pk]))
+
+        assert_that(response.status_code).is_equal_to(400)
+        assert_that(response.content.decode()).contains("POST required")
+
+    def test_release_requires_approved_status(self, manager_client, sample, project):
+        result = Result.objects.create(
+            title="Draft Result",
+            description="Not approved",
+            sample=sample,
+            project=project,
+            status=Result.Status.DRAFT,
+        )
+
+        response = manager_client.post(reverse("results:release", args=[result.pk]))
+        result.refresh_from_db()
+
+        assert_that(response.status_code).is_equal_to(400)
+        assert_that(response.content.decode()).contains("Result must be APPROVED")
+        assert_that(result.status).is_equal_to(Result.Status.DRAFT)
+
+    def test_release_transitions_approved_to_released(self, manager_client, sample, project, reviewer_user, manager_user):
+        result = Result.objects.create(
+            title="Approved Result",
+            description="Ready to release",
+            sample=sample,
+            project=project,
+            status=Result.Status.APPROVED,
+            approved_at=timezone.now(),
+            approved_by=reviewer_user,
+            reviewer=reviewer_user,
+        )
+
+        response = manager_client.post(reverse("results:release", args=[result.pk]), HTTP_HX_REQUEST="true")
+        result.refresh_from_db()
+
+        assert_that(response.status_code).is_equal_to(200)
+        assert_that(result.status).is_equal_to(Result.Status.RELEASED)
+        assert_that(result.released_at).is_not_none()
+        assert_that(result.released_by).is_equal_to(manager_user)
+
+    def test_released_result_is_read_only(self, db, sample, project, reviewer_user, manager_user):
+        result = Result.objects.create(
+            title="Approved Result",
+            description="Ready to release",
+            sample=sample,
+            project=project,
+            status=Result.Status.APPROVED,
+            approved_at=timezone.now(),
+            approved_by=reviewer_user,
+            reviewer=reviewer_user,
+        )
+        result.status = Result.Status.RELEASED
+        result.released_at = timezone.now()
+        result.released_by = manager_user
+        result.save()
+
+        result.description = "Changed after release"
+        with pytest.raises(ValidationError) as exc:
+            result.save()
+
+        assert_that(exc.value.message_dict).contains_key("status")
 
 
 class TestResultDetailTabAudit:

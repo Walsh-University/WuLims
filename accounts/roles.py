@@ -32,6 +32,7 @@ ROLE_PERMISSIONS: dict[str, set[str]] = {
         "results.delete_result",
         "results.approve_result",
         "results.reject_result",
+        "results.release_result",
     },
     "Customer Contact": {
         "samples.view_sample",
@@ -51,6 +52,7 @@ ROLE_PERMISSIONS: dict[str, set[str]] = {
         "results.delete_result",
         "results.approve_result",
         "results.reject_result",
+        "results.release_result",
     },
 }
 

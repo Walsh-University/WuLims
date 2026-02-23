@@ -8,14 +8,46 @@
     <div>
         <h1 class="h3 mb-0">Result {{ result.id }}</h1>
         <div class="text-muted">
-            {{ result.project.name|default:"No Project" }} •
-            {{ result.project.client_name|default:"No Client" }} •
+            {{ result.project.name|default:"No Project" }} -
+            {{ result.sample.client_name|default:"No Client" }} -
             {{ result.status }}
         </div>
     </div>
+
+    <div>
+        {% if result.status == "DRAFT" %}
+            {% if perms.results.submit_result %}
+                <button class="btn btn-outline-primary"
+                        hx-get="{% url 'results:submit_modal' result.pk %}"
+                        hx-target="#modal-target"
+                        hx-swap="innerHTML">
+                    Submit for Review...
+                </button>
+            {% endif %}
+        {% elif result.status == "IN_REVIEW" %}
+            {% if perms.results.approve_result or perms.results.reject_result %}
+                <button class="btn btn-primary"
+                        hx-get="{% url 'results:approve_modal' result.pk %}"
+                        hx-target="#modal-target"
+                        hx-swap="innerHTML">
+                    Review...
+                </button>
+            {% endif %}
+        {% elif result.status == "APPROVED" %}
+            {% if perms.results.release_result %}
+                <form method="post" action="{% url 'results:release' result.pk %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit"
+                            class="btn btn-primary"
+                            onclick="return confirm('Release this approved result? This will lock it as read-only.');">
+                        Release
+                    </button>
+                </form>
+            {% endif %}
+        {% endif %}
+    </div>
 </div>
 
-<!-- Вкладки -->
 <ul class="nav nav-tabs" id="resultTabs">
     <li class="nav-item">
         <a class="nav-link active"
@@ -41,7 +73,6 @@
     </li>
 </ul>
 
-<!-- Контейнер для контента вкладок -->
 <div id="tab-target" class="mt-3"
      hx-get="{% url 'results:result_detail_tab' result.pk %}?tab=overview"
      hx-trigger="load"
