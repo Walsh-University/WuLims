@@ -16,6 +16,8 @@ RESULT_FIELDS = [
     "approved_by",
     "rejected_at",
     "rejected_by",
+    "released_at",
+    "released_by",
     "sample",
     "project",
 ]

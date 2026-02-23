@@ -13,6 +13,7 @@ urlpatterns = [
     path("<int:pk>/submit/", views.submit_result, name="submit"),
     path("<int:pk>/_approve_modal/", views.approve_modal, name="approve_modal"),
     path("<int:pk>/approve/", views.approve_result, name="approve"),
+    path("<int:pk>/release/", views.release_result, name="release"),
     path("<int:pk>/reject/", views.reject_result, name="reject"),
     path("add/", views.result_add, name="add"),
 ]
