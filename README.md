@@ -56,6 +56,7 @@ Dev Team:
 | Payton McCord   | [@pmccord2003](https://github.com/pmccord2003)             | Core app development |
 | Olesia Ivashchuk | [@olesyaivashchuk24](https://github.com/olesyaivashchuk24) | Core app development |
 | Joey Timco       | [@jatimco7](https://github.com/jatimco7)                   | Core app development |
+| Ethan Milgan     | [@ethanmilgan](https://github.com/ethanmilgan)   | Core App Development
 
 ## Quick Start
 
