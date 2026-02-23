@@ -740,7 +740,9 @@ class TestReleaseResultView:
         assert_that(response.content.decode()).contains("Result must be APPROVED")
         assert_that(result.status).is_equal_to(Result.Status.DRAFT)
 
-    def test_release_transitions_approved_to_released(self, manager_client, sample, project, reviewer_user, manager_user):
+    def test_release_transitions_approved_to_released(
+        self, manager_client, sample, project, reviewer_user, manager_user
+    ):
         result = Result.objects.create(
             title="Approved Result",
             description="Ready to release",
