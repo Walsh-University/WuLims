@@ -18,5 +18,7 @@ urlpatterns = [
     path("<int:pk>/reject_result/", views.reject_result, name="reject_result"),
     path("<int:pk>/submit_result/", views.submit_result, name="submit"),
     path("<int:pk>/approve_result/", views.approve_result, name="approve"),
+    path("<int:pk>/release_result/", views.release_result, name="release_result"),
     path("<int:pk>/reject_result/", views.reject_result, name="reject"),
+    path("<int:pk>/release/", views.release_result, name="release"),
 ]

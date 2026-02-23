@@ -1,12 +1,16 @@
 <tr id="results-row-{{ r.pk }}">
     <td><a href="{% url 'results:detail' r.pk %}">{{ r.id }}</a></td>
-    <td>{{ r.project.name|default:"—" }}</td>
+    <td>{{ r.project.name|default:"&mdash;" }}</td>
     <td>{{ r.project.customer_id.customer_name|default:r.sample.client_name|default:"-" }}</td>
     <td>
         {% if r.status == "DRAFT" %}
             <span class="badge bg-success">{{ r.status }}</span>
         {% elif r.status == "IN_REVIEW" %}
             <span class="badge bg-warning text-dark">{{ r.status }}</span>
+        {% elif r.status == "APPROVED" %}
+            <span class="badge bg-info text-dark">{{ r.status }}</span>
+        {% elif r.status == "RELEASED" %}
+            <span class="badge bg-primary">{{ r.status }}</span>
         {% else %}
             <span class="badge bg-secondary">{{ r.status }}</span>
         {% endif %}
@@ -19,10 +23,10 @@
                         hx-get="{% url 'results:submit_modal' r.pk %}"
                         hx-target="#modal-target"
                         hx-swap="innerHTML">
-                    Submit…
+                    Submit...
                 </button>
             {% else %}
-                <span class="text-muted small">—</span>
+                <span class="text-muted small">&mdash;</span>
             {% endif %}
         {% elif r.status == "IN_REVIEW" %}
             {% if perms.results.approve_result or perms.results.reject_result %}
@@ -30,13 +34,25 @@
                         hx-get="{% url 'results:approve_modal' r.pk %}"
                         hx-target="#modal-target"
                         hx-swap="innerHTML">
-                    Review…
+                    Review...
                 </button>
             {% else %}
-                <span class="text-muted small">—</span>
+                <span class="text-muted small">&mdash;</span>
+            {% endif %}
+        {% elif r.status == "APPROVED" %}
+            {% if perms.results.release_result %}
+                <button class="btn btn-sm btn-primary"
+                        hx-post="{% url 'results:release' r.pk %}"
+                        hx-confirm="Release result {{ r.id }}? This sets status to RELEASED and locks the record."
+                        hx-target="#results-row-{{ r.pk }}"
+                        hx-swap="outerHTML">
+                    Release
+                </button>
+            {% else %}
+                <span class="text-muted small">&mdash;</span>
             {% endif %}
         {% else %}
-            <span class="text-muted small">—</span>
+            <span class="text-muted small">&mdash;</span>
         {% endif %}
     </td>
 </tr>

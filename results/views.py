@@ -220,6 +220,26 @@ def approve_result(request, pk):
 
 
 @login_required
+@permission_required("results.release_result", raise_exception=True)
+def release_result(request, pk):
+    if request.method != "POST":
+        return HttpResponseBadRequest("POST required")
+
+    result = get_object_or_404(Result, pk=pk)
+    if result.status != Result.Status.APPROVED:
+        return HttpResponseBadRequest("Result must be APPROVED to release.")
+
+    result.status = Result.Status.RELEASED
+    result.released_at = timezone.now()
+    result.released_by = request.user
+    result.save()
+
+    if request.headers.get("HX-Request") == "true":
+        return _result_row_response(request, result, f"Result {result.id} released.")
+    return redirect("results:detail", pk=result.pk)
+
+
+@login_required
 @permission_required("results.reject_result", raise_exception=True)
 def reject_result(request, pk):
     if request.method != "POST":
