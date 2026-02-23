@@ -10,6 +10,7 @@ from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.trace import SpanContext, TraceFlags
+
 from audit.middleware import get_request_id
 
 _otel_configured = False

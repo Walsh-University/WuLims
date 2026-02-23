@@ -8,6 +8,7 @@ _thread_locals = threading.local()
 # Helpers
 # =========================
 
+
 def get_current_user():
     return getattr(_thread_locals, "user", None)
 
@@ -19,6 +20,7 @@ def get_request_id():
 # =========================
 # Middleware: Request ID
 # =========================
+
 
 class RequestIDMiddleware:
     """
@@ -49,6 +51,7 @@ class RequestIDMiddleware:
 # =========================
 # Middleware: Audit User
 # =========================
+
 
 class AuditUserMiddleware:
     """
