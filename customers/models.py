@@ -1,6 +1,7 @@
 import uuid
 
 from django.db import models
+from django.db.models import Q
 
 
 class Customer(models.Model):
@@ -40,3 +41,22 @@ class Person(models.Model):
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
+
+
+class PersonEmail(models.Model):
+    person_id = models.ForeignKey(Person, on_delete=models.CASCADE, related_name="email_addresses")
+    email = models.EmailField()
+    is_primary = models.BooleanField(default=False)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["person_id", "email"], name="uniq_person_email"),
+            models.UniqueConstraint(
+                fields=["person_id"],
+                condition=Q(is_primary=True),
+                name="uniq_primary_email_per_person",
+            ),
+        ]
+
+    def __str__(self):
+        return self.email
