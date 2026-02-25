@@ -4,9 +4,10 @@
       <thead class="table-light">
         <tr>
           <th>Customer ID</th>
-          <th>Client Name</th>
+          <th>Name</th>
+          <th>External ID</th>
+          <th>Type</th>
           <th>Status</th>
-          <th>Received</th>
           <th class="text-end">Actions</th>
         </tr>
       </thead>
@@ -14,7 +15,7 @@
         {% for customer in customers %}
           {% include "customers/partials/customer_row.html" with customer=customer %}
         {% empty %}
-          <tr><td colspan="5" class="p-3 text-muted">No customers found.</td></tr>
+          <tr><td colspan="6" class="p-3 text-muted">No customers found.</td></tr>
         {% endfor %}
       </tbody>
     </table>

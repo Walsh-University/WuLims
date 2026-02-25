@@ -17,6 +17,7 @@ def ensure_role_permissions(role_name: str) -> Group:
 
     app_models = {
         "accounts": "user",
+        "customers": "customer",
         "samples": "sample",
         "results": "result",
     }
