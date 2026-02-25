@@ -1,0 +1,12 @@
+<div class="card shadow-sm">
+  <div class="card-body">
+    <dl class="row mb-0">
+      <dt class="col-sm-3">Customer ID</dt><dd class="col-sm-9">{{ customer.customer_id }}</dd>
+      <dt class="col-sm-3">Name</dt><dd class="col-sm-9">{{ customer.customer_name }}</dd>
+      <dt class="col-sm-3">External ID</dt><dd class="col-sm-9">{{ customer.external_id }}</dd>
+      <dt class="col-sm-3">Type</dt><dd class="col-sm-9">{{ customer.customer_type }}</dd>
+      <dt class="col-sm-3">Status</dt><dd class="col-sm-9">{{ customer.get_is_active_display }}</dd>
+      <dt class="col-sm-3">Created</dt><dd class="col-sm-9">{{ customer.created_at|date:"Y-m-d H:i" }}</dd>
+    </dl>
+  </div>
+</div>
