@@ -13,7 +13,6 @@ from opentelemetry.trace import SpanContext, TraceFlags
 
 from audit.middleware import get_request_id
 
-
 _otel_configured = False
 
 
@@ -41,9 +40,7 @@ def _resolve_service_name() -> str:
 
 def _build_trace_exporter() -> OTLPSpanExporter | None:
     endpoint = (
-        os.getenv("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT")
-        or os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
-        or ""
+        os.getenv("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT") or os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT") or ""
     ).strip()
     if not endpoint:
         return None
@@ -76,9 +73,7 @@ def configure_opentelemetry() -> None:
                     "service.name": _resolve_service_name(),
                     "service.namespace": os.getenv("OTEL_SERVICE_NAMESPACE", "wulims"),
                     "service.version": os.getenv("OTEL_SERVICE_VERSION", "0.1.0"),
-                    "deployment.environment": os.getenv(
-                        "OTEL_ENVIRONMENT", "production"
-                    ),
+                    "deployment.environment": os.getenv("OTEL_ENVIRONMENT", "production"),
                 }
             )
             provider = TracerProvider(resource=resource)
@@ -90,9 +85,7 @@ def configure_opentelemetry() -> None:
         instrumentor.instrument()
 
 
-def add_otel_trace_context(
-    logger: Any, method_name: str, event_dict: dict[str, Any]
-) -> dict[str, Any]:
+def add_otel_trace_context(logger: Any, method_name: str, event_dict: dict[str, Any]) -> dict[str, Any]:
     span = trace.get_current_span()
     if span is None:
         return event_dict
@@ -109,9 +102,7 @@ def add_otel_trace_context(
     return event_dict
 
 
-def add_request_id(
-    logger: Any, method_name: str, event_dict: dict[str, Any]
-) -> dict[str, Any]:
+def add_request_id(logger: Any, method_name: str, event_dict: dict[str, Any]) -> dict[str, Any]:
     request_id = get_request_id()
     if request_id:
         event_dict["request_id"] = request_id
@@ -144,9 +135,7 @@ def configure_structlog() -> None:
     )
 
 
-def build_logging_config(
-    log_level: str, json_logs: bool = True
-) -> dict[str, Any]:
+def build_logging_config(log_level: str, json_logs: bool = True) -> dict[str, Any]:
     if json_logs:
         render_processor: Any = structlog.processors.JSONRenderer()
     else:
@@ -205,4 +194,3 @@ def build_logging_config(
             },
         },
     }
-
