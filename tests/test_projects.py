@@ -112,3 +112,49 @@ class TestProjectTableView:
         assert_that(response.status_code).is_equal_to(200)
         assert_that(content).contains("Alpha Initiative")
         assert_that(content).does_not_contain("Beta Initiative")
+
+
+class TestProjectAddView:
+    """Tests for the project add view."""
+
+    def test_add_requires_login(self, client):
+        response = client.get(reverse("projects:add"))
+
+        assert_that(response.status_code).is_equal_to(302)
+        assert_that(response.url).contains("login")
+
+    def test_add_forbidden_without_permission(self, authenticated_client):
+        response = authenticated_client.get(reverse("projects:add"))
+
+        assert_that(response.status_code).is_equal_to(403)
+
+    def test_add_renders_form_when_authorized(self, client, admin_user):
+        client.force_login(admin_user)
+        response = client.get(reverse("projects:add"))
+
+        assert_that(response.status_code).is_equal_to(200)
+        assert_that(response.content.decode()).contains("Add Project")
+
+    def test_add_creates_project_and_redirects(self, client, admin_user, customer):
+        client.force_login(admin_user)
+        response = client.post(
+            reverse("projects:add"),
+            {
+                "name": "New Intake Project",
+                "description": "Created from add form",
+                "status": Project.Status.ACTIVE,
+                "start_date": "2026-02-01",
+                "completed_date": "",
+                "customer_id": customer.pk,
+            },
+        )
+
+        created = Project.objects.get(name="New Intake Project")
+        assert_that(created.description).is_equal_to("Created from add form")
+        assert_that(created.status).is_equal_to(Project.Status.ACTIVE)
+        assert_that(str(created.start_date)).is_equal_to("2026-02-01")
+        assert_that(created.completed_date).is_none()
+        assert_that(created.customer_id).is_equal_to(customer)
+
+        assert_that(response.status_code).is_equal_to(302)
+        assert_that(response.url).is_equal_to(reverse("projects:list"))

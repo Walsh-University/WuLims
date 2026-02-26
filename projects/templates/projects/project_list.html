@@ -6,6 +6,9 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
   <h1 class="h3 mb-0">Projects</h1>
+  {% if perms.projects.add_project %}
+    <a class="btn btn-sm btn-primary" href="{% url 'projects:add' %}">Add Project</a>
+  {% endif %}
 </div>
 
 <div
