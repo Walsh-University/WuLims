@@ -1,0 +1,16 @@
+<tr id="customer-row-{{ customer.pk }}">
+  <td><a href="{% url 'customers:detail' customer.pk %}">{{ customer.customer_id }}</a></td>
+  <td>{{ customer.customer_name }}</td>
+  <td>{{ customer.external_id }}</td>
+  <td>{{ customer.customer_type }}</td>
+  <td>
+    {% if customer.is_active == "ACTIVE" %}
+      <span class="badge bg-success">{{ customer.get_is_active_display }}</span>
+    {% else %}
+      <span class="badge bg-secondary">{{ customer.get_is_active_display }}</span>
+    {% endif %}
+  </td>
+  <td class="text-end">
+    <a class="btn btn-sm btn-outline-primary" href="{% url 'customers:detail' customer.pk %}">View</a>
+  </td>
+</tr>

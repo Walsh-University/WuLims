@@ -9,8 +9,8 @@ class User(AbstractUser):
     department = models.CharField(max_length=128, blank=True, default="")
 
     def display_name(self) -> str:
-        full = self.get_full_name().strip()
-        return full if full else (self.email or self.username)
+        full: str = self.get_full_name().strip()
+        return full if full else (self.email or self.username)  # ty: ignore[invalid-return-type]
 
     class Meta:
         permissions = [
