@@ -18,7 +18,24 @@ class Customer(models.Model):
 
     def __str__(self):
         return self.customer_name
+class CustomerAddress(models.Model):
+    class Address(models.TextChoices):
+        BILLING = "BILLING"
+        SHIPPING = "SHIPPING"
+        MAILING = "MAILING"
+        OTHER = "OTHER"
+    address_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    customer_id = models.ForeignKey(default=uuid.uuid4, editable=False)
+    address_line_one = models.CharField(max_length=200)
+    address_line_two = models.CharField(max_length=200)
+    city = models.CharField(max_length=200)
+    state = models.CharField(max_length=200)
+    zip_code = models.CharField(max_length=200)
+    country = models.CharField(max_length=200)
+    is_primary = models.BooleanField(default=False)
 
+    def __str__(self):
+        return self.address_line_one
 
 class Person(models.Model):
     class Title(models.TextChoices):
@@ -40,3 +57,4 @@ class Person(models.Model):
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
+
