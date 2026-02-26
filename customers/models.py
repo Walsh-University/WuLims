@@ -43,13 +43,33 @@ class Person(models.Model):
         return f"{self.first_name} {self.last_name}"
 
 
+<<<<<<< HEAD
 class PersonEmail(models.Model):
     person_id = models.ForeignKey(Person, on_delete=models.CASCADE, related_name="email_addresses")
     email = models.EmailField()
+=======
+class PersonPhoneNumber(models.Model):
+    class PhoneType(models.TextChoices):
+        OFFICE = "office", "Office"
+        CELL = "cell", "Cell"
+        PERSONAL = "personal", "Personal"
+        FAX = "fax", "Fax"
+        OTHER = "other", "Other"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    person_id = models.ForeignKey(
+        Person,
+        on_delete=models.CASCADE,
+        related_name="phone_numbers",
+    )
+    phone_number = models.CharField(max_length=32)
+    phone_type = models.CharField(max_length=20, choices=PhoneType.choices)
+>>>>>>> main
     is_primary = models.BooleanField(default=False)
 
     class Meta:
         constraints = [
+<<<<<<< HEAD
             models.UniqueConstraint(fields=["person_id", "email"], name="uniq_person_email"),
             models.UniqueConstraint(
                 fields=["person_id"],
@@ -60,3 +80,14 @@ class PersonEmail(models.Model):
 
     def __str__(self):
         return self.email
+=======
+            models.UniqueConstraint(
+                fields=["person_id"],
+                condition=models.Q(is_primary=True),
+                name="customers_one_primary_phone_per_person",
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.phone_number} ({self.phone_type})"
+>>>>>>> main

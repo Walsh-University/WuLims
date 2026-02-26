@@ -1,0 +1,17 @@
+{% extends "lims_core/base.html" %}
+{% block title %}Customer {{ customer.customer_id }} - WuLims{% endblock %}
+{% block nav_customers_active %}active{% endblock %}
+{% block breadcrumb_current %}Customer {{ customer.customer_id }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h1 class="h3 mb-0">Customer {{ customer.customer_id }}</h1>
+    <div class="text-muted">{{ customer.customer_name }} • {{ customer.is_active }}</div>
+  </div>
+</div>
+
+{% include "customers/partials/customer_overview.html" %}
+
+<div id="modal-target"></div>
+{% endblock %}

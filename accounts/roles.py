@@ -2,10 +2,12 @@ from django.contrib.auth import get_user_model
 
 ROLE_PERMISSIONS: dict[str, set[str]] = {
     "Lab Tech": {
+        "customers.view_customer",
         "samples.view_sample",
         "results.view_result",
     },
     "Analyst": {
+        "customers.view_customer",
         "samples.view_sample",
         "samples.change_sample",
         "results.view_result",
@@ -13,6 +15,7 @@ ROLE_PERMISSIONS: dict[str, set[str]] = {
         "results.submit_result",
     },
     "QA Reviewer": {
+        "customers.view_customer",
         "samples.view_sample",
         "samples.approve_sample",
         "results.view_result",
@@ -20,6 +23,10 @@ ROLE_PERMISSIONS: dict[str, set[str]] = {
         "results.reject_result",
     },
     "Lab Manager": {
+        "customers.view_customer",
+        "customers.add_customer",
+        "customers.change_customer",
+        "customers.delete_customer",
         "samples.view_sample",
         "samples.add_sample",
         "samples.change_sample",
@@ -35,11 +42,16 @@ ROLE_PERMISSIONS: dict[str, set[str]] = {
         "results.release_result",
     },
     "Customer Contact": {
+        "customers.view_customer",
         "samples.view_sample",
         "results.view_result",
     },
     "System Admin": {
         "accounts.manage_roles",
+        "customers.view_customer",
+        "customers.add_customer",
+        "customers.change_customer",
+        "customers.delete_customer",
         "samples.view_sample",
         "samples.add_sample",
         "samples.change_sample",

@@ -1,8 +1,8 @@
 from django.contrib.auth.decorators import login_required, permission_required
 from django.db.models import Q
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 
-from projects.forms import ProjectFilterForm
+from projects.forms import ProjectFilterForm, ProjectForm
 from projects.models import Project
 
 
@@ -29,3 +29,17 @@ def project_table(request):
             qs = qs.filter(status=status)
 
     return render(request, "projects/partials/project_table.html", {"projects": qs, "form": form})
+
+
+@login_required
+@permission_required("projects.add_project", raise_exception=True)
+def project_add(request):
+    if request.method == "POST":
+        form = ProjectForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("projects:list")
+    else:
+        form = ProjectForm()
+
+    return render(request, "projects/project_form.html", {"form": form})
