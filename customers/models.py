@@ -71,3 +71,22 @@ class PersonPhoneNumber(models.Model):
 
     def __str__(self):
         return f"{self.phone_number} ({self.phone_type})"
+    
+
+class PersonEmail(models.Model):
+    person_id = models.ForeignKey(Person, on_delete=models.CASCADE, related_name="email_addresses")
+    email = models.EmailField()
+    is_primary = models.BooleanField(default=False)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["person_id", "email"], name="uniq_person_email"),
+            models.UniqueConstraint(
+                fields=["person_id"],
+                condition=Q(is_primary=True),
+                name="uniq_primary_email_per_person",
+            ),
+        ]
+
+    def __str__(self):
+        return self.email
