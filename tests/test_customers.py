@@ -5,7 +5,7 @@ from assertpy import assert_that
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 
-from customers.models import Person, PersonPhoneNumber, PersonEmail
+from customers.models import Person, PersonEmail, PersonPhoneNumber
 
 
 class TestPeopleModel:
