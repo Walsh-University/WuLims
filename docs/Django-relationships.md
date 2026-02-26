@@ -80,14 +80,24 @@ class Person(models.Model):
         return f"{self.first_name} {self.last_name}"
 
 
-    class PersonEmail(models.Model):
-        person = models.ForeignKey(
-                Person,
-                on_delete=models.CASCADE,
-                related_name="email_addresses"
-        )
+class PersonEmail(models.Model):
+    person = models.ForeignKey(
+        Person,
+        on_delete=models.CASCADE,
+        related_name="email_addresses"
+    )
     email = models.EmailField()
     is_primary = models.BooleanField(default=False)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["person", "email"], name="uniq_person_email"),
+            models.UniqueConstraint(
+                fields=["person"],
+                condition=models.Q(is_primary=True),
+                name="uniq_primary_email_per_person",
+            ),
+        ]
 
     def __str__(self):
         return self.email
