@@ -42,6 +42,37 @@ class Person(models.Model):
         return f"{self.first_name} {self.last_name}"
 
 
+class CustomerAddress(models.Model):
+    class AddressType(models.TextChoices):
+        BILLING = "billing", "Billing"
+        SHIPPING = "shipping", "Shipping"
+        MAILING = "mailing", "Mailing"
+        OTHER = "other", "Other"
+
+    address_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    customer_id = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name="addresses")
+    address_type = models.CharField(max_length=20, choices=AddressType.choices)
+    address_line_one = models.CharField(max_length=200)
+    address_line_two = models.CharField(max_length=200, blank=True)
+    city = models.CharField(max_length=100)
+    state = models.CharField(max_length=100)
+    zip_code = models.CharField(max_length=20)
+    country = models.CharField(max_length=100)
+    is_primary = models.BooleanField(default=False)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["customer_id"],
+                condition=models.Q(is_primary=True),
+                name="customers_one_primary_address_per_customer",
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.address_line_one}, {self.city}"
+
+
 class PersonPhoneNumber(models.Model):
     class PhoneType(models.TextChoices):
         OFFICE = "office", "Office"
