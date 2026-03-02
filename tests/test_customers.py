@@ -5,7 +5,7 @@ from assertpy import assert_that
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 
-from customers.models import Person, PersonEmail, PersonPhoneNumber
+from customers.models import CustomerAddress, Person, PersonEmail, PersonPhoneNumber
 
 
 class TestPeopleModel:
@@ -34,6 +34,78 @@ class TestPeopleModel:
         Person.objects.create(customer_id=customer, first_name="Rosalind", last_name="Franklin")
 
         assert_that(customer.people.count()).is_equal_to(2)
+
+
+class TestCustomerAddressModel:
+    """Tests for customer addresses."""
+
+    def test_address_belongs_to_customer(self, db, customer):
+        """An address belongs to one customer."""
+        address = CustomerAddress.objects.create(
+            customer_id=customer,
+            address_type=CustomerAddress.AddressType.BILLING,
+            address_line_one="123 Main St",
+            city="North Canton",
+            state="Ohio",
+            zip_code="44720",
+            country="USA",
+        )
+
+        assert_that(address.customer_id).is_equal_to(customer)
+
+    def test_customer_can_have_multiple_addresses(self, db, customer):
+        """A customer can have many addresses."""
+        CustomerAddress.objects.create(
+            customer_id=customer,
+            address_type=CustomerAddress.AddressType.BILLING,
+            address_line_one="123 Main St",
+            city="North Canton",
+            state="Ohio",
+            zip_code="44720",
+            country="USA",
+        )
+        CustomerAddress.objects.create(
+            customer_id=customer,
+            address_type=CustomerAddress.AddressType.SHIPPING,
+            address_line_one="456 Market St",
+            city="Canton",
+            state="Ohio",
+            zip_code="44702",
+            country="USA",
+        )
+
+        assert_that(customer.addresses.count()).is_equal_to(2)
+
+    def test_address_has_type(self, db, customer):
+        """Addresses store a type from defined choices."""
+        address_types = [choice[0] for choice in CustomerAddress.AddressType.choices]
+
+        assert_that(address_types).contains("billing", "shipping", "mailing", "other")
+
+    def test_only_one_primary_address_per_customer(self, db, customer):
+        """Only one address may be primary for a customer."""
+        CustomerAddress.objects.create(
+            customer_id=customer,
+            address_type=CustomerAddress.AddressType.BILLING,
+            address_line_one="123 Main St",
+            city="North Canton",
+            state="Ohio",
+            zip_code="44720",
+            country="USA",
+            is_primary=True,
+        )
+
+        with pytest.raises(IntegrityError):
+            CustomerAddress.objects.create(
+                customer_id=customer,
+                address_type=CustomerAddress.AddressType.SHIPPING,
+                address_line_one="456 Market St",
+                city="Canton",
+                state="Ohio",
+                zip_code="44702",
+                country="USA",
+                is_primary=True,
+            )
 
 
 class TestPersonPhoneNumberModel:
