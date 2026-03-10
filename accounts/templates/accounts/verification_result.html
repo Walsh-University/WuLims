@@ -1,0 +1,20 @@
+{% extends "lims_core/base.html" %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6 col-lg-5">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h1 class="h4 mb-3">{{ title }}</h1>
+        <p>{{ message }}</p>
+        {% if cta_url %}
+          <a class="btn btn-primary" href="{{ cta_url }}">{{ cta_label }}</a>
+        {% else %}
+          <a class="btn btn-outline-primary" href="{% url 'login' %}">Back to login</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -59,6 +59,7 @@
 
 <div class="container-fluid">
   <div class="row g-0">
+    {% if user and user.is_authenticated and user.is_staff %}
 
     <!-- Sidebar column -->
     <aside class="col-md-3 col-lg-2 p-0">
@@ -105,8 +106,8 @@
         </div>
       </div>
     </aside>
-
-    <!-- Main content column -->
+    {% endif %}
+      <!-- Main content column -->
     <main class="col-md-9 col-lg-10 px-md-4 py-4">
       {% block breadcrumbs %}
       <nav aria-label="breadcrumb" class="mb-3">

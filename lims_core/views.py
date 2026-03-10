@@ -10,7 +10,13 @@ from .status import get_system_status
 
 @login_required
 def home(request):
-    return render(request, "lims_core/home.html")
+    return render(
+        request,
+        "lims_core/home.html",
+        {
+            "user": request.user,
+        },
+    )
 
 
 @login_required
