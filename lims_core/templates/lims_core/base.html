@@ -24,10 +24,12 @@
 <!-- Top bar -->
 <nav class="navbar navbar-dark bg-primary sticky-top shadow-sm">
   <div class="container-fluid">
+    {% if user and user.is_authenticated and user.is_staff %}
     <button class="btn btn-primary d-md-none me-2" type="button"
             data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar">
       <span class="navbar-toggler-icon"></span>
     </button>
+    {% endif %}
 
     <a class="navbar-brand fw-semibold" href="/">WuLims</a>
 
@@ -59,6 +61,7 @@
 
 <div class="container-fluid">
   <div class="row g-0">
+    {% if user and user.is_authenticated and user.is_staff %}
 
     <!-- Sidebar column -->
     <aside class="col-md-3 col-lg-2 p-0">
@@ -105,8 +108,8 @@
         </div>
       </div>
     </aside>
-
-    <!-- Main content column -->
+    {% endif %}
+      <!-- Main content column -->
     <main class="col-md-9 col-lg-10 px-md-4 py-4">
       {% block breadcrumbs %}
       <nav aria-label="breadcrumb" class="mb-3">

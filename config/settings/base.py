@@ -51,6 +51,7 @@ LOG_LEVEL = os.getenv("DJANGO_LOG_LEVEL", "INFO").upper()
 JSON_LOGS = env_bool("DJANGO_JSON_LOGS", "1")
 configure_structlog()
 LOGGING = build_logging_config(log_level=LOG_LEVEL, json_logs=JSON_LOGS)
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "no-reply@wulims.local")
 
 # ---------------------------------------------------------------------
 # Apps / middleware
