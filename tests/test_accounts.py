@@ -260,13 +260,26 @@ class TestPublicCustomerSignup:
 
         assert_that(response.status_code).is_equal_to(200)
         assert_that(content).does_not_contain('id="sidebar"')
+        assert_that(content).does_not_contain('data-bs-target="#sidebar"')
         assert_that(content).does_not_contain(">Customers<")
-        assert_that(content).contains('href="/portal/"')
+        assert_that(content).contains('href="/"')
 
-    def test_internal_user_still_sees_sidebar_navigation(self, authenticated_client):
+    def test_non_staff_internal_user_does_not_see_sidebar_navigation(self, authenticated_client):
         response = authenticated_client.get(reverse("lims_core:dashboard"))
         content = response.content.decode()
 
         assert_that(response.status_code).is_equal_to(200)
+        assert_that(content).does_not_contain('id="sidebar"')
+        assert_that(content).does_not_contain('data-bs-target="#sidebar"')
+        assert_that(content).does_not_contain(">Customers<")
+
+    def test_staff_user_still_sees_sidebar_navigation(self, client, admin_user):
+        client.force_login(admin_user)
+
+        response = client.get(reverse("lims_core:dashboard"))
+        content = response.content.decode()
+
+        assert_that(response.status_code).is_equal_to(200)
         assert_that(content).contains('id="sidebar"')
+        assert_that(content).contains('data-bs-target="#sidebar"')
         assert_that(content).contains(">Customers<")

@@ -24,10 +24,12 @@
 <!-- Top bar -->
 <nav class="navbar navbar-dark bg-primary sticky-top shadow-sm">
   <div class="container-fluid">
+    {% if user and user.is_authenticated and user.is_staff %}
     <button class="btn btn-primary d-md-none me-2" type="button"
             data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar">
       <span class="navbar-toggler-icon"></span>
     </button>
+    {% endif %}
 
     <a class="navbar-brand fw-semibold" href="/">WuLims</a>
 
