@@ -7,6 +7,13 @@ class User(AbstractUser):
     external_id = models.CharField(max_length=255, blank=True, default="", help_text="SSO subject / GUID")
     employee_id = models.CharField(max_length=64, blank=True, default="")
     department = models.CharField(max_length=128, blank=True, default="")
+    customer_profile = models.ForeignKey(
+        "customers.Customer",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="portal_users",
+    )
 
     def display_name(self) -> str:
         full: str = self.get_full_name().strip()
