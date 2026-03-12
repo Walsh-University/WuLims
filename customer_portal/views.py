@@ -7,14 +7,16 @@ from customer_portal.forms import CompanyProfileForm
 
 @login_required
 def home(request):
-    if is_customer_contact(request.user) and request.user.customer_profile_id is None:
+    customer_contact = is_customer_contact(request.user)
+
+    if customer_contact and request.user.customer_profile_id is None:
         return redirect("customer_portal:company_profile")
 
     return render(
         request,
         "customer_portal/index.html",
         {
-            "is_customer_contact": is_customer_contact(request.user),
+            "is_customer_contact": customer_contact,
             "company_profile": request.user.customer_profile,
         },
     )
@@ -22,6 +24,9 @@ def home(request):
 
 @login_required
 def company_profile(request):
+    if not is_customer_contact(request.user):
+        return redirect("customer_portal:home")
+
     customer = request.user.customer_profile
 
     if request.method == "POST":
