@@ -10,6 +10,7 @@ from django.urls import reverse
 from accounts.audit import role_audit_actor
 from accounts.models import RoleAssignmentAudit, User
 from accounts.roles import ROLE_PERMISSIONS
+from customers.models import Customer
 
 
 class TestUserModel:
@@ -48,6 +49,17 @@ class TestUserModel:
         assert_that(user.external_id).is_equal_to("abc-123-guid")
         assert_that(user.employee_id).is_equal_to("EMP001")
         assert_that(user.department).is_equal_to("Chemistry")
+
+    def test_user_can_link_to_customer_profile(self, db):
+        """Customer contacts can retain a linked company profile."""
+        customer = Customer.objects.create(
+            customer_name="Acme Labs",
+            external_id="ACME-001",
+            customer_type="Commercial",
+        )
+        user = User.objects.create_user(username="portaluser", password="pass", customer_profile=customer)
+
+        assert_that(user.customer_profile).is_equal_to(customer)
 
 
 class TestUserDisplayName:
@@ -251,8 +263,8 @@ class TestPublicCustomerSignup:
         assert_that(login_response.headers["Location"]).ends_with(reverse("customer_portal:home"))
 
         portal_response = client.get(reverse("customer_portal:home"))
-        assert_that(portal_response.status_code).is_equal_to(200)
-        assert_that(portal_response.content.decode()).contains("Customer Portal")
+        assert_that(portal_response.status_code).is_equal_to(302)
+        assert_that(portal_response.headers["Location"]).ends_with(reverse("customer_portal:company_profile"))
 
     def test_customer_contact_does_not_see_sidebar_navigation(self, viewer_client):
         response = viewer_client.get(reverse("lims_core:dashboard"))

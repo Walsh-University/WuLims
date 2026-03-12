@@ -23,6 +23,7 @@
     <div class="card shadow-sm">
       <div class="card-body p-4">
         <h2 class="h5">Welcome, {{ request.user.display_name }}</h2>
+        {% if is_customer_contact %}
         <p class="text-secondary mb-4">Your account is verified and ready for customer portal workflows.</p>
         <div class="row g-3">
           <div class="col-md-6">
@@ -30,11 +31,33 @@
               <h3 class="h6">Account status</h3>
               <p class="mb-0">Verified{% if is_customer_contact %} as a customer contact{% endif %}.</p>
             </div>
+        {% else %}
+            <p class="text-secondary mb-4">You are not a customer contact.</p>
+            <div class="row g-3">
+            <div class="col-md-6">
+            <div class="border rounded p-3 h-100">
+                <h3 class="h6">Account status</h3>
+                <p class="mb-0">You are not a customer contact.  This portal is for external customers.</p>
+            </div>
+        {% endif %}
           </div>
           <div class="col-md-6">
             <div class="border rounded p-3 h-100">
-              <h3 class="h6">Next step</h3>
-              <p class="mb-0">Portal-specific project request workflows can be added here without changing the sign-up or verification flow.</p>
+              {% if is_customer_contact %}
+                <h3 class="h6">Company profile</h3>
+                {% if company_profile %}
+                  <p class="mb-2"><strong>{{ company_profile.customer_name }}</strong></p>
+                  <p class="mb-1 text-secondary">Customer ID: {{ company_profile.external_id }}</p>
+                  <p class="mb-3 text-secondary">Type: {{ company_profile.customer_type }}</p>
+                  <a href="{% url 'customer_portal:company_profile' %}" class="btn btn-outline-primary btn-sm">Edit company profile</a>
+                {% else %}
+                  <p class="mb-3">Set up your company profile before submitting project requests.</p>
+                  <a href="{% url 'customer_portal:company_profile' %}" class="btn btn-primary btn-sm">Create company profile</a>
+                {% endif %}
+              {% else %}
+                <h3 class="h6">Next step</h3>
+                <p class="mb-0">Portal-specific project request workflows can be added here without changing the sign-up or verification flow.</p>
+              {% endif %}
             </div>
           </div>
         </div>
