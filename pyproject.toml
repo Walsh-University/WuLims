@@ -17,8 +17,6 @@ dependencies = [
     "psycopg2-binary>=2.9.11",
     "pytest-django==4.12.0",
     "python-dotenv>=1.2.2",
-    "ruff==0.15.5",
-    "ty==0.0.20",
     "whitenoise>=6.12.0",
 ]
 
@@ -119,6 +117,6 @@ dev = [
     "pytest-cov>=5.0.0",
     "pytest-django>=4.11.1",
     "pytest-mock>=3.15.1",
-    "ruff>=0.15.5",
-    "ty>=0.0.20",
+    "ruff>=0.15.6",
+    "ty>=0.0.23",
 ]
