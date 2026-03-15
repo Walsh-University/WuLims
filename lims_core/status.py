@@ -26,7 +26,7 @@ def get_system_status(include_internal: bool = False):
     else:
         status = "Operational"
 
-    payload = {
+    payload: dict[str, str | list[dict[str, object]]] = {
         "status": status,
         "last_checked": datetime.now(UTC).isoformat(),
     }
