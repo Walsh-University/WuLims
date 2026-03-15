@@ -105,7 +105,7 @@ unresolved-attribute = "ignore"
 invalid-return-type = "warn"
 
 [tool.ty.src]
-exclude = ["migrations"]
+exclude = ["migrations", "tests"]
 
 [dependency-groups]
 dev = [
