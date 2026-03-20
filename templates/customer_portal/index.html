@@ -60,6 +60,23 @@
               {% endif %}
             </div>
           </div>
+          {% if is_customer_contact %}
+          <div class="col-md-6">
+            <div class="border rounded p-3 h-100">
+              <h3 class="h6">Contact profile</h3>
+              {% if contact_profile %}
+                <p class="mb-2"><strong>{{ contact_profile }}</strong></p>
+                <p class="mb-1 text-secondary">Title: {{ contact_profile.get_title_display|default:"Not provided" }}</p>
+                <p class="mb-1 text-secondary">Job title: {{ contact_profile.job_title|default:"Not provided" }}</p>
+                <p class="mb-3 text-secondary">Status: {% if contact_profile.is_active %}Active{% else %}Inactive{% endif %}</p>
+                <a href="{% url 'customer_portal:contact_profile' %}" class="btn btn-outline-primary btn-sm">Edit contact profile</a>
+              {% else %}
+                <p class="mb-3">Set up your contact profile so the lab knows who to reach at your company.</p>
+                <a href="{% url 'customer_portal:contact_profile' %}" class="btn btn-primary btn-sm">Create contact profile</a>
+              {% endif %}
+            </div>
+          </div>
+          {% endif %}
         </div>
       </div>
     </div>

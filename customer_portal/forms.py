@@ -1,6 +1,6 @@
 from django import forms
 
-from customers.models import Customer
+from customers.models import Customer, Person
 
 
 class CompanyProfileForm(forms.ModelForm):
@@ -21,4 +21,20 @@ class CompanyProfileForm(forms.ModelForm):
             "external_id": {
                 "unique": "A company profile with this customer identifier already exists.",
             }
+        }
+
+
+class ContactProfileForm(forms.ModelForm):
+    class Meta:
+        model = Person
+        fields = ["title", "first_name", "last_name", "job_title", "is_active"]
+        labels = {
+            "is_active": "Active contact",
+        }
+        widgets = {
+            "title": forms.Select(attrs={"class": "form-select"}),
+            "first_name": forms.TextInput(attrs={"class": "form-control"}),
+            "last_name": forms.TextInput(attrs={"class": "form-control"}),
+            "job_title": forms.TextInput(attrs={"class": "form-control"}),
+            "is_active": forms.CheckboxInput(attrs={"class": "form-check-input"}),
         }
