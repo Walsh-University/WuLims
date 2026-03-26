@@ -33,6 +33,7 @@ urlpatterns = [
     path("experiments/", include("experiments.urls")),
     path("projects/", include("projects.urls")),
     path("customers/", include("customers.urls")),
+    path("projects/", include("projects.urls")),
 ]
 
 if settings.OIDC_ENABLED:

@@ -2,8 +2,8 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.db.models import Q
 from django.shortcuts import redirect, render
 
-from projects.forms import ProjectFilterForm, ProjectForm
-from projects.models import Project
+from projects.forms import ProjectFilterForm, ProjectForm, ProjectRequestForm
+from projects.models import Project, ProjectRequest
 
 
 @login_required
@@ -43,3 +43,32 @@ def project_add(request):
         form = ProjectForm()
 
     return render(request, "projects/project_form.html", {"form": form})
+
+@login_required
+def project_request_create(request):
+    if request.method == "POST":
+        form = ProjectRequestForm(request.POST)
+        if form.is_valid():
+            obj = form.save(commit=False)
+
+            obj.customer_contact = request.user.customer_contact
+            obj.status = "PENDING"
+
+            obj.save()
+
+            return redirect("projects:project_request_success", pk=obj.id)
+
+    else:
+        form = ProjectRequestForm()
+
+    return render(request, "projects/project_request_form.html", {
+        "form": form
+    })
+
+@login_required
+def project_request_success(request, pk):
+    obj = ProjectRequest.objects.get(id=pk)
+
+    return render(request, "projects/project_request_success.html", {
+        "project": obj
+    })

@@ -1,0 +1,16 @@
+{% extends "lims_core/base.html" %}
+
+{% block content %}
+<div class="card shadow-sm">
+  <div class="card-body">
+    <h2>Request Submitted</h2>
+
+    <p>Your request ID: <strong>{{ project.id }}</strong></p>
+    <p>Status: <strong>{{ project.status }}</strong></p>
+
+    <a href="/projects/request/new/" class="btn btn-primary">
+      Submit another request
+    </a>
+  </div>
+</div>
+{% endblock %}
