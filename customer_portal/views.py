@@ -11,7 +11,10 @@ from .models import CustomerContact
 def home(request):
     customer_contact = is_customer_contact(request.user)
 
-    if customer_contact and request.user.customer_profile_id is None:
+    company = getattr(request.user, "customer_profile", None)
+
+    # если пользователь customer_contact, но профиля нет → направляем создать
+    if customer_contact and company is None:
         return redirect("customer_portal:company_profile")
 
     return render(
@@ -19,25 +22,32 @@ def home(request):
         "customer_portal/index.html",
         {
             "is_customer_contact": customer_contact,
-            "company_profile": request.user.customer_profile,
+            "company_profile": company,
         },
     )
 
 
 @login_required
 def company_profile(request):
+    # 🚫 доступ только customer contacts
+    if not is_customer_contact(request.user):
+        return redirect("customer_portal:home")
+
+    company = getattr(request.user, "customer_profile", None)
+
     if request.method == "POST":
-        form = CompanyProfileForm(request.POST, instance=request.user.customer_profile)
+        form = CompanyProfileForm(request.POST, instance=company)
 
         if form.is_valid():
             company = form.save()
+
             request.user.customer_profile = company
-            request.user.save()
+            request.user.save(update_fields=["customer_profile"])
 
             return redirect("customer_portal:home")
 
     else:
-        form = CompanyProfileForm(instance=request.user.customer_profile)
+        form = CompanyProfileForm(instance=company)
 
     return render(
         request,
