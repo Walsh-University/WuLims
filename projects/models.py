@@ -20,17 +20,14 @@ class Project(models.Model):
     def __str__(self):
         return self.name
 
+
 class ProjectRequest(models.Model):
     class Status(models.TextChoices):
         PENDING = "PENDING"
         APPROVED = "APPROVED"
         REJECTED = "REJECTED"
 
-    customer_contact = models.ForeignKey(
-        CustomerContact,
-        on_delete=models.CASCADE,
-        related_name="project_requests"
-    )
+    customer_contact = models.ForeignKey(CustomerContact, on_delete=models.CASCADE, related_name="project_requests")
 
     title = models.CharField(max_length=255)
     description = models.TextField()
@@ -38,11 +35,7 @@ class ProjectRequest(models.Model):
     business_context = models.TextField()
     scientific_context = models.TextField()
 
-    status = models.CharField(
-        max_length=20,
-        choices=Status.choices,
-        default=Status.PENDING
-    )
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
 
     created_at = models.DateTimeField(auto_now_add=True)
 

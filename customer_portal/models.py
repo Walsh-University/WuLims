@@ -7,21 +7,17 @@ from customers.models import Customer
 
 class CustomerContact(models.Model):
     TITLE_CHOICES = [
-        ('Mr', 'Mr'),
-        ('Mrs', 'Mrs'),
+        ("Mr", "Mr"),
+        ("Mrs", "Mrs"),
     ]
 
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name = "customer_contact",
+        related_name="customer_contact",
     )
 
-    customer = models.ForeignKey(
-            Customer,
-            on_delete=models.CASCADE,
-            related_name="contacts"
-        )
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name="contacts")
 
     title = models.CharField(
         max_length=10,

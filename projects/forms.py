@@ -32,6 +32,7 @@ class ProjectForm(forms.ModelForm):
             "customer_id": forms.Select(attrs={"class": "form-select"}),
         }
 
+
 class ProjectRequestForm(forms.ModelForm):
     class Meta:
         model = ProjectRequest

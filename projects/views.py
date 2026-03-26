@@ -44,6 +44,7 @@ def project_add(request):
 
     return render(request, "projects/project_form.html", {"form": form})
 
+
 @login_required
 def project_request_create(request):
     if request.method == "POST":
@@ -61,14 +62,11 @@ def project_request_create(request):
     else:
         form = ProjectRequestForm()
 
-    return render(request, "projects/project_request_form.html", {
-        "form": form
-    })
+    return render(request, "projects/project_request_form.html", {"form": form})
+
 
 @login_required
 def project_request_success(request, pk):
     obj = ProjectRequest.objects.get(id=pk)
 
-    return render(request, "projects/project_request_success.html", {
-        "project": obj
-    })
+    return render(request, "projects/project_request_success.html", {"project": obj})
