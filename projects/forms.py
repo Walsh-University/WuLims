@@ -1,6 +1,6 @@
 from django import forms
 
-from projects.models import Project
+from projects.models import Project, ProjectRequest
 
 
 class ProjectFilterForm(forms.Form):
@@ -30,4 +30,21 @@ class ProjectForm(forms.ModelForm):
             "start_date": forms.DateInput(attrs={"class": "form-control", "type": "date"}),
             "completed_date": forms.DateInput(attrs={"class": "form-control", "type": "date"}),
             "customer_id": forms.Select(attrs={"class": "form-select"}),
+        }
+
+
+class ProjectRequestForm(forms.ModelForm):
+    class Meta:
+        model = ProjectRequest
+        fields = [
+            "title",
+            "description",
+            "business_context",
+            "scientific_context",
+        ]
+        widgets = {
+            "title": forms.TextInput(attrs={"class": "form-control"}),
+            "description": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
+            "business_context": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
+            "scientific_context": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
         }

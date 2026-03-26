@@ -74,6 +74,7 @@ INSTALLED_APPS = [
     "audit",
     "customers",
     "results.apps.ResultsConfig",
+    "customer_portal",
 ]
 
 
