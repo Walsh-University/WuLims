@@ -14,6 +14,13 @@ class User(AbstractUser):
         on_delete=models.SET_NULL,
         related_name="portal_users",
     )
+    contact_profile = models.OneToOneField(
+        "customers.Person",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="portal_user",
+    )
 
     def display_name(self) -> str:
         full: str = self.get_full_name().strip()
