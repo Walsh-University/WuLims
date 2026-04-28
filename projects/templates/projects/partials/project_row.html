@@ -15,4 +15,11 @@
             <span class="text-muted small">—</span>
         {% endif %}
     </td>
+    <td>
+        {% if p.turnaround_time %}
+            {{ p.turnaround_time }}
+        {% else %}
+            <span class="text-muted small">-</span>
+        {% endif %}
+    </td>
 </tr>

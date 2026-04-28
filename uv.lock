@@ -1237,6 +1237,7 @@ dependencies = [
     { name = "psycopg2-binary" },
     { name = "pytest-django" },
     { name = "python-dotenv" },
+    { name = "structlog" },
     { name = "whitenoise" },
 ]
 
@@ -1269,6 +1270,7 @@ requires-dist = [
     { name = "psycopg2-binary", specifier = ">=2.9.11" },
     { name = "pytest-django", specifier = "==4.12.0" },
     { name = "python-dotenv", specifier = ">=1.2.2" },
+    { name = "structlog", specifier = ">=25.5.0" },
     { name = "whitenoise", specifier = ">=6.12.0" },
 ]
 
