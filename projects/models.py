@@ -7,6 +7,7 @@ class Project(models.Model):
     class Status(models.TextChoices):
         ACTIVE = "ACTIVE"
         CLOSED = "CLOSED"
+
     class TurnaroundTime(models.TextChoices):
         STANDARD = "STANDARD", "Standard"
         RUSHED = "RUSHED", "Rushed"
