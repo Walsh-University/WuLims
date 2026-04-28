@@ -17,16 +17,15 @@ def check_database():
 def get_system_status(include_internal: bool = False):
     checks = [check_database()]
 
-    # Overall status rules: database down → Down, any other dep down → Degraded
-    check_by_name = {c["name"]: c["ok"] for c in checks}
-    if not check_by_name.get("database", False):
+    # Overall status rules
+    if not checks[0]["ok"]:
         status = "Down"
-    elif not all(check_by_name.values()):
+    elif any(not c["ok"] for c in checks):
         status = "Degraded"
     else:
         status = "Operational"
 
-    payload: dict[str, str | list[dict[str, object]]] = {
+    payload = {
         "status": status,
         "last_checked": datetime.now(UTC).isoformat(),
     }

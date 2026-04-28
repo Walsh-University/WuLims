@@ -24,12 +24,10 @@
 <!-- Top bar -->
 <nav class="navbar navbar-dark bg-primary sticky-top shadow-sm">
   <div class="container-fluid">
-    {% if user and user.is_authenticated and user.is_staff %}
     <button class="btn btn-primary d-md-none me-2" type="button"
             data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar">
       <span class="navbar-toggler-icon"></span>
     </button>
-    {% endif %}
 
     <a class="navbar-brand fw-semibold" href="/">WuLims</a>
 
@@ -47,12 +45,7 @@
           <li><a class="dropdown-item" href="#">Profile</a></li>
           <li><a class="dropdown-item" href="#">Settings</a></li>
           <li><hr class="dropdown-divider"></li>
-          <li>
-            <form method="post" action="{% url 'logout' %}" class="m-0">
-              {% csrf_token %}
-              <button type="submit" class="dropdown-item">Logout</button>
-            </form>
-          </li>
+          <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
         </ul>
       </div>
     </div>
@@ -61,7 +54,6 @@
 
 <div class="container-fluid">
   <div class="row g-0">
-    {% if user and user.is_authenticated and user.is_staff %}
 
     <!-- Sidebar column -->
     <aside class="col-md-3 col-lg-2 p-0">
@@ -82,12 +74,12 @@
           <div class="p-2">
             <div class="nav flex-column nav-pills">
               <a class="nav-link {% block nav_dashboard_active %}{% endblock %}" href="{% url 'lims_core:dashboard' %}">Dashboard</a>
-              <a class="nav-link {% block nav_customers_active %}{% endblock %}" href="{% url 'customers:list' %}">Customers</a>
-              <a class="nav-link {% block nav_projects_active %}{% endblock %}" href="{% url 'projects:list' %}">Projects</a>
-              <a class="nav-link {% block nav_experiments_active %}{% endblock %}" href="{% url 'experiments:list' %}">Experiments</a>
+              <a class="nav-link" href="#">Customers</a>
+              <a class="nav-link" href="#">Projects</a>
+              <a class="nav-link" href="#">Experiments</a>
               <a class="nav-link {% block nav_instruments_active %}{% endblock %}" href="{% url 'instruments:list' %}">Instruments</a>
               <a class="nav-link {% block nav_samples_active %}{% endblock %}" href="{% url 'samples:list' %}">Samples</a>
-              <a class="nav-link {% block nav_results_active %}{% endblock %}" href="{% url 'results:list' %}">Results</a>
+
               <hr class="my-2">
 
               <a class="nav-link" href="#">Reports</a>
@@ -108,8 +100,8 @@
         </div>
       </div>
     </aside>
-    {% endif %}
-      <!-- Main content column -->
+
+    <!-- Main content column -->
     <main class="col-md-9 col-lg-10 px-md-4 py-4">
       {% block breadcrumbs %}
       <nav aria-label="breadcrumb" class="mb-3">
@@ -130,27 +122,9 @@
 
 <!-- JS: load once, at the bottom -->
 <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
-<script src="https://unpkg.com/htmx.org@1.9.12" integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2" crossorigin="anonymous"></script>
-<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" integrity="sha384-LXWjKwDZz29o7TduNe+r/UxaolHh5FsSvy2W7bDHSZ8jJeGgDeuNnsDNHoxpSgDi" crossorigin="anonymous"></script>
-<script>
-  (function () {
-    function getCookie(name) {
-      const cookieValue = `; ${document.cookie}`;
-      const parts = cookieValue.split(`; ${name}=`);
-      if (parts.length === 2) {
-        return parts.pop().split(";").shift();
-      }
-      return "";
-    }
+<script src="https://unpkg.com/htmx.org@1.9.12"></script>
+<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
-    document.body.addEventListener("htmx:configRequest", function (event) {
-      const csrfToken = getCookie("csrftoken");
-      if (csrfToken) {
-        event.detail.headers["X-CSRFToken"] = csrfToken;
-      }
-    });
-  })();
-</script>
 <script>
   (function () {
     async function loadSystemStatus() {
@@ -214,7 +188,6 @@
 
     document.body.addEventListener("htmx:responseError", function () {
       showToast("Something went wrong. Please try again.", "danger");
-    });
 
     function setAppStatus(label, variant) {
       const badge = document.getElementById("appStatus");
@@ -225,16 +198,13 @@
     }
 
     document.body.addEventListener("htmx:afterOnLoad", () =>
-      setAppStatus("Connected", "success")
+            setAppStatus("Connected", "success")
     );
 
     document.body.addEventListener("htmx:responseError", () =>
-      setAppStatus("Disconnected", "danger")
+            setAppStatus("Disconnected", "danger")
     );
 
-    document.body.addEventListener("closeModal", () => {
-      const modalTarget = document.getElementById("modal-target");
-      if (modalTarget) modalTarget.innerHTML = "";
     });
   })();
 </script>
