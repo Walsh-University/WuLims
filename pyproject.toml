@@ -6,7 +6,7 @@ requires-python = ">=3.13"
 dependencies = [
     "asgiref==3.11.1",
     "dj-database-url>=3.1.2",
-    "django==6.0.3",
+    "django==6.0.5",
     "django-structlog>=10.0.0",
     "gunicorn==25.1.0",
     "mozilla-django-oidc>=5.0.2",
