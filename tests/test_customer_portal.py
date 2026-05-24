@@ -213,162 +213,164 @@ class TestCompanyProfileOnboarding:
 
 class TestProjectRequestWorkflow:
     def test_customer_contact_can_submit_project_request(self, viewer_client, viewer_user, customer):
-       person = Person.objects.create(
-           customer_id=customer,
-           title=Person.Title.MR,
-           first_name="John",
-           last_name="Doe",
-           job_title="Research Director",
-           is_active=True,
-       )
-       viewer_user.customer_profile = customer
-       viewer_user.contact_profile = person
-       viewer_user.save(update_fields=["customer_profile", "contact_profile"])
+        person = Person.objects.create(
+            customer_id=customer,
+            title=Person.Title.MR,
+            first_name="John",
+            last_name="Doe",
+            job_title="Research Director",
+            is_active=True,
+        )
+        viewer_user.customer_profile = customer
+        viewer_user.contact_profile = person
+        viewer_user.save(update_fields=["customer_profile", "contact_profile"])
 
-       response = viewer_client.post(
-           reverse("customer_portal:project_request_create"),
-           {
-               "business_context": "We need to analyze sample composition for quality control.",
-               "scientific_context": "We require HPLC analysis with mass spectrometry confirmation.",
-           },
-       )
+        response = viewer_client.post(
+            reverse("customer_portal:project_request_create"),
+            {
+                "business_context": "We need to analyze sample composition for quality control.",
+                "scientific_context": "We require HPLC analysis with mass spectrometry confirmation.",
+            },
+        )
 
-       assert_that(response.status_code).is_equal_to(302)
-       assert_that(response.headers["Location"]).contains("confirmation")
+        assert_that(response.status_code).is_equal_to(302)
+        assert_that(response.headers["Location"]).contains("confirmation")
 
     def test_project_request_confirmation_shows_request_id(self, viewer_client, viewer_user, customer):
-       person = Person.objects.create(
-           customer_id=customer,
-           title=Person.Title.MS,
-           first_name="Jane",
-           last_name="Smith",
-           job_title="Lab Manager",
-           is_active=True,
-       )
-       viewer_user.customer_profile = customer
-       viewer_user.contact_profile = person
-       viewer_user.save(update_fields=["customer_profile", "contact_profile"])
+        person = Person.objects.create(
+            customer_id=customer,
+            title=Person.Title.MS,
+            first_name="Jane",
+            last_name="Smith",
+            job_title="Lab Manager",
+            is_active=True,
+        )
+        viewer_user.customer_profile = customer
+        viewer_user.contact_profile = person
+        viewer_user.save(update_fields=["customer_profile", "contact_profile"])
 
-       response = viewer_client.post(
-           reverse("customer_portal:project_request_create"),
-           {
-               "business_context": "Quality control analysis required.",
-               "scientific_context": "Standard HPLC protocol.",
-           },
-       )
+        response = viewer_client.post(
+            reverse("customer_portal:project_request_create"),
+            {
+                "business_context": "Quality control analysis required.",
+                "scientific_context": "Standard HPLC protocol.",
+            },
+        )
 
-       # Extract request_id from redirect location
-       from customer_portal.models import ProjectRequest
-       request_obj = ProjectRequest.objects.latest("created_at")
+        # Extract request_id from redirect location
+        from customer_portal.models import ProjectRequest
 
-       confirmation_response = viewer_client.get(
-           reverse("customer_portal:project_request_confirmation", kwargs={"request_id": request_obj.request_id})
-       )
-       content = confirmation_response.content.decode()
+        request_obj = ProjectRequest.objects.latest("created_at")
 
-       assert_that(confirmation_response.status_code).is_equal_to(200)
-       assert_that(content).contains(str(request_obj.request_id))
-       assert_that(content).contains("Pending")
-       assert_that(content).contains("Request Submitted Successfully")
+        confirmation_response = viewer_client.get(
+            reverse("customer_portal:project_request_confirmation", kwargs={"request_id": request_obj.request_id})
+        )
+        content = confirmation_response.content.decode()
+
+        assert_that(confirmation_response.status_code).is_equal_to(200)
+        assert_that(content).contains(str(request_obj.request_id))
+        assert_that(content).contains("Pending")
+        assert_that(content).contains("Request Submitted Successfully")
 
     def test_customer_cannot_access_another_customers_request(self, viewer_client, viewer_user, customer):
-       from customer_portal.models import ProjectRequest
+        from customer_portal.models import ProjectRequest
 
-       # Create another customer and request
-       other_customer = Customer.objects.create(
-           customer_name="Other Company",
-           external_id="OTHER-123",
-           customer_type="Commercial",
-       )
-       other_person = Person.objects.create(
-           customer_id=other_customer,
-           title=Person.Title.MR,
-           first_name="Bob",
-           last_name="Brown",
-           job_title="Manager",
-           is_active=True,
-       )
-       other_request = ProjectRequest.objects.create(
-           customer=other_customer,
-           requesting_contact=other_person,
-           business_context="Other company request",
-           scientific_context="Other company science",
-       )
+        # Create another customer and request
+        other_customer = Customer.objects.create(
+            customer_name="Other Company",
+            external_id="OTHER-123",
+            customer_type="Commercial",
+        )
+        other_person = Person.objects.create(
+            customer_id=other_customer,
+            title=Person.Title.MR,
+            first_name="Bob",
+            last_name="Brown",
+            job_title="Manager",
+            is_active=True,
+        )
+        other_request = ProjectRequest.objects.create(
+            customer=other_customer,
+            requesting_contact=other_person,
+            business_context="Other company request",
+            scientific_context="Other company science",
+        )
 
-       # Setup viewer user with first customer
-       person = Person.objects.create(
-           customer_id=customer,
-           title=Person.Title.MR,
-           first_name="Alice",
-           last_name="Anderson",
-           job_title="Analyst",
-           is_active=True,
-       )
-       viewer_user.customer_profile = customer
-       viewer_user.contact_profile = person
-       viewer_user.save(update_fields=["customer_profile", "contact_profile"])
+        # Setup viewer user with first customer
+        person = Person.objects.create(
+            customer_id=customer,
+            title=Person.Title.MR,
+            first_name="Alice",
+            last_name="Anderson",
+            job_title="Analyst",
+            is_active=True,
+        )
+        viewer_user.customer_profile = customer
+        viewer_user.contact_profile = person
+        viewer_user.save(update_fields=["customer_profile", "contact_profile"])
 
-       # Try to access other customer's request
-       response = viewer_client.get(
-           reverse("customer_portal:project_request_confirmation", kwargs={"request_id": other_request.request_id})
-       )
+        # Try to access other customer's request
+        response = viewer_client.get(
+            reverse("customer_portal:project_request_confirmation", kwargs={"request_id": other_request.request_id})
+        )
 
-       assert_that(response.status_code).is_equal_to(404)
+        assert_that(response.status_code).is_equal_to(404)
 
     def test_customer_can_list_only_their_project_requests(self, viewer_client, viewer_user, customer):
-       from customer_portal.models import ProjectRequest
+        from customer_portal.models import ProjectRequest
 
-       # Create another customer with request
-       other_customer = Customer.objects.create(
-           customer_name="Another Company",
-           external_id="ANOTHER-456",
-           customer_type="Commercial",
-       )
-       other_person = Person.objects.create(
-           customer_id=other_customer,
-           title=Person.Title.MS,
-           first_name="Carol",
-           last_name="Clark",
-           job_title="Director",
-           is_active=True,
-       )
+        # Create another customer with request
+        other_customer = Customer.objects.create(
+            customer_name="Another Company",
+            external_id="ANOTHER-456",
+            customer_type="Commercial",
+        )
+        other_person = Person.objects.create(
+            customer_id=other_customer,
+            title=Person.Title.MS,
+            first_name="Carol",
+            last_name="Clark",
+            job_title="Director",
+            is_active=True,
+        )
 
-       # Create requests for both customers
-       own_request = ProjectRequest.objects.create(
-           customer=customer,
-           requesting_contact=viewer_user.contact_profile or Person.objects.create(
-               customer_id=customer,
-               title=Person.Title.MR,
-               first_name="David",
-               last_name="Davis",
-               job_title="Scientist",
-               is_active=True,
-           ),
-           business_context="My request",
-           scientific_context="My science",
-       )
-       other_request = ProjectRequest.objects.create(
-           customer=other_customer,
-           requesting_contact=other_person,
-           business_context="Other request",
-           scientific_context="Other science",
-       )
+        # Create requests for both customers
+        own_request = ProjectRequest.objects.create(
+            customer=customer,
+            requesting_contact=viewer_user.contact_profile
+            or Person.objects.create(
+                customer_id=customer,
+                title=Person.Title.MR,
+                first_name="David",
+                last_name="Davis",
+                job_title="Scientist",
+                is_active=True,
+            ),
+            business_context="My request",
+            scientific_context="My science",
+        )
+        other_request = ProjectRequest.objects.create(
+            customer=other_customer,
+            requesting_contact=other_person,
+            business_context="Other request",
+            scientific_context="Other science",
+        )
 
-       # Setup viewer user
-       if not viewer_user.contact_profile:
-           person = own_request.requesting_contact
-           viewer_user.contact_profile = person
-       viewer_user.customer_profile = customer
-       viewer_user.save(update_fields=["customer_profile", "contact_profile"])
+        # Setup viewer user
+        if not viewer_user.contact_profile:
+            person = own_request.requesting_contact
+            viewer_user.contact_profile = person
+        viewer_user.customer_profile = customer
+        viewer_user.save(update_fields=["customer_profile", "contact_profile"])
 
-       response = viewer_client.get(reverse("customer_portal:project_request_list"))
-       content = response.content.decode()
+        response = viewer_client.get(reverse("customer_portal:project_request_list"))
+        content = response.content.decode()
 
-       assert_that(response.status_code).is_equal_to(200)
-       assert_that(content).contains(str(own_request.request_id))
-       assert_that(content).does_not_contain(str(other_request.request_id))
+        assert_that(response.status_code).is_equal_to(200)
+        assert_that(content).contains(str(own_request.request_id))
+        assert_that(content).does_not_contain(str(other_request.request_id))
 
     def test_non_customer_cannot_create_project_request(self, authenticated_client):
-       response = authenticated_client.get(reverse("customer_portal:project_request_create"))
+        response = authenticated_client.get(reverse("customer_portal:project_request_create"))
 
-       assert_that(response.status_code).is_equal_to(404)
+        assert_that(response.status_code).is_equal_to(404)

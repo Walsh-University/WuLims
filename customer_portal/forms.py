@@ -1,7 +1,7 @@
 from django import forms
 
-from customers.models import Customer, Person
 from customer_portal.models import ProjectRequest
+from customers.models import Customer, Person
 
 
 class CompanyProfileForm(forms.ModelForm):
@@ -50,14 +50,18 @@ class ProjectRequestForm(forms.ModelForm):
             "scientific_context": "Scientific Background & Methodology",
         }
         widgets = {
-            "business_context": forms.Textarea(attrs={
-                "class": "form-control",
-                "rows": 5,
-                "placeholder": "Describe the business objectives, project scope, and any constraints..."
-            }),
-            "scientific_context": forms.Textarea(attrs={
-                "class": "form-control",
-                "rows": 5,
-                "placeholder": "Provide scientific background, methodology, and any special requirements..."
-            }),
+            "business_context": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "rows": 5,
+                    "placeholder": "Describe the business objectives, project scope, and any constraints...",
+                }
+            ),
+            "scientific_context": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "rows": 5,
+                    "placeholder": "Provide scientific background, methodology, and any special requirements...",
+                }
+            ),
         }

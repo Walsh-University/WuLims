@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.http import Http404
-from django.shortcuts import redirect, render, get_object_or_404
+from django.shortcuts import get_object_or_404, redirect, render
 
 from accounts.views import is_customer_contact
 from customer_portal.forms import CompanyProfileForm, ContactProfileForm, ProjectRequestForm
