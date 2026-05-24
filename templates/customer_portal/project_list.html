@@ -1,0 +1,64 @@
+{% load static %}
+<!doctype html>
+<html lang="en" data-bs-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Projects</title>
+  <link rel="stylesheet" href="{% static 'css/bootstrap.wulims.min.css' %}">
+</head>
+<body class="bg-body-tertiary">
+  <div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <p class="text-uppercase small text-secondary mb-1">WuLims</p>
+        <h1 class="h3 mb-0">Projects</h1>
+      </div>
+      <a href="{% url 'customer_portal:home' %}" class="btn btn-outline-secondary">Back to Dashboard</a>
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+        <p class="text-secondary mb-4">Company: <strong>{{ company_profile.customer_name }}</strong></p>
+
+        {% if projects %}
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead class="table-light">
+                <tr>
+                  <th>Name</th>
+                  <th>Status</th>
+                  <th>Start Date</th>
+                  <th>Completed Date</th>
+                  <th class="text-end">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for project in projects %}
+                  <tr>
+                    <td>{{ project.name }}</td>
+                    <td>
+                      {% if project.status == "ACTIVE" %}
+                        <span class="badge bg-success">Active</span>
+                      {% elif project.status == "CLOSED" %}
+                        <span class="badge bg-secondary">Closed</span>
+                      {% endif %}
+                    </td>
+                    <td>{{ project.start_date|date:"M d, Y" }}</td>
+                    <td>{{ project.completed_date|date:"M d, Y"|default:"-" }}</td>
+                    <td class="text-end">
+                      <a href="{% url 'customer_portal:project_detail' project.pk %}" class="btn btn-sm btn-outline-primary">View</a>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="alert alert-info mb-0">No projects are available for your company yet.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -15,4 +15,6 @@ urlpatterns = [
         name="project_request_confirmation",
     ),
     path("project-requests/", views.project_request_list, name="project_request_list"),
+    path("projects/", views.project_list, name="project_list"),
+    path("projects/<int:pk>/", views.project_detail, name="project_detail"),
 ]

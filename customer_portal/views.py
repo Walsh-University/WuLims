@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from accounts.views import is_customer_contact
 from customer_portal.forms import CompanyProfileForm, ContactProfileForm, ProjectRequestForm
 from customer_portal.models import ProjectRequest
+from projects.models import Project
 
 
 def _get_customer_for_user(user):
@@ -193,6 +194,50 @@ def project_request_list(request):
         "customer_portal/project_request_list.html",
         {
             "project_requests": project_requests,
+            "company_profile": customer,
+        },
+    )
+
+
+@login_required
+def project_list(request):
+    """List projects for the authenticated customer's organization."""
+    if not is_customer_contact(request.user):
+        raise Http404("Access denied")
+
+    customer = _get_customer_for_user(request.user)
+    if not customer:
+        raise Http404("Access denied")
+
+    projects = Project.objects.filter(customer_id=customer).order_by("name")
+
+    return render(
+        request,
+        "customer_portal/project_list.html",
+        {
+            "projects": projects,
+            "company_profile": customer,
+        },
+    )
+
+
+@login_required
+def project_detail(request, pk):
+    """Show a project only when it belongs to the authenticated customer's organization."""
+    if not is_customer_contact(request.user):
+        raise Http404("Access denied")
+
+    customer = _get_customer_for_user(request.user)
+    if not customer:
+        raise Http404("Access denied")
+
+    project = get_object_or_404(Project, pk=pk, customer_id=customer)
+
+    return render(
+        request,
+        "customer_portal/project_detail.html",
+        {
+            "project": project,
             "company_profile": customer,
         },
     )
