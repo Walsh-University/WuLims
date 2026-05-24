@@ -1,6 +1,7 @@
 from django import forms
 
 from customers.models import Customer, Person
+from customer_portal.models import ProjectRequest
 
 
 class CompanyProfileForm(forms.ModelForm):
@@ -37,4 +38,26 @@ class ContactProfileForm(forms.ModelForm):
             "last_name": forms.TextInput(attrs={"class": "form-control"}),
             "job_title": forms.TextInput(attrs={"class": "form-control"}),
             "is_active": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+        }
+
+
+class ProjectRequestForm(forms.ModelForm):
+    class Meta:
+        model = ProjectRequest
+        fields = ["business_context", "scientific_context"]
+        labels = {
+            "business_context": "Business Context & Objectives",
+            "scientific_context": "Scientific Background & Methodology",
+        }
+        widgets = {
+            "business_context": forms.Textarea(attrs={
+                "class": "form-control",
+                "rows": 5,
+                "placeholder": "Describe the business objectives, project scope, and any constraints..."
+            }),
+            "scientific_context": forms.Textarea(attrs={
+                "class": "form-control",
+                "rows": 5,
+                "placeholder": "Provide scientific background, methodology, and any special requirements..."
+            }),
         }

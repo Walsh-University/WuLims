@@ -1,0 +1,56 @@
+{% load static %}
+<!doctype html>
+<html lang="en" data-bs-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Request Submitted</title>
+  <link rel="stylesheet" href="{% static 'css/bootstrap.wulims.min.css' %}">
+</head>
+<body class="bg-body-tertiary">
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-7">
+        <div class="card shadow-sm">
+          <div class="card-body p-4 text-center">
+            <p class="text-uppercase small text-secondary mb-3">WuLims</p>
+            
+            <div class="mb-4">
+              <svg class="text-success" width="48" height="48" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M10.854 7.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 0 1 .708-.708L7.5 9.793l2.646-2.647a.5.5 0 0 1 .708 0z"/>
+                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+              </svg>
+            </div>
+
+            <h1 class="h3 mb-2">Request Submitted Successfully</h1>
+            <p class="text-secondary mb-4">Your project request has been received and is awaiting review by our lab team.</p>
+
+            <div class="alert alert-light border text-start mb-4">
+              <div class="mb-2">
+                <strong>Request ID:</strong><br>
+                <code class="text-primary">{{ project_request.request_id }}</code>
+              </div>
+              <div class="mb-2">
+                <strong>Status:</strong><br>
+                <span class="badge bg-warning">{{ project_request.get_status_display }}</span>
+              </div>
+              <div class="mb-0">
+                <strong>Submitted:</strong><br>
+                {{ project_request.created_at|date:"M d, Y \a\t g:i A" }}
+              </div>
+            </div>
+
+            <p class="text-secondary small mb-4">
+              You can reference the Request ID above to track your request status. Our team will contact you at the email on file within 2 business days with next steps.
+            </p>
+
+            <div class="d-flex gap-2 justify-content-center">
+              <a href="{% url 'customer_portal:home' %}" class="btn btn-primary">Back to Dashboard</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
