@@ -316,6 +316,11 @@ class TestProjectRequestWorkflow:
 
         request_obj = ProjectRequest.objects.latest("created_at")
 
+        assert_that(response.status_code).is_equal_to(302)
+        assert_that(response.headers["Location"]).ends_with(
+            reverse("customer_portal:project_request_confirmation", kwargs={"request_id": request_obj.request_id})
+        )
+
         confirmation_response = viewer_client.get(
             reverse("customer_portal:project_request_confirmation", kwargs={"request_id": request_obj.request_id})
         )
