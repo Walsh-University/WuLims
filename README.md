@@ -49,14 +49,20 @@ WuLims is designed to be:
 
 Dev Team:
 
+| Contributor      | GitHub                                                     | Notes                       |
+|------------------|------------------------------------------------------------|-----------------------------|
+| David Good       | [@davidgood](https://github.com/davidgood)                 | Faculty Advisor / Developer |
+| Logan Trent      | [@logantrent](https://github.com/logantrent)               | Core app development        |
+| Payton McCord   | [@pmccord2003](https://github.com/pmccord2003)             | Core app development        |
+| Olesia Ivashchuk | [@olesyaivashchuk24](https://github.com/olesyaivashchuk24) | Core app development        |
+
+Alumni:
+
 | Contributor      | GitHub                                                     | Notes |
 |------------------|------------------------------------------------------------| --- |
-| David Good       | [@programminggoody](https://github.com/programminggoody)   | Faculty Advisor      |
-| Logan Trent      | [@logantrent](https://github.com/logantrent)               | Core app development |
-| Payton McCord   | [@pmccord2003](https://github.com/pmccord2003)             | Core app development |
-| Olesia Ivashchuk | [@olesyaivashchuk24](https://github.com/olesyaivashchuk24) | Core app development |
 | Joey Timco       | [@jatimco7](https://github.com/jatimco7)                   | Core app development |
 | Ethan Milgan     | [@ethanmilgan](https://github.com/ethanmilgan)   | Core App Development
+
 
 ## Quick Start
 
