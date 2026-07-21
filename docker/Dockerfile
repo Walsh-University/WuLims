@@ -14,6 +14,9 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libpq-dev \
+    pkg-config \
+    libxmlsec1-dev \
+    libxmlsec1-openssl \
  && rm -rf /var/lib/apt/lists/*
 
 # Optional: you can keep this, or omit it and let uv create the venv
@@ -43,6 +46,8 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq5 \
     bash \
+    xmlsec1 \
+    libxmlsec1-openssl \
  && rm -rf /var/lib/apt/lists/*
 
 # Create an unprivileged runtime user.

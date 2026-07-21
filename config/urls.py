@@ -35,5 +35,5 @@ urlpatterns = [
     path("customers/", include("customers.urls")),
 ]
 
-if settings.OIDC_ENABLED:
-    urlpatterns.append(path("oidc/", include("mozilla_django_oidc.urls")))
+if settings.SAML_ENABLED:
+    urlpatterns.append(path("saml2/", include("djangosaml2.urls")))
