@@ -1,8 +1,26 @@
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect, render
+from django.http import Http404
+from django.shortcuts import get_object_or_404, redirect, render
 
 from accounts.views import is_customer_contact
-from customer_portal.forms import CompanyProfileForm, ContactProfileForm
+from customer_portal.forms import CompanyProfileForm, ContactProfileForm, ProjectRequestForm
+from customer_portal.models import ProjectRequest
+from projects.models import Project
+
+
+def _get_customer_for_user(user):
+    """Get the customer associated with the logged-in user."""
+    customer = getattr(user, "customer_profile", None)
+    if not customer:
+        return None
+    return customer
+
+
+def _check_customer_access(request, customer_id):
+    """Check if user has access to view/modify this customer's data."""
+    user_customer = _get_customer_for_user(request.user)
+    if not user_customer or user_customer.customer_id != customer_id:
+        raise Http404("Access denied")
 
 
 @login_required
@@ -92,5 +110,134 @@ def contact_profile(request):
             "form": form,
             "contact_profile": person,
             "company_profile": request.user.customer_profile,
+        },
+    )
+
+
+@login_required
+def project_request_create(request):
+    """Create a new project request."""
+    if not is_customer_contact(request.user):
+        raise Http404("Access denied")
+
+    customer = _get_customer_for_user(request.user)
+    if not customer:
+        return redirect("customer_portal:company_profile")
+
+    contact = request.user.contact_profile
+    if not contact:
+        return redirect("customer_portal:contact_profile")
+
+    if request.method == "POST":
+        form = ProjectRequestForm(request.POST)
+        if form.is_valid():
+            project_request = form.save(commit=False)
+            project_request.customer = customer
+            project_request.requesting_contact = contact
+            project_request.save()
+            return redirect("customer_portal:project_request_confirmation", request_id=project_request.request_id)
+    else:
+        form = ProjectRequestForm()
+
+    return render(
+        request,
+        "customer_portal/project_request_form.html",
+        {
+            "form": form,
+            "company_profile": customer,
+            "contact_profile": contact,
+        },
+    )
+
+
+@login_required
+def project_request_confirmation(request, request_id):
+    """Display confirmation page after project request submission."""
+    if not is_customer_contact(request.user):
+        raise Http404("Access denied")
+
+    customer = _get_customer_for_user(request.user)
+    if not customer:
+        raise Http404("Access denied")
+
+    project_request = get_object_or_404(ProjectRequest, request_id=request_id)
+
+    # Check tenant access: ensure user's customer owns this request
+    if project_request.customer_id != customer.customer_id:
+        raise Http404("Access denied")
+
+    return render(
+        request,
+        "customer_portal/project_request_confirmation.html",
+        {
+            "project_request": project_request,
+            "company_profile": customer,
+        },
+    )
+
+
+@login_required
+def project_request_list(request):
+    """List project requests for the authenticated customer."""
+    if not is_customer_contact(request.user):
+        raise Http404("Access denied")
+
+    customer = _get_customer_for_user(request.user)
+    if not customer:
+        raise Http404("Access denied")
+
+    # Tenant isolation: only show requests for this customer
+    project_requests = ProjectRequest.objects.filter(customer=customer)
+
+    return render(
+        request,
+        "customer_portal/project_request_list.html",
+        {
+            "project_requests": project_requests,
+            "company_profile": customer,
+        },
+    )
+
+
+@login_required
+def project_list(request):
+    """List projects for the authenticated customer's organization."""
+    if not is_customer_contact(request.user):
+        raise Http404("Access denied")
+
+    customer = _get_customer_for_user(request.user)
+    if not customer:
+        raise Http404("Access denied")
+
+    projects = Project.objects.filter(customer_id=customer).order_by("name")
+
+    return render(
+        request,
+        "customer_portal/project_list.html",
+        {
+            "projects": projects,
+            "company_profile": customer,
+        },
+    )
+
+
+@login_required
+def project_detail(request, pk):
+    """Show a project only when it belongs to the authenticated customer's organization."""
+    if not is_customer_contact(request.user):
+        raise Http404("Access denied")
+
+    customer = _get_customer_for_user(request.user)
+    if not customer:
+        raise Http404("Access denied")
+
+    project = get_object_or_404(Project, pk=pk, customer_id=customer)
+
+    return render(
+        request,
+        "customer_portal/project_detail.html",
+        {
+            "project": project,
+            "company_profile": customer,
         },
     )

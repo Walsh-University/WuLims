@@ -77,6 +77,8 @@ WuLims uses both Django model permissions and custom workflow/admin permissions.
 - Add-sample flow requires `samples.add_sample`.
 - Approve modal/approval actions require `samples.approve_sample`.
 - Group/role administration is limited to superusers or users with `accounts.manage_roles`.
+- Customer portal project and project-request views require the `Customer Contact` role and scope records to the user's linked company profile.
+- Internal project screens remain separate from portal views and require internal Django project permissions such as `projects.view_project` or `projects.add_project`.
 
 ## Keeping Roles Synced
 

@@ -76,6 +76,31 @@
               {% endif %}
             </div>
           </div>
+          <div class="col-md-6">
+            <div class="border rounded p-3 h-100">
+              <h3 class="h6">Project request</h3>
+              <p class="text-secondary mb-3">Submit a new project request to initiate lab work.</p>
+              {% if company_profile and contact_profile %}
+                <div class="d-flex flex-wrap gap-2">
+                  <a href="{% url 'customer_portal:project_request_create' %}" class="btn btn-primary btn-sm">Submit project request</a>
+                  <a href="{% url 'customer_portal:project_request_list' %}" class="btn btn-outline-primary btn-sm">View requests</a>
+                </div>
+              {% else %}
+                <p class="text-muted small mb-0">Complete your company and contact profiles first.</p>
+              {% endif %}
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="border rounded p-3 h-100">
+              <h3 class="h6">Projects</h3>
+              <p class="text-secondary mb-3">Review active and closed projects for your company.</p>
+              {% if company_profile and contact_profile %}
+                <a href="{% url 'customer_portal:project_list' %}" class="btn btn-outline-primary btn-sm">View projects</a>
+              {% else %}
+                <p class="text-muted small mb-0">Complete your company and contact profiles first.</p>
+              {% endif %}
+            </div>
+          </div>
           {% endif %}
         </div>
       </div>
