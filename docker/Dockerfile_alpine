@@ -21,7 +21,9 @@ RUN apk add --no-cache \
     libffi-dev \
     openssl-dev \
     cargo \
-    curl
+    curl \
+    pkgconfig \
+    xmlsec-dev
 
 # Create venv
 RUN python -m venv "${VIRTUAL_ENV}"
@@ -57,7 +59,8 @@ WORKDIR /app
 # - bash only if your entrypoint requires bash; otherwise drop it.
 RUN apk add --no-cache \
     libpq \
-    bash
+    bash \
+    xmlsec
 
 COPY --from=builder /opt/venv /opt/venv
 COPY --from=builder /app /app

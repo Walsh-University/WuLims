@@ -18,7 +18,7 @@ WuLims is designed to be:
 
 1. Student-led for learning full-stack development with real workflows
 2. Enterprise-ready with a custom user model and role-based permissions
-3. OIDC authentication
+3. SAML2 authentication
 4. Sample tracking, chain-of-custody, Experiments, QA, review and approval gates, Reporting
 
 ## Core Features
@@ -87,7 +87,7 @@ Then visit:
 
 - Custom user model is enabled from day 1 (`AUTH_USER_MODEL = "accounts.User"`).
 - Groups/permissions are ready for role-based workflows (reviewer approvals, etc.).
-- For AD/SSO later: prefer OIDC (Azure AD/Entra or ADFS OIDC) or SAML2 (common in higher-ed).
+- AD/SSO: SAML2 integration with Microsoft Entra ID (common in higher-ed).
 - Developer documentation is in `docs/README.md`.
 
 ## Observability (Structured Logging + OpenTelemetry)

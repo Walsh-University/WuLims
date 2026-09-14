@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django_structlog",
+    "djangosaml2",
     # local apps
     "accounts",
     "experiments.apps.ExperimentsConfig",
@@ -146,27 +147,58 @@ AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
 ]
 
-OIDC_ENABLED = env_bool("OIDC_ENABLED", "0")
-OIDC_PROVIDER_NAME = os.getenv("OIDC_PROVIDER_NAME", "Single Sign-On")
-OIDC_LOGIN_ONLY = env_bool("OIDC_LOGIN_ONLY", "0")
-OIDC_RP_CLIENT_ID = os.getenv("OIDC_RP_CLIENT_ID", "")
-OIDC_RP_CLIENT_SECRET = os.getenv("OIDC_RP_CLIENT_SECRET", "")
-OIDC_RP_SIGN_ALGO = os.getenv("OIDC_RP_SIGN_ALGO", "RS256")
-OIDC_RP_SCOPES = os.getenv("OIDC_RP_SCOPES", "openid email profile")
+SAML_ENABLED = env_bool("SAML_ENABLED", "0")
+SAML_PROVIDER_NAME = os.getenv("SAML_PROVIDER_NAME", "Microsoft Entra")
+SAML_LOGIN_ONLY = env_bool("SAML_LOGIN_ONLY", "0")
 
-OIDC_OP_DISCOVERY_ENDPOINT = os.getenv("OIDC_OP_DISCOVERY_ENDPOINT", "")
-OIDC_OP_AUTHORIZATION_ENDPOINT = os.getenv("OIDC_OP_AUTHORIZATION_ENDPOINT", "")
-OIDC_OP_TOKEN_ENDPOINT = os.getenv("OIDC_OP_TOKEN_ENDPOINT", "")
-OIDC_OP_USER_ENDPOINT = os.getenv("OIDC_OP_USER_ENDPOINT", "")
-OIDC_OP_JWKS_ENDPOINT = os.getenv("OIDC_OP_JWKS_ENDPOINT", "")
-OIDC_OP_LOGOUT_ENDPOINT = os.getenv("OIDC_OP_LOGOUT_ENDPOINT", "")
+SAML_SP_ENTITY_ID = os.getenv("SAML_SP_ENTITY_ID", "")
+SAML_ACS_URL = os.getenv("SAML_ACS_URL", "")
+SAML_IDP_METADATA_FILE = os.getenv("SAML_IDP_METADATA_FILE", "")
+SAML_SP_KEY_FILE = os.getenv("SAML_SP_KEY_FILE", "")
+SAML_SP_CERT_FILE = os.getenv("SAML_SP_CERT_FILE", "")
+SAML_XMLSEC_BINARY = os.getenv("SAML_XMLSEC_BINARY", "/usr/bin/xmlsec1")
 
-OIDC_STORE_ACCESS_TOKEN = env_bool("OIDC_STORE_ACCESS_TOKEN", "0")
-OIDC_USE_NONCE = env_bool("OIDC_USE_NONCE", "1")
-OIDC_NONCE_SIZE = int(os.getenv("OIDC_NONCE_SIZE", "32"))
-OIDC_VERIFY_SSL = env_bool("OIDC_VERIFY_SSL", "1")
-OIDC_CREATE_USER = env_bool("OIDC_CREATE_USER", "1")
-OIDC_UPDATE_USER = env_bool("OIDC_UPDATE_USER", "1")
+# djangosaml2: which User field identifies a SAML user, and which SAML
+# attribute (via SAML_ATTRIBUTE_MAPPING below) supplies its value.
+SAML_DJANGO_USER_MAIN_ATTRIBUTE = "external_id"
+SAML_CREATE_UNKNOWN_USER = True
+
+# Maps Entra's default SAML claim URIs (plus the custom "employeeid"/
+# "department" claims configured on the Enterprise App) to User fields.
+SAML_ATTRIBUTE_MAPPING = {
+    "http://schemas.microsoft.com/identity/claims/objectidentifier": ("external_id",),
+    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress": ("email",),
+    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname": ("first_name",),
+    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname": ("last_name",),
+    "employeeid": ("employee_id",),
+    "department": ("department",),
+}
+
+if SAML_ENABLED:
+    import saml2
+
+    SAML_CONFIG = {
+        "xmlsec_binary": SAML_XMLSEC_BINARY,
+        "entityid": SAML_SP_ENTITY_ID,
+        "allow_unknown_attributes": True,
+        "service": {
+            "sp": {
+                "endpoints": {
+                    "assertion_consumer_service": [
+                        (SAML_ACS_URL, saml2.BINDING_HTTP_POST),
+                    ],
+                },
+                "allow_unsolicited": True,
+                "authn_requests_signed": True,
+                "want_response_signed": True,
+            },
+        },
+        "metadata": {
+            "local": [SAML_IDP_METADATA_FILE] if SAML_IDP_METADATA_FILE else [],
+        },
+        "key_file": SAML_SP_KEY_FILE,
+        "cert_file": SAML_SP_CERT_FILE,
+    }
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -179,8 +211,8 @@ LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "samples:list"
 LOGOUT_REDIRECT_URL = "login"
 
-if OIDC_ENABLED:
-    AUTHENTICATION_BACKENDS.insert(0, "accounts.oidc.WuLimsOIDCAuthenticationBackend")
+if SAML_ENABLED:
+    AUTHENTICATION_BACKENDS.insert(0, "accounts.saml.WuLimsSaml2Backend")
 
 # ---------------------------------------------------------------------
 # Internationalization

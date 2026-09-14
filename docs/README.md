@@ -17,7 +17,7 @@ Welcome to the WuLims project! This is a Laboratory Information Management Syste
 | [Migrations](migrations.md)               | Database migrations and model changes                     |
 | [Chain of Custody](chain_of_custody.md)   | Sample custody flow and auditability rules                |
 | [Roles & Permissions](roles-and-permissions.md) | Default roles, group permissions, and enforcement rules |
-| [OIDC Setup](oidc.md)                     | Configure Microsoft Entra or Authentik OIDC login        |
+| [SAML2 Setup](saml.md)                    | Configure Microsoft Entra SAML2 login                     |
 | [Docker](docker.md)                       | Container setup and running WuLims in Docker              |
 | [Debugging HTMX](debugging-htmx.md)       | Console logging, common request errors, and swap issues   |
 
